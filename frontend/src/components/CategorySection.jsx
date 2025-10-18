@@ -1,0 +1,125 @@
+import { useState } from 'react';
+import { ChevronRight } from 'lucide-react';
+import ClothingShowcase from './ClothingShowcase';
+
+export default function CategorySection({ onCategorySelect }) {
+  const [selectedCategory, setSelectedCategory] = useState(null);
+
+  const categories = [
+    {
+      id: 1,
+      name: "T-Shirts",
+      image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop",
+      itemCount: 156,
+    },
+    {
+      id: 2,
+      name: "Hoodies",
+      image: "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400&h=400&fit=crop",
+      itemCount: 89,
+    },
+    {
+      id: 3,
+      name: "Jeans",
+      image: "https://images.unsplash.com/photo-1542272454315-7f6b6c17f7f8?w=400&h=400&fit=crop",
+      itemCount: 124,
+    },
+    {
+      id: 4,
+      name: "Track Pants",
+      image: "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=400&h=400&fit=crop",
+      itemCount: 98
+    },
+    {
+      id: 5,
+      name: "Polo Shirts",
+      image: "https://images.unsplash.com/photo-1551028719-00167b16eac5?w=400&h=400&fit=crop",
+      itemCount: 67,
+    },
+    {
+      id: 6,
+      name: "Track Suits",
+      image: "https://images.unsplash.com/photo-1460353581641-37baddab0fa2?w=400&h=400&fit=crop",
+      itemCount: 142,
+    },
+    {
+      id: 7,
+      name: "wind cheater",
+      image: "https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=400&h=400&fit=crop",
+      itemCount: 43
+    },
+    {
+      id: 8,
+      name: "jerseys",
+      image: "https://images.unsplash.com/photo-1523359346063-d879354c0ea5?w=400&h=400&fit=crop",
+      itemCount: 211,
+    }
+  ];
+
+  const handleCategoryClick = (category) => {
+    setSelectedCategory(category.id);
+    if (onCategorySelect) {
+      onCategorySelect(category);
+    }
+  };
+
+  return (
+    <>
+    <section className="bg-white">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        {/* Header */}
+        <div className="text-center mb-10">
+          <h2 className="text-3xl font-bold text-gray-900 mb-2">
+            Shop by Category
+          </h2>
+          <p className="text-gray-600">Discover our premium men's collection</p>
+        </div>
+
+        {/* Categories Grid */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-6">
+          {categories.map((category) => (
+            <button
+              key={category.id}
+              onClick={() => handleCategoryClick(category)}
+              className={`group relative rounded-xl overflow-hidden transition-all duration-300 ${selectedCategory === category.id
+                  ? 'ring-4 ring-black ring-offset-2'
+                  : 'hover:shadow-xl'
+                }`}
+            >
+              {/* Image Container */}
+              <div className="relative aspect-[4/5] overflow-hidden bg-gray-100 rounded-t-xl">
+                <img
+                  src={category.image}
+                  alt={category.name}
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                />
+
+                {/* Arrow Icon */}
+                <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm rounded-full p-2 opacity-0 group-hover:opacity-100 transform group-hover:translate-x-0 translate-x-2 transition-all duration-300 shadow-lg">
+                  <ChevronRight className="w-4 h-4 text-gray-900" />
+                </div>
+              </div>
+
+              {/* Content Below Image */}
+              <div className="bg-white p-4 rounded-b-xl">
+                <h3 className="text-gray-900 font-bold text-lg mb-1">
+                  {category.name}
+                </h3>
+                <p className="text-gray-600 text-sm font-medium">
+                  {category.itemCount}+ Products
+                </p>
+              </div>
+
+              {/* Selected Indicator */}
+              {selectedCategory === category.id && (
+                <div className="absolute inset-0 border-4 border-black rounded-xl pointer-events-none" />
+              )}
+            </button>
+          ))}
+        </div>
+      </div>
+    </section>
+<ClothingShowcase/>
+    </>
+  );
+}
