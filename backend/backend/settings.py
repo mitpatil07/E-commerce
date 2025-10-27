@@ -11,7 +11,9 @@ SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "django-insecure-63lez)2lmefg4hqezl=
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DEBUG", "True") == "True"
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1", "*"]
+# ALLOWED_HOSTS = ["localhost", "127.0.0.1", "*"]
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
+
 
 # Application definition
 INSTALLED_APPS = [
@@ -130,24 +132,29 @@ SIMPLE_JWT = {
 }
 
 # CORS Settings
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-    # Add your deployed frontend domain here after deployment
-    "https://your-frontend-domain.netlify.app",
-]
-CORS_ALLOW_CREDENTIALS = True
+# CORS_ALLOWED_ORIGINS = [
+#     "http://localhost:3000",
+#     "http://127.0.0.1:3000",
+#     "http://localhost:5173",
+#     "http://127.0.0.1:5173",
+#     # Add your deployed frontend domain here after deployment
+#     "https://your-frontend-domain.netlify.app",
+# ]
+# CORS_ALLOW_CREDENTIALS = True
 
 # CSRF Settings
-CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-    "https://your-backend-name.onrender.com",
-]
+# CSRF_TRUSTED_ORIGINS = [
+#     "http://localhost:3000",
+#     "http://127.0.0.1:3000",
+#     "http://localhost:5173",
+#     "http://127.0.0.1:5173",
+#     "https://your-backend-name.onrender.com",
+# ]
+
+CORS_ALLOWED_ORIGINS = os.getenv("CORS_ALLOWED_ORIGINS", "").split(",")
+CSRF_TRUSTED_ORIGINS = os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",")
+
+
 CSRF_COOKIE_SECURE = not DEBUG
 SESSION_COOKIE_SECURE = not DEBUG
 
