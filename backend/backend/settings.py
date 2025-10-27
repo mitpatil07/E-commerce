@@ -132,28 +132,26 @@ SIMPLE_JWT = {
 }
 
 # CORS Settings
-# CORS_ALLOWED_ORIGINS = [
-#     "http://localhost:3000",
-#     "http://127.0.0.1:3000",
-#     "http://localhost:5173",
-#     "http://127.0.0.1:5173",
-#     # Add your deployed frontend domain here after deployment
-#     "https://your-frontend-domain.netlify.app",
-# ]
-# CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOWED_ORIGINS = [
+    # "http://127.0.0.1:3000",
+    # "http://localhost:5173",
+    # "http://127.0.0.1:5173",
+    # Add your deployed frontend domain here after deployment
+    "http://localhost:3000",
+    "https://www.whatyouwear.store",
+]
+CORS_ALLOW_CREDENTIALS = True
 
 # CSRF Settings
-# CSRF_TRUSTED_ORIGINS = [
-#     "http://localhost:3000",
-#     "http://127.0.0.1:3000",
-#     "http://localhost:5173",
-#     "http://127.0.0.1:5173",
-#     "https://your-backend-name.onrender.com",
-# ]
-
-CORS_ALLOWED_ORIGINS = os.getenv("CORS_ALLOWED_ORIGINS", "").split(",")
-CSRF_TRUSTED_ORIGINS = os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",")
-
+CSRF_TRUSTED_ORIGINS = [
+    # "http://localhost:3000",
+    # "http://127.0.0.1:3000",
+    # "http://localhost:5173",
+    # "http://127.0.0.1:5173",
+    "https://www.whatyouwear.store",
+    "https://65.2.152.151",
+    "http://65.2.152.151",
+]
 
 CSRF_COOKIE_SECURE = not DEBUG
 SESSION_COOKIE_SECURE = not DEBUG
