@@ -5,18 +5,18 @@ import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# ========================
 # ✅ Security
+# ========================
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "your-strong-secret-key")
 DEBUG = os.getenv("DEBUG", "False") == "True"
 
-# ✅ Allow frontend + EC2 IP/domain
 ALLOWED_HOSTS = [
     "localhost",
     "127.0.0.1",
-    "65.2.152.151",           # your EC2 IPv4
-    "api.whatyouwear.store",  # optional if using subdomain
-    "www.whatyouwear.store",  # your main frontend domain
-    "*"
+    "65.2.152.151",           # EC2 IPv4
+    "api.whatyouwear.store",  # Backend domain
+    "www.whatyouwear.store",  # Frontend domain
 ]
 
 # ========================
@@ -141,7 +141,7 @@ REST_FRAMEWORK = {
 }
 
 # ========================
-# JWT
+# JWT Configuration
 # ========================
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(hours=1),
@@ -158,9 +158,9 @@ SIMPLE_JWT = {
 # CORS (Frontend Communication)
 # ========================
 CORS_ALLOWED_ORIGINS = [
-    "https://www.whatyouwear.store",  # your frontend (Vercel)
-    "https://whatyouwear.store",      # root domain
-    "http://localhost:3000",          # local testing
+    "https://www.whatyouwear.store",  # Your frontend (Vercel)
+    "https://whatyouwear.store",      # Root domain
+    "http://localhost:3000",          # Local testing
 ]
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_HEADERS = ["*"]
@@ -171,8 +171,8 @@ CORS_ALLOW_HEADERS = ["*"]
 CSRF_TRUSTED_ORIGINS = [
     "https://www.whatyouwear.store",
     "https://whatyouwear.store",
+    "https://api.whatyouwear.store",
     "https://65.2.152.151",
-    "http://65.2.152.151",
 ]
 
 CSRF_COOKIE_SECURE = not DEBUG
@@ -206,7 +206,7 @@ LOGGING = {
 }
 
 # ========================
-# Razorpay
+# Razorpay (Production Safe)
 # ========================
-RAZORPAY_KEY_ID = os.getenv("RAZORPAY_KEY_ID", "rzp_test_1DP5mmOlF5G5ag")
-RAZORPAY_KEY_SECRET = os.getenv("RAZORPAY_KEY_SECRET", "rzp_test_1DP5mmOlF5G5ag_secret")
+RAZORPAY_KEY_ID = os.getenv("RAZORPAY_KEY_ID", "")
+RAZORPAY_KEY_SECRET = os.getenv("RAZORPAY_KEY_SECRET", "")
