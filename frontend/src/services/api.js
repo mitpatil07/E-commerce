@@ -1,6 +1,8 @@
 // src/services/api.js - UNIFIED AND FIXED VERSION
 
-const API_BASE_URL = 'http://127.0.0.1:8000/api';
+// const API_BASE_URL = 'http://127.0.0.1:8000/api';
+const API_BASE_URL = 'http://65.2.152.151:8000/api';
+
 
 // Helper function to handle API responses
 const handleResponse = async (response) => {
