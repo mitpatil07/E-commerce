@@ -5,17 +5,23 @@ import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "django-insecure-63lez)2lmefg4hqezl=(+@!a5k^q6vetoj3$99sp0au%_f3h=t")
+# ✅ Security
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "your-strong-secret-key")
+DEBUG = os.getenv("DEBUG", "False") == "True"
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv("DEBUG", "True") == "True"
+# ✅ Allow frontend + EC2 IP/domain
+ALLOWED_HOSTS = [
+    "localhost",
+    "127.0.0.1",
+    "65.2.152.151",           # your EC2 IPv4
+    "api.whatyouwear.store",  # optional if using subdomain
+    "www.whatyouwear.store",  # your main frontend domain
+    "*"
+]
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1", "*"]
-# ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
-
-
-# Application definition
+# ========================
+# Django Apps
+# ========================
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -24,7 +30,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
 
-    # Third party apps
+    # Third-party
     "rest_framework",
     "rest_framework_simplejwt",
     "rest_framework_simplejwt.token_blacklist",
@@ -37,9 +43,12 @@ INSTALLED_APPS = [
 
 AUTH_USER_MODEL = "accounts.User"
 
+# ========================
+# Middleware
+# ========================
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    "whitenoise.middleware.WhiteNoiseMiddleware",  # for static files on Render
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -51,6 +60,9 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = "backend.urls"
 
+# ========================
+# Templates
+# ========================
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
@@ -69,7 +81,9 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "backend.wsgi.application"
 
-# Database (Auto-detect PostgreSQL on Render)
+# ========================
+# Database
+# ========================
 DATABASES = {
     "default": dj_database_url.config(
         default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
@@ -77,7 +91,9 @@ DATABASES = {
     )
 }
 
-# Password validation
+# ========================
+# Password Validation
+# ========================
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
@@ -85,23 +101,29 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
 
+# ========================
+# Internationalization
+# ========================
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = "Asia/Kolkata"
 USE_I18N = True
 USE_TZ = True
 
-# Static files
+# ========================
+# Static & Media
+# ========================
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
-# Media files
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# REST Framework Settings
+# ========================
+# REST Framework
+# ========================
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework_simplejwt.authentication.JWTAuthentication",
@@ -118,7 +140,9 @@ REST_FRAMEWORK = {
     ],
 }
 
-# JWT Settings
+# ========================
+# JWT
+# ========================
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(hours=1),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
@@ -128,27 +152,25 @@ SIMPLE_JWT = {
     "ALGORITHM": "HS256",
     "SIGNING_KEY": SECRET_KEY,
     "AUTH_HEADER_TYPES": ("Bearer",),
-    "AUTH_TOKEN_CLASSES": ("rest_framework_simplejwt.tokens.AccessToken",),
 }
 
-# CORS Settings
+# ========================
+# CORS (Frontend Communication)
+# ========================
 CORS_ALLOWED_ORIGINS = [
-    # "http://127.0.0.1:3000",
-    # "http://localhost:5173",
-    # "http://127.0.0.1:5173",
-    # Add your deployed frontend domain here after deployment
-    "http://localhost:3000",
-    "https://www.whatyouwear.store",
+    "https://www.whatyouwear.store",  # your frontend (Vercel)
+    "https://whatyouwear.store",      # root domain
+    "http://localhost:3000",          # local testing
 ]
 CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_HEADERS = ["*"]
 
-# CSRF Settings
+# ========================
+# CSRF (Form & Auth Safety)
+# ========================
 CSRF_TRUSTED_ORIGINS = [
-    # "http://localhost:3000",
-    # "http://127.0.0.1:3000",
-    # "http://localhost:5173",
-    # "http://127.0.0.1:5173",
     "https://www.whatyouwear.store",
+    "https://whatyouwear.store",
     "https://65.2.152.151",
     "http://65.2.152.151",
 ]
@@ -156,20 +178,26 @@ CSRF_TRUSTED_ORIGINS = [
 CSRF_COOKIE_SECURE = not DEBUG
 SESSION_COOKIE_SECURE = not DEBUG
 
-# Session Settings
+# ========================
+# Sessions
+# ========================
 SESSION_ENGINE = "django.contrib.sessions.backends.db"
 SESSION_COOKIE_AGE = 86400 * 30
 SESSION_SAVE_EVERY_REQUEST = True
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = "Lax"
 
+# ========================
 # Google OAuth
+# ========================
 GOOGLE_CLIENT_ID = os.getenv(
     "GOOGLE_CLIENT_ID",
     "323225275507-dnjb6ok6iv5u153c8nteu8ral51pnj13.apps.googleusercontent.com",
 )
 
+# ========================
 # Logging
+# ========================
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
@@ -177,6 +205,8 @@ LOGGING = {
     "root": {"handlers": ["console"], "level": "INFO"},
 }
 
-# Razorpay Configuration (Use env vars on Render)
+# ========================
+# Razorpay
+# ========================
 RAZORPAY_KEY_ID = os.getenv("RAZORPAY_KEY_ID", "rzp_test_1DP5mmOlF5G5ag")
 RAZORPAY_KEY_SECRET = os.getenv("RAZORPAY_KEY_SECRET", "rzp_test_1DP5mmOlF5G5ag_secret")
