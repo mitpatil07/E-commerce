@@ -1,9 +1,12 @@
-// api/axios.js
+// src/api/axios.js
 import axios from 'axios';
 
-// ✅ Use environment variable from Vercel (.env)
+// ✅ Dynamically use environment variable (Vercel or local)
+const API_BASE_URL =
+  process.env.REACT_APP_API_BASE_URL || 'http://127.0.0.1:8000/api';
+
 const API = axios.create({
-  baseURL: `${process.env.REACT_APP_API_BASE_URL}/api`,
+  baseURL: `${API_BASE_URL}/api`.replace('//api', '/api'), // safety fix for double /api
   headers: {
     'Content-Type': 'application/json',
   },
