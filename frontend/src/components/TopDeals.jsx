@@ -12,7 +12,7 @@ export default function TopDeals({ addToCart, onProductClick }) {
   const scrollContainerRef = useRef(null);
 
   // API configuration
-  const API_BASE_URL = 'api.whatyouwear.store/api';
+  const API_BASE_URL = 'https://api.whatyouwear.store/api';
   // const API_BASE_URL = 'http://127.0.0.1:8000/api';
 
 
@@ -48,19 +48,21 @@ export default function TopDeals({ addToCart, onProductClick }) {
       try {
         console.log('🔄 Fetching top deals...');
         
-        const response = await fetch(`${API_BASE_URL}/products/`, {
-          method: 'GET',
-          credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
+        // const response = await fetch(`${API_BASE_URL}/products/`, {
+        //   method: 'GET',
+        //   credentials: 'include',
+        //   headers: {
+        //     'Content-Type': 'application/json',
+        //   },
+        // });
 
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
+        // if (!response.ok) {
+        //   throw new Error(`HTTP error! status: ${response.status}`);
+        // }
 
-        const data = await response.json();
+        // const data = await response.json();
+
+        const data = await api.getProducts();
         console.log('✅ Products received for deals:', data);
         
         // Handle paginated response

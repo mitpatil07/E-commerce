@@ -10,7 +10,7 @@ export default function ClothingShowcase() {
   const navigate = useNavigate();
 
   // API configuration
-  const API_BASE_URL = 'api.whatyouwear.store/api';
+  const API_BASE_URL = 'https://api.whatyouwear.store/api';
     // const API_BASE_URL = 'http://127.0.0.1:8000/api';
 
 
@@ -39,19 +39,21 @@ export default function ClothingShowcase() {
       try {
         console.log('🔄 Fetching showcase products...');
         
-        const response = await fetch(`${API_BASE_URL}/products/`, {
-          method: 'GET',
-          credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
+        // const response = await fetch(`${API_BASE_URL}/products/`, {
+        //   method: 'GET',
+        //   credentials: 'include',
+        //   headers: {
+        //     'Content-Type': 'application/json',
+        //   },
+        // });
 
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
+        const data = await api.getProducts();
 
-        const data = await response.json();
+        // if (!response.ok) {
+        //   throw new Error(`HTTP error! status: ${response.status}`);
+        // }
+
+        // const data = await response.json();
         console.log('✅ Products received for showcase:', data);
         
         // Handle paginated response

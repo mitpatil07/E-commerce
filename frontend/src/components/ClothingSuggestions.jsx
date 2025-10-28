@@ -11,7 +11,7 @@ export default function ClothingSuggestions({ onProductClick, addToCart }) {
   const [toastMessage, setToastMessage] = useState('');
 
   // API configuration
-  const API_BASE_URL = 'api.whatyouwear.store/api';
+  const API_BASE_URL = 'https://api.whatyouwear.store/api';
     // const API_BASE_URL = 'http://127.0.0.1:8000/api';
 
 
@@ -31,19 +31,20 @@ export default function ClothingSuggestions({ onProductClick, addToCart }) {
       try {
         console.log('🔄 Fetching product suggestions...');
         
-        const response = await fetch(`${API_BASE_URL}/products/`, {
-          method: 'GET',
-          credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
+        // const response = await fetch(`${API_BASE_URL}/products/`, {
+        //   method: 'GET',
+        //   credentials: 'include',
+        //   headers: {
+        //     'Content-Type': 'application/json',
+        //   },
+        // });
+        const data = await api.getProducts();
 
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
+        // if (!response.ok) {
+        //   throw new Error(`HTTP error! status: ${response.status}`);
+        // }
 
-        const data = await response.json();
+        // const data = await response.json();
         console.log('✅ Products received:', data);
         
         // Handle paginated response
