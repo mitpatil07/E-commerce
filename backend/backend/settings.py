@@ -170,6 +170,7 @@ CORS_ALLOWED_ORIGINS = [
     "https://www.whatyouwear.store",
     "https://whatyouwear.store",
     "http://localhost:3000",
+    "http://127.0.0.1:3000"
 ]
 
 CORS_ALLOW_CREDENTIALS = True
@@ -202,6 +203,8 @@ CSRF_TRUSTED_ORIGINS = [
     "https://www.whatyouwear.store",
     "https://whatyouwear.store",
     "https://api.whatyouwear.store",
+    "http://localhost:3000",
+    "http://127.0.0.1:3000"
 ]
 
 CSRF_COOKIE_SECURE = True
