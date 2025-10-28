@@ -14,7 +14,7 @@ DEBUG = os.getenv("DEBUG", "False") == "True"
 ALLOWED_HOSTS = [
     'api.whatyouwear.store',
     'www.api.whatyouwear.store',
-    '65.2.152.151',
+    '13.127.0.77',
     'localhost',
     '127.0.0.1'
 ]
