@@ -1,7 +1,7 @@
 // src/services/api.js - UNIFIED AND FIXED VERSION
 
-// const API_BASE_URL = 'http://127.0.0.1:8000/api';
-const API_BASE_URL = 'https://api.whatyouwear.store/api';
+const API_BASE_URL = 'http://13.127.0.77';
+// const API_BASE_URL = 'https://api.whatyouwear.store/api';
 
 
 // Helper function to handle API responses
