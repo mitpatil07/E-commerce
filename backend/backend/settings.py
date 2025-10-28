@@ -11,14 +11,17 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "your-strong-secret-key")
 DEBUG = os.getenv("DEBUG", "False") == "True"
 
-ALLOWED_HOSTS = [
-    "localhost",
-    "127.0.0.1",
-    "65.2.152.151",
-    "api.whatyouwear.store",
-    "www.whatyouwear.store",
-    "whatyouwear.store",
-]
+# ALLOWED_HOSTS = [
+#     "localhost",
+#     "127.0.0.1",
+#     "65.2.152.151",
+#     "api.whatyouwear.store",
+#     "www.whatyouwear.store",
+#     "whatyouwear.store",
+# ]
+
+ALLOWED_HOSTS = ['api.whatyouwear.store', 'localhost', '127.0.0.1']
+
 
 
 # ========================
