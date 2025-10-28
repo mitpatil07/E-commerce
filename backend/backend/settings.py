@@ -20,8 +20,8 @@ DEBUG = os.getenv("DEBUG", "False") == "True"
 #     "whatyouwear.store",
 # ]
 
-ALLOWED_HOSTS = ['api.whatyouwear.store', 'localhost', '127.0.0.1']
 
+ALLOWED_HOSTS = ['api.whatyouwear.store', '65.2.152.151', 'localhost', '127.0.0.1']
 
 
 # ========================
