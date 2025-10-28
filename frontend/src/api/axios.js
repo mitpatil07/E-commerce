@@ -3,7 +3,7 @@ import axios from 'axios';
 
 // ✅ Dynamically use environment variable (Vercel or local)
 const API_BASE_URL =
-  process.env.REACT_APP_API_BASE_URL || 'http://127.0.0.1:8000/api';
+  process.env.REACT_APP_API_BASE_URL || 'api.whatyouwear.store/api';
 
 const API = axios.create({
   baseURL: `${API_BASE_URL}/api`.replace('//api', '/api'), // safety fix for double /api
