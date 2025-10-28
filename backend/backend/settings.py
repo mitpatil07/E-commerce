@@ -164,17 +164,40 @@ SIMPLE_JWT = {
 # CORS (Frontend Communication)
 # ========================
 CORS_ALLOWED_ORIGINS = [
-    "https://www.whatyouwear.store",   # Vercel frontend
-    "https://whatyouwear.store",       # Root domain
-    "http://localhost:3000",           # Local testing
-    "http://65.2.152.151:8000",        # Backend IP (for testing)
+    "https://www.whatyouwear.store",
+    "https://whatyouwear.store",
+    "https://api.whatyouwear.store",
+    "http://localhost:3000",
 ]
 
 CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOW_HEADERS = ["*"]
+
+CORS_ALLOW_HEADERS = [
+    "accept",
+    "accept-encoding",
+    "authorization",
+    "content-type",
+    "dnt",
+    "origin",
+    "user-agent",
+    "x-csrftoken",
+    "x-requested-with",
+]
+
+CORS_ALLOW_METHODS = [
+    "DELETE",
+    "GET",
+    "OPTIONS",
+    "PATCH",
+    "POST",
+    "PUT",
+]
+
+# Temporary debug (keep until all works)
+CORS_ALLOW_ALL_ORIGINS = False
 
 # ⚠️ TEMPORARY DEBUG (to test if CORS is the issue)
-CORS_ALLOW_ALL_ORIGINS = True  # Remove after testing once everything works
+# CORS_ALLOW_ALL_ORIGINS = True 
 
 
 # ========================
