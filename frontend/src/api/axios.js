@@ -1,10 +1,9 @@
 // api/axios.js
 import axios from 'axios';
 
+// ✅ Use environment variable from Vercel (.env)
 const API = axios.create({
-
-  baseURL: 'http://65.2.152.151:8000/api',
-  // baseURL: 'http://localhost:8000/api/',
+  baseURL: `${process.env.REACT_APP_API_BASE_URL}/api`,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -19,61 +18,49 @@ API.interceptors.request.use(
     }
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
 // Response interceptor to handle token refresh and errors
 API.interceptors.response.use(
-  (response) => {
-    return response;
-  },
+  (response) => response,
   async (error) => {
     const originalRequest = error.config;
 
-    // If error is 401 and we haven't retried yet
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
 
       try {
         const refreshToken = localStorage.getItem('refresh_token');
-        
-        if (!refreshToken) {
-          throw new Error('No refresh token');
-        }
+        if (!refreshToken) throw new Error('No refresh token');
 
         console.log('🔄 Refreshing access token...');
 
-        // Try to refresh the token
-        const response = await axios.post('http://localhost:8000/api/accounts/token/refresh/', {
-          refresh: refreshToken
-        });
+        // ✅ Use same base URL for token refresh
+        const response = await axios.post(
+          `${process.env.REACT_APP_API_BASE_URL}/api/accounts/token/refresh/`,
+          { refresh: refreshToken }
+        );
 
         const { access } = response.data;
-        
-        // Save new access token
         localStorage.setItem('access_token', access);
-        
+
         console.log('✅ Token refreshed successfully');
-        
-        // Retry the original request with new token
+
         originalRequest.headers.Authorization = `Bearer ${access}`;
         return API(originalRequest);
-        
+
       } catch (refreshError) {
         console.error('❌ Token refresh failed:', refreshError);
-        
-        // Refresh failed, logout user
+
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
         localStorage.removeItem('user');
-        
-        // Redirect to login if not already there
+
         if (window.location.pathname !== '/login') {
           window.location.href = '/login';
         }
-        
+
         return Promise.reject(refreshError);
       }
     }

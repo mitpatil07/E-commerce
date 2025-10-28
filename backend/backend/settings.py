@@ -14,10 +14,12 @@ DEBUG = os.getenv("DEBUG", "False") == "True"
 ALLOWED_HOSTS = [
     "localhost",
     "127.0.0.1",
-    "65.2.152.151",           # EC2 IPv4
-    "api.whatyouwear.store",  # Backend domain
-    "www.whatyouwear.store",  # Frontend domain
+    "65.2.152.151",
+    "api.whatyouwear.store",
+    "www.whatyouwear.store",
+    "whatyouwear.store",
 ]
+
 
 # ========================
 # Django Apps
@@ -50,13 +52,17 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+
+    # CORS MUST BE HERE 👇
     "corsheaders.middleware.CorsMiddleware",
+
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
+
 
 ROOT_URLCONF = "backend.urls"
 
@@ -158,12 +164,18 @@ SIMPLE_JWT = {
 # CORS (Frontend Communication)
 # ========================
 CORS_ALLOWED_ORIGINS = [
-    "https://www.whatyouwear.store",  # Your frontend (Vercel)
-    "https://whatyouwear.store",      # Root domain
-    "http://localhost:3000",          # Local testing
+    "https://www.whatyouwear.store",   # Vercel frontend
+    "https://whatyouwear.store",       # Root domain
+    "http://localhost:3000",           # Local testing
+    "http://65.2.152.151:8000",        # Backend IP (for testing)
 ]
+
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_HEADERS = ["*"]
+
+# ⚠️ TEMPORARY DEBUG (to test if CORS is the issue)
+CORS_ALLOW_ALL_ORIGINS = True  # Remove after testing once everything works
+
 
 # ========================
 # CSRF (Form & Auth Safety)
