@@ -167,34 +167,16 @@ CORS_ALLOWED_ORIGINS = [
     "https://www.whatyouwear.store",
     "https://whatyouwear.store",
     "https://api.whatyouwear.store",
-    "http://localhost:3000",
+    # "http://localhost:3000",
 ]
 
 CORS_ALLOW_CREDENTIALS = True
 
-CORS_ALLOW_HEADERS = [
-    "accept",
-    "accept-encoding",
-    "authorization",
-    "content-type",
-    "dnt",
-    "origin",
-    "user-agent",
-    "x-csrftoken",
-    "x-requested-with",
-]
 
-CORS_ALLOW_METHODS = [
-    "DELETE",
-    "GET",
-    "OPTIONS",
-    "PATCH",
-    "POST",
-    "PUT",
-]
+CORS_ALLOW_HEADERS = ["*"]
+CORS_ALLOW_METHODS = ["DELETE", "GET", "OPTIONS", "PATCH", "POST", "PUT"]
 
-# Temporary debug (keep until all works)
-CORS_ALLOW_ALL_ORIGINS = False
+
 
 # ⚠️ TEMPORARY DEBUG (to test if CORS is the issue)
 # CORS_ALLOW_ALL_ORIGINS = True 
@@ -210,8 +192,10 @@ CSRF_TRUSTED_ORIGINS = [
     "https://65.2.152.151",
 ]
 
-CSRF_COOKIE_SECURE = not DEBUG
-SESSION_COOKIE_SECURE = not DEBUG
+# CSRF_COOKIE_SECURE = not DEBUG
+# SESSION_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
 
 # ========================
 # Sessions

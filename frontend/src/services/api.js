@@ -4,7 +4,6 @@
 const API_BASE_URL = 'https://api.whatyouwear.store/api';
 
 
-
 // Helper function to handle API responses
 const handleResponse = async (response) => {
   if (!response.ok) {
