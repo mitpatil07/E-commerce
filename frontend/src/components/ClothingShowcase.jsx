@@ -10,7 +10,9 @@ export default function ClothingShowcase() {
   const navigate = useNavigate();
 
   // API configuration
-  const API_BASE_URL = 'http://127.0.0.1:8000/api';
+  const API_BASE_URL = 'api.whatyouwear.store/api';
+    // const API_BASE_URL = 'http://127.0.0.1:8000/api';
+
 
   // Shuffle array function
   const shuffleArray = (array) => {
