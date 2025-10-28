@@ -1,6 +1,6 @@
 // src/services/api.js - UNIFIED AND FIXED VERSION
 
-const API_BASE_URL = 'http://13.127.0.77/api';
+const API_BASE_URL = 'https://13.127.0.77/api';
 // const API_BASE_URL = 'https://api.whatyouwear.store/api';
 
 
