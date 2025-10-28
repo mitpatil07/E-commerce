@@ -1,16 +1,17 @@
-// src/api/axios.js
-import axios from 'axios';
+import axios from "axios";
 
-// ✅ Dynamically use environment variable (Vercel or local)
-const API_BASE_URL =
-  process.env.REACT_APP_API_BASE_URL || 'api.whatyouwear.store/api';
+// ✅ Use correct API base URL
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "https://api.whatyouwear.store/api";
 
+// ✅ Create axios instance
 const API = axios.create({
-  baseURL: `${API_BASE_URL}/api`.replace('//api', '/api'), // safety fix for double /api
+  baseURL: API_BASE_URL, // ✅ clean base URL
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
+  withCredentials: true, // ✅ include cookies if using JWT/CSRF
 });
+
 
 // Request interceptor to add JWT token
 API.interceptors.request.use(
