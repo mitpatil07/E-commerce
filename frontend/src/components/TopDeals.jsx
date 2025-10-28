@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { ChevronLeft, ChevronRight, ShoppingCart, Star, Check, Loader2 } from 'lucide-react';
+import api from '../services/api';
 
 export default function TopDeals({ addToCart, onProductClick }) {
   const [deals, setDeals] = useState([]);

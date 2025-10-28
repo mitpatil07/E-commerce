@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ShoppingCart, Loader2, Check } from 'lucide-react';
+import api from '../services/api';
 
 export default function ClothingSuggestions({ onProductClick, addToCart }) {
   const navigate = useNavigate();
