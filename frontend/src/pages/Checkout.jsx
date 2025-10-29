@@ -1,4 +1,4 @@
-// frontend/src/pages/Checkout.jsx
+// frontend/src/pages/Checkout.jsx - Updated with CategoryProducts theme
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Check, Loader2, CreditCard, Truck, AlertCircle } from 'lucide-react';
@@ -101,7 +101,7 @@ export default function Checkout() {
         key: razorpayData.key,
         amount: razorpayData.amount,
         currency: razorpayData.currency,
-        name: 'Your Store Name',
+        name: 'WhatYouWear',
         description: 'Order Payment',
         order_id: razorpayData.razorpay_order_id,
         handler: async function (response) {
@@ -160,291 +160,344 @@ export default function Checkout() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white">
-        <div className="flex items-center justify-center min-h-[60vh]">
-          <Loader2 className="w-10 h-10 animate-spin text-gray-900" />
+      <>
+        <Navbar />
+        <div className="min-h-screen bg-white flex items-center justify-center">
+          <div className="text-center">
+            <Loader2 className="w-12 h-12 animate-spin text-black mx-auto mb-4" />
+            <p className="text-lg font-bold text-black" style={{ fontFamily: 'Inter, system-ui, -apple-system, sans-serif', letterSpacing: '0.02em' }}>
+              Loading checkout...
+            </p>
+          </div>
         </div>
         <Footer />
-      </div>
+      </>
     );
   }
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Success Toast */}
-      {showSuccess && (
-        <div className="fixed top-24 right-4 z-50 animate-in slide-in-from-right duration-300">
-          <div className="bg-gradient-to-r from-green-600 to-green-500 text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3">
-            <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
-              <Check className="w-5 h-5" />
-            </div>
-            <div>
-              <p className="font-bold">Payment Successful!</p>
-              <p className="text-sm text-white/90">Redirecting to orders...</p>
-            </div>
-          </div>
-        </div>
-      )}
+    <>
+      <Navbar />
+      
+      <div className="min-h-screen bg-white">
+        <style>{`
+          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+          
+          .page-title {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+            font-weight: 900;
+            letter-spacing: -0.04em;
+            line-height: 1;
+          }
+          
+          .section-title {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+          }
+          
+          .label-text {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+          }
+          
+          .button-text {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+            font-weight: 800;
+            letter-spacing: 0.02em;
+          }
+        `}</style>
 
-      {/* Error Alert */}
-      {error && (
-        <div className="fixed top-24 right-4 z-50 animate-in slide-in-from-right duration-300">
-          <div className="bg-red-600 text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 max-w-md">
-            <AlertCircle className="w-5 h-5 flex-shrink-0" />
-            <div>
-              <p className="font-bold">Error</p>
-              <p className="text-sm text-white/90">{error}</p>
-            </div>
-            <button 
-              onClick={() => setError(null)}
-              className="ml-2 text-white/80 hover:text-white"
-            >
-              ×
-            </button>
-          </div>
-        </div>
-      )}
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <h1 className="text-4xl font-bold text-gray-900 mb-8">Checkout</h1>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Checkout Form */}
-          <div className="lg:col-span-2">
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Contact Information */}
-              <div className="bg-gray-50 rounded-xl p-6 border-2 border-gray-200">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-10 h-10 bg-black text-white rounded-full flex items-center justify-center font-bold">
-                    1
-                  </div>
-                  <h2 className="text-2xl font-bold text-gray-900">Contact Information</h2>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-900 mb-2">
-                      Full Name *
-                    </label>
-                    <input
-                      type="text"
-                      name="shipping_name"
-                      value={formData.shipping_name}
-                      onChange={handleChange}
-                      required
-                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black outline-none transition"
-                      placeholder="Enter Name"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-900 mb-2">
-                      Email Address *
-                    </label>
-                    <input
-                      type="email"
-                      name="shipping_email"
-                      value={formData.shipping_email}
-                      onChange={handleChange}
-                      required
-                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black outline-none transition"
-                      placeholder="john@example.com"
-                    />
-                  </div>
-
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-semibold text-gray-900 mb-2">
-                      Phone Number *
-                    </label>
-                    <input
-                      type="tel"
-                      name="shipping_phone"
-                      value={formData.shipping_phone}
-                      onChange={handleChange}
-                      required
-                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black outline-none transition"
-                      placeholder="+91 9876543210"
-                    />
-                  </div>
-                </div>
+        {/* Success Toast */}
+        {showSuccess && (
+          <div className="fixed top-20 sm:top-24 right-4 z-50 animate-in slide-in-from-right duration-300">
+            <div className="bg-green-600 text-white px-6 py-4 flex items-center gap-3 border-2 border-green-700">
+              <div className="w-8 h-8 bg-white flex items-center justify-center">
+                <Check className="w-5 h-5 text-green-600" />
               </div>
+              <div>
+                <p className="font-bold uppercase text-sm">Payment Successful!</p>
+                <p className="text-xs uppercase">Redirecting to orders...</p>
+              </div>
+            </div>
+          </div>
+        )}
 
-              {/* Shipping Address */}
-              <div className="bg-gray-50 rounded-xl p-6 border-2 border-gray-200">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-10 h-10 bg-black text-white rounded-full flex items-center justify-center font-bold">
-                    2
-                  </div>
-                  <h2 className="text-2xl font-bold text-gray-900">Shipping Address</h2>
-                </div>
-                
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-900 mb-2">
-                      Street Address *
-                    </label>
-                    <textarea
-                      name="shipping_address"
-                      value={formData.shipping_address}
-                      onChange={handleChange}
-                      required
-                      rows="3"
-                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black outline-none transition"
-                      placeholder="123 Main Street, Apartment 4B"
-                    />
-                  </div>
+        {/* Error Alert */}
+        {error && (
+          <div className="fixed top-20 sm:top-24 right-4 z-50 animate-in slide-in-from-right duration-300">
+            <div className="bg-red-600 text-white px-6 py-4 flex items-center gap-3 max-w-md border-2 border-red-700">
+              <AlertCircle className="w-5 h-5 flex-shrink-0" />
+              <div className="flex-1">
+                <p className="font-bold uppercase text-sm">Error</p>
+                <p className="text-xs uppercase">{error}</p>
+              </div>
+              <button 
+                onClick={() => setError(null)}
+                className="ml-2 text-white hover:text-gray-200 text-xl font-bold"
+              >
+                ×
+              </button>
+            </div>
+          </div>
+        )}
 
+        {/* Header Section */}
+        <div className="bg-white border-b border-gray-200">
+          <div className="px-4 py-4 sm:py-6 max-w-screen-2xl mx-auto">
+            <h1 className="page-title text-3xl sm:text-4xl lg:text-5xl text-black uppercase">
+              Checkout
+            </h1>
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="px-4 py-6 sm:py-8 max-w-screen-2xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+            {/* Checkout Form */}
+            <div className="lg:col-span-2">
+              <form onSubmit={handleSubmit} className="space-y-6">
+                {/* Contact Information */}
+                <div className="bg-white border-2 border-gray-300 p-6">
+                  <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-200">
+                    <div className="w-10 h-10 bg-black text-white flex items-center justify-center font-bold">
+                      1
+                    </div>
+                    <h2 className="section-title text-xl sm:text-2xl text-black uppercase">
+                      Contact Information
+                    </h2>
+                  </div>
+                  
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-semibold text-gray-900 mb-2">
-                        City *
+                      <label className="label-text block text-xs sm:text-sm text-black mb-2 uppercase">
+                        Full Name *
                       </label>
                       <input
                         type="text"
-                        name="shipping_city"
-                        value={formData.shipping_city}
+                        name="shipping_name"
+                        value={formData.shipping_name}
                         onChange={handleChange}
                         required
-                        className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black outline-none transition"
-                        placeholder="Mumbai"
+                        className="w-full px-4 py-3 border-2 border-gray-300 focus:ring-2 focus:ring-black focus:border-black outline-none transition text-sm"
+                        placeholder="Enter Name"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-semibold text-gray-900 mb-2">
-                        State / Province *
+                      <label className="label-text block text-xs sm:text-sm text-black mb-2 uppercase">
+                        Email Address *
                       </label>
                       <input
-                        type="text"
-                        name="shipping_state"
-                        value={formData.shipping_state}
+                        type="email"
+                        name="shipping_email"
+                        value={formData.shipping_email}
                         onChange={handleChange}
                         required
-                        className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black outline-none transition"
-                        placeholder="Maharashtra"
+                        className="w-full px-4 py-3 border-2 border-gray-300 focus:ring-2 focus:ring-black focus:border-black outline-none transition text-sm"
+                        placeholder="john@example.com"
                       />
                     </div>
 
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-900 mb-2">
-                        ZIP / Postal Code *
+                    <div className="md:col-span-2">
+                      <label className="label-text block text-xs sm:text-sm text-black mb-2 uppercase">
+                        Phone Number *
                       </label>
                       <input
-                        type="text"
-                        name="shipping_zip_code"
-                        value={formData.shipping_zip_code}
+                        type="tel"
+                        name="shipping_phone"
+                        value={formData.shipping_phone}
                         onChange={handleChange}
                         required
-                        className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black outline-none transition"
-                        placeholder="400001"
+                        className="w-full px-4 py-3 border-2 border-gray-300 focus:ring-2 focus:ring-black focus:border-black outline-none transition text-sm"
+                        placeholder="+91 9876543210"
                       />
                     </div>
+                  </div>
+                </div>
 
+                {/* Shipping Address */}
+                <div className="bg-white border-2 border-gray-300 p-6">
+                  <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-200">
+                    <div className="w-10 h-10 bg-black text-white flex items-center justify-center font-bold">
+                      2
+                    </div>
+                    <h2 className="section-title text-xl sm:text-2xl text-black uppercase">
+                      Shipping Address
+                    </h2>
+                  </div>
+                  
+                  <div className="space-y-4">
                     <div>
-                      <label className="block text-sm font-semibold text-gray-900 mb-2">
-                        Country
+                      <label className="label-text block text-xs sm:text-sm text-black mb-2 uppercase">
+                        Street Address *
                       </label>
-                      <input
-                        type="text"
-                        name="shipping_country"
-                        value={formData.shipping_country}
+                      <textarea
+                        name="shipping_address"
+                        value={formData.shipping_address}
                         onChange={handleChange}
-                        className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed"
-                        disabled
+                        required
+                        rows="3"
+                        className="w-full px-4 py-3 border-2 border-gray-300 focus:ring-2 focus:ring-black focus:border-black outline-none transition text-sm"
+                        placeholder="123 Main Street, Apartment 4B"
                       />
                     </div>
-                  </div>
-                </div>
-              </div>
 
-              {/* Action Buttons */}
-              <div className="flex gap-4">
-                <button
-                  type="button"
-                  onClick={() => navigate('/cart')}
-                  disabled={submitting}
-                  className="flex-1 bg-gray-200 text-gray-900 py-4 rounded-lg hover:bg-gray-300 transition font-bold text-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Back to Cart
-                </button>
-                <button
-                  type="submit"
-                  disabled={submitting}
-                  className="flex-1 bg-black text-white py-4 rounded-lg hover:bg-gray-800 transition font-bold text-lg disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
-                >
-                  {submitting ? (
-                    <>
-                      <Loader2 className="w-5 h-5 animate-spin" />
-                      Processing...
-                    </>
-                  ) : (
-                    <>
-                      <CreditCard className="w-5 h-5" />
-                      Proceed to Payment
-                    </>
-                  )}
-                </button>
-              </div>
-            </form>
-          </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="label-text block text-xs sm:text-sm text-black mb-2 uppercase">
+                          City *
+                        </label>
+                        <input
+                          type="text"
+                          name="shipping_city"
+                          value={formData.shipping_city}
+                          onChange={handleChange}
+                          required
+                          className="w-full px-4 py-3 border-2 border-gray-300 focus:ring-2 focus:ring-black focus:border-black outline-none transition text-sm"
+                          placeholder="Mumbai"
+                        />
+                      </div>
 
-          {/* Order Summary */}
-          <div className="lg:col-span-1">
-            <div className="bg-gray-50 rounded-xl p-6 sticky top-24 border-2 border-gray-200">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">Order Summary</h2>
-              
-              {/* Order Items */}
-              <div className="space-y-3 mb-6 max-h-64 overflow-y-auto">
-                {cart?.items?.map((item) => (
-                  <div key={item.id} className="flex gap-3">
-                    <div className="w-16 h-16 bg-white rounded-lg overflow-hidden border border-gray-200 flex-shrink-0">
-                      <img
-                        src={item.product.image}
-                        alt={item.product.name}
-                        className="w-full h-full object-cover"
-                      />
+                      <div>
+                        <label className="label-text block text-xs sm:text-sm text-black mb-2 uppercase">
+                          State / Province *
+                        </label>
+                        <input
+                          type="text"
+                          name="shipping_state"
+                          value={formData.shipping_state}
+                          onChange={handleChange}
+                          required
+                          className="w-full px-4 py-3 border-2 border-gray-300 focus:ring-2 focus:ring-black focus:border-black outline-none transition text-sm"
+                          placeholder="Maharashtra"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="label-text block text-xs sm:text-sm text-black mb-2 uppercase">
+                          ZIP / Postal Code *
+                        </label>
+                        <input
+                          type="text"
+                          name="shipping_zip_code"
+                          value={formData.shipping_zip_code}
+                          onChange={handleChange}
+                          required
+                          className="w-full px-4 py-3 border-2 border-gray-300 focus:ring-2 focus:ring-black focus:border-black outline-none transition text-sm"
+                          placeholder="400001"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="label-text block text-xs sm:text-sm text-black mb-2 uppercase">
+                          Country
+                        </label>
+                        <input
+                          type="text"
+                          name="shipping_country"
+                          value={formData.shipping_country}
+                          onChange={handleChange}
+                          className="w-full px-4 py-3 border-2 border-gray-300 bg-gray-100 cursor-not-allowed text-sm"
+                          disabled
+                        />
+                      </div>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <h4 className="text-sm font-semibold text-gray-900 line-clamp-1">
-                        {item.product.name}
-                      </h4>
-                      <p className="text-xs text-gray-500">Qty: {item.quantity}</p>
-                      <p className="text-sm font-bold text-gray-900">
-                        ₹{parseFloat(item.subtotal).toFixed(2)}
-                      </p>
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+                  <button
+                    type="button"
+                    onClick={() => navigate('/cart')}
+                    disabled={submitting}
+                    className="button-text flex-1 bg-white border-2 border-gray-300 text-black py-3 sm:py-4 hover:border-black transition text-sm uppercase disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Back to Cart
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={submitting}
+                    className="button-text flex-1 bg-black text-white py-3 sm:py-4 rounded-md hover:bg-gray-900 transition text-sm uppercase disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  >
+                    {submitting ? (
+                      <>
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                        Processing...
+                      </>
+                    ) : (
+                      <>
+                        <CreditCard className="w-5 h-5" />
+                        Proceed to Payment
+                      </>
+                    )}
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            {/* Order Summary */}
+            <div className="lg:col-span-1">
+              <div className="bg-white border-2 border-gray-300 p-6 sticky top-24">
+                <h2 className="section-title text-xl sm:text-2xl text-black mb-6 uppercase">
+                  Order Summary
+                </h2>
+                
+                {/* Order Items */}
+                <div className="space-y-3 mb-6 max-h-64 overflow-y-auto">
+                  {cart?.items?.map((item) => (
+                    <div key={item.id} className="flex gap-3">
+                      <div className="w-16 h-16 bg-gray-100 overflow-hidden border border-gray-200 flex-shrink-0">
+                        <img
+                          src={item.product.image}
+                          alt={item.product.name}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="text-xs sm:text-sm font-bold text-black line-clamp-2 uppercase">
+                          {item.product.name}
+                        </h4>
+                        <p className="text-xs text-gray-500 uppercase">Qty: {item.quantity}</p>
+                        <p className="text-sm font-bold text-black">
+                          Rs. {parseFloat(item.subtotal).toFixed(2)}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
 
-              {/* Totals */}
-              <div className="border-t-2 border-gray-300 pt-4 space-y-3">
-                <div className="flex justify-between text-gray-700">
-                  <span>Subtotal</span>
-                  <span className="font-semibold">₹{parseFloat(cart?.total_price || 0).toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between text-gray-700">
-                  <span className="flex items-center gap-2">
-                    <Truck className="w-4 h-4" />
-                    Shipping
-                  </span>
-                  <span className="text-green-600 font-bold">Free</span>
-                </div>
-                <div className="border-t-2 border-gray-300 pt-3 flex justify-between text-xl font-bold text-gray-900">
-                  <span>Total</span>
-                  <span>₹{parseFloat(cart?.total_price || 0).toFixed(2)}</span>
-                </div>
-              </div>
-
-              {/* Security Badge */}
-              <div className="mt-6 pt-6 border-t border-gray-300">
-                <div className="flex items-center gap-3 text-sm text-gray-600">
-                  <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                    <Check className="w-5 h-5 text-green-600" />
+                {/* Totals */}
+                <div className="border-t-2 border-gray-300 pt-4 space-y-3">
+                  <div className="flex justify-between text-gray-700 text-sm">
+                    <span className="uppercase font-bold">Subtotal</span>
+                    <span className="font-bold">Rs. {parseFloat(cart?.total_price || 0).toFixed(2)}</span>
                   </div>
-                  <div>
-                    <p className="font-semibold text-gray-900">Secure Checkout</p>
-                    <p className="text-xs">Powered by Razorpay</p>
+                  <div className="flex justify-between text-gray-700 text-sm">
+                    <span className="flex items-center gap-2 uppercase font-bold">
+                      <Truck className="w-4 h-4" />
+                      Shipping
+                    </span>
+                    <span className="text-green-600 font-bold uppercase">Free</span>
+                  </div>
+                  <div className="border-t-2 border-gray-300 pt-3 flex justify-between">
+                    <span className="section-title text-lg sm:text-xl text-black uppercase">Total</span>
+                    <span className="section-title text-lg sm:text-xl text-black">Rs. {parseFloat(cart?.total_price || 0).toFixed(2)}</span>
+                  </div>
+                </div>
+
+                {/* Security Badge */}
+                <div className="mt-6 pt-6 border-t border-gray-300">
+                  <div className="flex items-center gap-3 text-xs sm:text-sm text-gray-600">
+                    <div className="w-8 h-8 bg-green-100 flex items-center justify-center">
+                      <Check className="w-5 h-5 text-green-600" />
+                    </div>
+                    <div>
+                      <p className="font-bold text-black uppercase">Secure Checkout</p>
+                      <p className="text-xs uppercase">Powered by Razorpay</p>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -454,6 +507,6 @@ export default function Checkout() {
       </div>
 
       <Footer />
-    </div>
+    </>
   );
 }
