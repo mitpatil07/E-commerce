@@ -1,8 +1,15 @@
-// src/services/api.js - UNIFIED AND FIXED VERSION
+// src/services/api.js 
 
 // const API_BASE_URL = 'https://13.127.0.77/api';
-const API_BASE_URL = 'https://api.whatyouwear.store/api';
+// const API_BASE_URL = 'https://api.whatyouwear.store/api';
 
+// Use empty string in development to use Vite proxy, full URL in production
+const API_BASE_URL = import.meta.env.PROD 
+  ? 'https://api.whatyouwear.store/api'  // Production - full URL
+  : '/api';  // Development - use Vite proxy
+
+// OR if you want to use environment variables:
+// const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || (import.meta.env.PROD ? 'https://api.whatyouwear.store/api' : '/api');
 
 // Helper function to handle API responses
 const handleResponse = async (response) => {

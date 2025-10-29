@@ -1,7 +1,9 @@
 import axios from "axios";
 
 // ✅ Use correct API base URL
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "https://api.whatyouwear.store/api";
+// const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "https://api.whatyouwear.store/api";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://api.whatyouwear.store/api";
+
 // const API_BASE_URL = 'https://13.127.0.77/api';
 
 // ✅ Create axios instance
