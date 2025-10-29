@@ -1,10 +1,10 @@
-// src/services/api.js - Optimized for both local and production
+// src/services/api.js - Enhanced with better auth handling
 
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL ||
   (import.meta.env.PROD
     ? 'https://api.whatyouwear.store/api'
-    : '/api'); // ✅ Use proxy in development
+    : '/api');
 
 console.log("🌍 Using API_BASE_URL:", API_BASE_URL);
 console.log("🔧 Environment:", import.meta.env.MODE);
@@ -25,24 +25,47 @@ const getCookie = (name) => {
 };
 
 const handleResponse = async (response) => {
+  // Get response text first
+  const text = await response.text();
+  
   if (!response.ok) {
-    const error = await response.json().catch(() => ({ 
-      message: `HTTP error! status: ${response.status}` 
-    }));
+    let error;
+    try {
+      error = JSON.parse(text);
+    } catch {
+      error = { message: `HTTP error! status: ${response.status}`, detail: text };
+    }
+    
+    // Special handling for authentication errors
+    if (response.status === 401) {
+      const errorMsg = error.detail || error.message || 'Authentication failed';
+      throw new Error(`Failed to create payment order: ${errorMsg}`);
+    }
+    
     throw new Error(error.message || error.detail || error.error || 'An error occurred');
   }
-  return response.json();
+  
+  // Parse successful response
+  try {
+    return JSON.parse(text);
+  } catch {
+    return text;
+  }
 };
 
 const getAuthHeaders = (includeAuth = false) => {
   const headers = {
     'Content-Type': 'application/json',
+    'Accept': 'application/json',
   };
   
   if (includeAuth) {
     const token = localStorage.getItem('access_token');
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
+      console.log('🔑 Adding auth header - Token exists:', !!token);
+    } else {
+      console.warn('⚠️ No access token found in localStorage');
     }
   }
   
@@ -74,15 +97,28 @@ const refreshAccessToken = async () => {
 
 const fetchWithAuth = async (url, options = {}) => {
   try {
+    // Log request details in development
+    if (import.meta.env.DEV) {
+      console.log('🌐 Request:', {
+        url,
+        method: options.method,
+        hasAuth: !!options.headers?.Authorization,
+      });
+    }
+    
     const response = await fetch(url, options);
     
+    // Handle 401 with token refresh
     if (response.status === 401 && options.headers?.Authorization) {
+      console.log('🔄 Token expired, attempting refresh...');
       try {
         const newToken = await refreshAccessToken();
         const newHeaders = { ...options.headers, Authorization: `Bearer ${newToken}` };
         const retryResponse = await fetch(url, { ...options, headers: newHeaders });
+        console.log('✅ Token refreshed, retry successful');
         return retryResponse;
       } catch (refreshError) {
+        console.error('❌ Token refresh failed:', refreshError);
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
         localStorage.removeItem('user');
@@ -97,6 +133,7 @@ const fetchWithAuth = async (url, options = {}) => {
     
     return response;
   } catch (error) {
+    console.error('🚨 Fetch error:', error);
     throw error;
   }
 };
@@ -130,6 +167,7 @@ const api = {
       localStorage.setItem('access_token', data.tokens.access);
       localStorage.setItem('refresh_token', data.tokens.refresh);
       localStorage.setItem('user', JSON.stringify(data.user));
+      console.log('✅ Tokens stored successfully');
     }
     return data;
   },
@@ -191,7 +229,9 @@ const api = {
   },
 
   isAuthenticated: () => {
-    return !!localStorage.getItem('access_token');
+    const hasToken = !!localStorage.getItem('access_token');
+    console.log('🔍 isAuthenticated check:', hasToken);
+    return hasToken;
   },
 
   getCurrentUser: () => {
@@ -334,15 +374,33 @@ const api = {
   },
 
   createRazorpayOrder: async (orderData = {}) => {
+    console.log('💳 Creating Razorpay order...');
+    
+    // CRITICAL: Verify token exists before making request
+    const token = localStorage.getItem('access_token');
+    if (!token) {
+      throw new Error('Authentication required. Please login first.');
+    }
+    
+    console.log('🔑 Token check:', {
+      exists: !!token,
+      preview: token.substring(0, 30) + '...',
+      length: token.length
+    });
+    
     const response = await fetchWithAuth(`${API_BASE_URL}/payment/create-order/`, {
       method: 'POST',
       headers: getAuthHeaders(true),
       body: JSON.stringify(orderData),
     });
-    return handleResponse(response);
+    
+    const data = await handleResponse(response);
+    console.log('✅ Razorpay order created successfully');
+    return data;
   },
 
   verifyPayment: async (paymentData) => {
+    console.log('✅ Verifying payment...');
     const response = await fetchWithAuth(`${API_BASE_URL}/payment/verify/`, {
       method: 'POST',
       headers: getAuthHeaders(true),

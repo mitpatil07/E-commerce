@@ -1,4 +1,4 @@
-# payment/views.py
+# payment/views.py - Enhanced with detailed auth debugging
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -30,8 +30,32 @@ class CreateRazorpayOrderView(APIView):
     def post(self, request):
         logger.info("=" * 60)
         logger.info("💳 CREATE RAZORPAY ORDER REQUEST")
-        logger.info(f"User: {request.user.email}")
-        logger.info(f"Request data: {request.data}")
+        
+        # 🔍 ENHANCED AUTH DEBUGGING
+        logger.info(f"🔐 AUTH DEBUGGING:")
+        logger.info(f"  - User: {request.user}")
+        logger.info(f"  - Is Authenticated: {request.user.is_authenticated}")
+        logger.info(f"  - User ID: {getattr(request.user, 'id', None)}")
+        logger.info(f"  - User Email: {getattr(request.user, 'email', None)}")
+        logger.info(f"  - Auth Header: {request.META.get('HTTP_AUTHORIZATION', 'NOT PRESENT')[:50]}")
+        logger.info(f"  - Request Method: {request.method}")
+        logger.info(f"  - Content Type: {request.content_type}")
+        logger.info(f"  - Remote Addr: {request.META.get('REMOTE_ADDR')}")
+        logger.info(f"  - X-Forwarded-For: {request.META.get('HTTP_X_FORWARDED_FOR')}")
+        
+        # 🚨 EXPLICIT AUTH CHECK
+        if not request.user.is_authenticated:
+            logger.error("❌ AUTHENTICATION FAILED - User not authenticated")
+            logger.error(f"   User object: {request.user}")
+            logger.error(f"   Request headers: {dict(request.headers)}")
+            return Response({
+                'success': False,
+                'message': 'Authentication credentials were not provided.',
+                'detail': 'User not authenticated'
+            }, status=status.HTTP_401_UNAUTHORIZED)
+        
+        logger.info(f"✅ User authenticated: {request.user.email}")
+        logger.info(f"📦 Request data: {request.data}")
         logger.info("=" * 60)
         
         try:
@@ -67,7 +91,8 @@ class CreateRazorpayOrderView(APIView):
                 'razorpay_order_id': razorpay_order['id'],
                 'amount': amount,
                 'currency': 'INR',
-                'key': settings.RAZORPAY_KEY_ID
+                'key': settings.RAZORPAY_KEY_ID,
+                'cart_total': f"{float(cart.total_price):.2f}"
             }, status=status.HTTP_200_OK)
             
         except Cart.DoesNotExist:
@@ -94,6 +119,15 @@ class VerifyPaymentView(APIView):
     def post(self, request):
         logger.info("=" * 60)
         logger.info("✅ VERIFY PAYMENT REQUEST")
+        
+        # 🔍 AUTH CHECK
+        if not request.user.is_authenticated:
+            logger.error("❌ User not authenticated for payment verification")
+            return Response({
+                'success': False,
+                'message': 'Authentication required'
+            }, status=status.HTTP_401_UNAUTHORIZED)
+        
         logger.info(f"User: {request.user.email}")
         logger.info(f"Request data keys: {list(request.data.keys())}")
         logger.info("=" * 60)
@@ -106,7 +140,7 @@ class VerifyPaymentView(APIView):
             
             logger.info(f"Order ID: {razorpay_order_id}")
             logger.info(f"Payment ID: {razorpay_payment_id}")
-            logger.info(f"Signature: {razorpay_signature[:20]}...")
+            logger.info(f"Signature: {razorpay_signature[:20] if razorpay_signature else 'None'}...")
             
             if not all([razorpay_order_id, razorpay_payment_id, razorpay_signature]):
                 logger.error("❌ Missing payment details")
