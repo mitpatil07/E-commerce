@@ -3,6 +3,7 @@ from datetime import timedelta
 import os
 import dj_database_url
 
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # ========================
@@ -246,12 +247,17 @@ LOGGING = {
     "root": {"handlers": ["console"], "level": "INFO"},
 }
 
-# ========================
-# Razorpay (Production Safe)
-# ========================
-# RAZORPAY_KEY_ID = os.getenv("RAZORPAY_KEY_ID", "")
-# RAZORPAY_KEY_SECRET = os.getenv("RAZORPAY_KEY_SECRET", "")
-# settings.py
 
-RAZORPAY_KEY_ID = "rzp_test_RZDfGWLWfUuhot"  
-RAZORPAY_KEY_SECRET = "nByz0vrFQwVDigMlCnDOpo8l"
+# ========================
+# Razorpay Configuration
+# ========================
+RAZORPAY_KEY_ID = os.getenv("RAZORPAY_KEY_ID", "rzp_test_RZDfGWLWfUuhot")
+RAZORPAY_KEY_SECRET = os.getenv("RAZORPAY_KEY_SECRET", "nByz0vrFQwVDigMlCnDOpo8l")
+
+# Log what's being used (helpful for debugging)
+import logging
+logger = logging.getLogger(__name__)
+key_type = "TEST" if "test" in RAZORPAY_KEY_ID else "LIVE"
+logger.info(f"🔐 Using Razorpay {key_type} keys: {RAZORPAY_KEY_ID[:15]}...")
+# RAZORPAY_KEY_ID = "rzp_test_RZDfGWLWfUuhot"  
+# RAZORPAY_KEY_SECRET = "nByz0vrFQwVDigMlCnDOpo8l"
