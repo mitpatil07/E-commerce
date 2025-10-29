@@ -46,10 +46,10 @@ export default function TopDeals({ addToCart, onProductClick }) {
   useEffect(() => {
     const fetchDeals = async () => {
       try {
-        console.log('🔄 Fetching top deals...');
+        // console.log('🔄 Fetching top deals...');
         
         const data = await api.getProducts();
-        console.log('✅ Products received for deals:', data);
+        // console.log('✅ Products received for deals:', data);
         
         // Handle paginated response
         const productList = data.results || data;
@@ -61,7 +61,7 @@ export default function TopDeals({ addToCart, onProductClick }) {
         setDeals(limitedDeals);
         setLoading(false);
       } catch (err) {
-        console.error('❌ Failed to fetch deals:', err);
+        // console.error('❌ Failed to fetch deals:', err);
         setError(err.message);
         setLoading(false);
       }
@@ -113,10 +113,10 @@ export default function TopDeals({ addToCart, onProductClick }) {
     }
     
     try {
-      console.log('🛒 Adding to cart from deals:', deal.name);
+      // console.log('🛒 Adding to cart from deals:', deal.name);
       
       const csrfToken = getCookie('csrftoken');
-      console.log('🔑 CSRF Token:', csrfToken ? 'Found' : 'Not found');
+      // console.log('🔑 CSRF Token:', csrfToken ? 'Found' : 'Not found');
       
       // Use the API service to add to cart
       const response = await fetch(`${API_BASE_URL}/cart/add_item/`, {
@@ -133,7 +133,7 @@ export default function TopDeals({ addToCart, onProductClick }) {
       });
 
       const data = await response.json();
-      console.log('📦 API Response:', data);
+      // console.log('📦 API Response:', data);
 
       if (!response.ok) {
         throw new Error(data.message || data.detail || 'Failed to add to cart');
@@ -145,17 +145,17 @@ export default function TopDeals({ addToCart, onProductClick }) {
       }
       
       showToastMessage(`${deal.name} added to cart!`);
-      console.log('✅ Added to cart successfully');
+      // console.log('✅ Added to cart successfully');
     } catch (err) {
-      console.error('❌ Failed to add to cart:', err);
-      console.error('❌ Error details:', err.message);
+      // console.error('❌ Failed to add to cart:', err);
+      // console.error('❌ Error details:', err.message);
       showToastMessage('Failed to add to cart. Please try again.');
     }
   };
 
   const handleProductClick = (deal) => {
-    console.log('🖱️ Deal product clicked:', deal);
-    console.log('🔗 Navigating to:', `/product/${deal.id}`);
+    // console.log('🖱️ Deal product clicked:', deal);
+    // console.log('🔗 Navigating to:', `/product/${deal.id}`);
     
     // Call the onProductClick prop function
     if (onProductClick && typeof onProductClick === 'function') {

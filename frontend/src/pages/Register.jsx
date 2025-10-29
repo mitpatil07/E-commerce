@@ -26,7 +26,7 @@ const Register = () => {
     script.onload = () => {
       if (window.google) {
         window.google.accounts.id.initialize({
-          client_id: process.env.REACT_APP_GOOGLE_CLIENT_ID,
+          client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
           callback: handleGoogleSignup
         });
 
@@ -35,7 +35,7 @@ const Register = () => {
           {
             theme: 'outline',
             size: 'large',
-            width: '100%',
+            width: 300,
             text: 'signup_with'
           }
         );
@@ -53,7 +53,7 @@ const Register = () => {
     try {
       setLoading(true);
       setError('');
-      
+
       const res = await API.post('accounts/google-login/', {
         token: response.credential
       });
@@ -62,9 +62,9 @@ const Register = () => {
         localStorage.setItem('access_token', res.data.tokens.access);
         localStorage.setItem('refresh_token', res.data.tokens.refresh);
         localStorage.setItem('user', JSON.stringify(res.data.user));
-        
-        console.log('✅ Google signup successful, redirecting...');
-        
+
+        // console.log('✅ Google signup successful, redirecting...');
+
         setTimeout(() => {
           window.location.href = '/';
         }, 100);
@@ -72,7 +72,7 @@ const Register = () => {
         setError(res.data.message || 'Google signup failed');
       }
     } catch (err) {
-      console.error('Google signup error:', err);
+      // console.error('Google signup error:', err);
       setError(err.response?.data?.message || 'An error occurred during Google signup');
     } finally {
       setLoading(false);
@@ -105,8 +105,8 @@ const Register = () => {
     }
 
     try {
-      console.log('🔍 Attempting registration...');
-      
+      // console.log('🔍 Attempting registration...');
+
       const response = await API.post('accounts/register/', {
         email: formData.email,
         password: formData.password,
@@ -114,27 +114,27 @@ const Register = () => {
         last_name: formData.last_name
       });
 
-      console.log('✅ Registration response:', response.data);
-      console.log('✅ User registered:', response.data.user);
+      // console.log('✅ Registration response:', response.data);
+      // console.log('✅ User registered:', response.data.user);
 
       if (response.data.tokens) {
         localStorage.setItem('access_token', response.data.tokens.access);
         localStorage.setItem('refresh_token', response.data.tokens.refresh);
         localStorage.setItem('user', JSON.stringify(response.data.user));
-        
-        console.log('✅ Registration successful, redirecting...');
-        
+
+        // console.log('✅ Registration successful, redirecting...');
+
         setTimeout(() => {
           window.location.href = '/';
         }, 100);
       } else {
-        navigate('/login', { 
-          state: { message: 'Account created successfully! Please login.' } 
+        navigate('/login', {
+          state: { message: 'Account created successfully! Please login.' }
         });
       }
     } catch (err) {
-      console.error('❌ Registration error:', err);
-      
+      // console.error('❌ Registration error:', err);
+
       if (err.response?.data?.message) {
         if (typeof err.response.data.message === 'object') {
           const errors = err.response.data.message;

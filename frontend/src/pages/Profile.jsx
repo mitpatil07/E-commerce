@@ -46,7 +46,7 @@ export default function Profile() {
       });
       setLoading(false);
     } catch (error) {
-      console.error('Error fetching profile:', error);
+      // console.error('Error fetching profile:', error);
       setMessage({ type: 'error', text: 'Failed to load profile' });
       setLoading(false);
     }
@@ -64,7 +64,7 @@ export default function Profile() {
         cart: cartData.total_items || 0
       });
     } catch (error) {
-      console.error('Error fetching stats:', error);
+      // console.error('Error fetching stats:', error);
     }
   };
 
@@ -89,7 +89,7 @@ export default function Profile() {
       
       setTimeout(() => setMessage({ type: '', text: '' }), 3000);
     } catch (error) {
-      console.error('Error updating profile:', error);
+      // console.error('Error updating profile:', error);
       setMessage({ type: 'error', text: error.message || 'Failed to update profile' });
     } finally {
       setSaving(false);
@@ -103,7 +103,7 @@ export default function Profile() {
       await api.logout();
       navigate('/login');
     } catch (error) {
-      console.error('Logout error:', error);
+      // console.error('Logout error:', error);
       localStorage.removeItem('access_token');
       localStorage.removeItem('refresh_token');
       localStorage.removeItem('user');

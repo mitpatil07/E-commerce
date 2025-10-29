@@ -158,6 +158,27 @@ class Order(models.Model):
         ('cancelled', 'Cancelled'),
     ]
     
+    payment_method = models.CharField(
+        max_length=50, 
+        default='razorpay',
+        choices=[
+            ('razorpay', 'Razorpay'),
+            ('cod', 'Cash on Delivery'),
+        ]
+    )
+    payment_status = models.CharField(
+        max_length=20,
+        default='pending',
+        choices=[
+            ('pending', 'Pending'),
+            ('completed', 'Completed'),
+            ('failed', 'Failed'),
+        ]
+    )
+    razorpay_order_id = models.CharField(max_length=100, blank=True, null=True)
+    razorpay_payment_id = models.CharField(max_length=100, blank=True, null=True)
+    
+    
     PAYMENT_STATUS_CHOICES = [
         ('PENDING', 'Pending'),
         ('PAID', 'Paid'),

@@ -1,9 +1,18 @@
 // src/services/api.js - PRODUCTION CLEAN (NO LOGS)
 
-const API_BASE_URL = import.meta.env.PROD 
-  ? 'https://api.whatyouwear.store/api'
-  : '/api';
+// const API_BASE_URL = import.meta.env.PROD 
+//   ? 'https://api.whatyouwear.store/api'
+//   : '/api';
 
+// api.js
+
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL ||
+  (import.meta.env.PROD
+    ? 'https://api.whatyouwear.store/api'
+    : 'http://127.0.0.1:8000/api');
+
+    console.log("🌍 Using API_BASE_URL:", API_BASE_URL);
 const getCookie = (name) => {
   let cookieValue = null;
   if (document.cookie && document.cookie !== '') {
@@ -222,13 +231,17 @@ const api = {
       const response = await fetchWithAuth(`${API_BASE_URL}/cart/current/`, {
         method: 'GET',
         credentials: 'include',
-        headers: getAuthHeaders(api.isAuthenticated()),
+        headers: getAuthHeaders(true), // ✅ always send token
       });
+  
+      // ✅ ensures proper JSON response even after token refresh
       return await handleResponse(response);
     } catch (error) {
+      console.warn('⚠️ Failed to load cart:', error.message);
       return { items: [], total_items: 0, total_price: 0 };
     }
   },
+  
 
   addToCart: async (productId, quantity = 1, selectedColor = null, selectedSize = null) => {
     const csrfToken = getCookie('csrftoken');
@@ -309,10 +322,11 @@ const api = {
     return handleResponse(response);
   },
 
-  createRazorpayOrder: async () => {
+  createRazorpayOrder: async (orderData = {}) => {
     const response = await fetchWithAuth(`${API_BASE_URL}/payment/create-order/`, {
       method: 'POST',
       headers: getAuthHeaders(true),
+      body: JSON.stringify(orderData),
     });
     return handleResponse(response);
   },

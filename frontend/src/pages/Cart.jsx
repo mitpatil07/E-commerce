@@ -20,12 +20,12 @@ export default function Cart() {
   const fetchCart = async () => {
     try {
       setError(null);
-      console.log('🛒 Fetching cart...');
+      // console.log('🛒 Fetching cart...');
       const data = await api.getCart();
-      console.log('✅ Cart data:', data);
+      // console.log('✅ Cart data:', data);
       setCart(data);
     } catch (err) {
-      console.error('❌ Error fetching cart:', err);
+      // console.error('❌ Error fetching cart:', err);
       setError(err.message);
     } finally {
       setLoading(false);
@@ -38,11 +38,11 @@ export default function Cart() {
     setUpdating({ ...updating, [itemId]: true });
     
     try {
-      console.log('📝 Updating quantity:', { itemId, newQuantity });
+      // console.log('📝 Updating quantity:', { itemId, newQuantity });
       await api.updateCartItem(itemId, newQuantity);
       await fetchCart();
     } catch (err) {
-      console.error('❌ Failed to update quantity:', err);
+      // console.error('❌ Failed to update quantity:', err);
       alert('Failed to update quantity: ' + err.message);
     } finally {
       setUpdating({ ...updating, [itemId]: false });
@@ -51,24 +51,24 @@ export default function Cart() {
 
   const removeItem = async (itemId) => {
     try {
-      console.log('🗑️ Removing item:', itemId);
+      // console.log('🗑️ Removing item:', itemId);
       await api.removeFromCart(itemId);
       await fetchCart();
     } catch (err) {
-      console.error('❌ Failed to remove item:', err);
+      // console.error('❌ Failed to remove item:', err);
       alert('Failed to remove item: ' + err.message);
     }
   };
 
   const clearCart = async () => {
-    if (!confirm('Clear all items from cart?')) return;
+
     
     try {
-      console.log('🗑️ Clearing cart...');
+      // console.log('🗑️ Clearing cart...');
       await api.clearCart();
       await fetchCart();
     } catch (err) {
-      console.error('❌ Failed to clear cart:', err);
+      // console.error('❌ Failed to clear cart:', err);
       alert('Failed to clear cart: ' + err.message);
     }
   };

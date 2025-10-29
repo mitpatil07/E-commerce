@@ -25,7 +25,7 @@ export default function Orders() {
       setOrders(Array.isArray(data) ? data : data.results || []);
       setLoading(false);
     } catch (err) {
-      console.error('Error:', err);
+      // console.error('Error:', err);
       setLoading(false);
     }
   };
@@ -163,7 +163,7 @@ export default function Orders() {
                 Start shopping to see your orders here
               </p>
               <button
-                onClick={() => navigate('/products')}
+                onClick={() => navigate('/')}
                 className="button-text bg-black text-white px-8 py-3 rounded-md hover:bg-gray-900 transition text-sm uppercase"
               >
                 Browse Products

@@ -37,11 +37,11 @@ export default function ClothingShowcase() {
   useEffect(() => {
     const fetchShowcaseProducts = async () => {
       try {
-        console.log('🔄 Fetching showcase products...');
+        // console.log('🔄 Fetching showcase products...');
         
         const data = await api.getProducts();
 
-        console.log('✅ Products received for showcase:', data);
+        // console.log('✅ Products received for showcase:', data);
         
         // Handle paginated response
         const productList = data.results || data;
@@ -56,7 +56,7 @@ export default function ClothingShowcase() {
         setShowcaseProducts(productsWithSizes);
         setLoading(false);
       } catch (err) {
-        console.error('❌ Failed to fetch showcase products:', err);
+        // console.error('❌ Failed to fetch showcase products:', err);
         setError(err.message);
         setLoading(false);
       }
@@ -79,8 +79,8 @@ export default function ClothingShowcase() {
   };
 
   const handleProductClick = (product) => {
-    console.log('🖱️ Showcase product clicked:', product);
-    console.log('🔗 Navigating to:', `/product/${product.id}`);
+    // console.log('🖱️ Showcase product clicked:', product);
+    // console.log('🔗 Navigating to:', `/product/${product.id}`);
     navigate(`/product/${product.id}`);
   };
 

@@ -38,37 +38,32 @@ export default function CategoryProductsPage({
   // Get category from route state or use default
   useEffect(() => {
     if (location.state?.category) {
-      console.log('📍 Category from route:', location.state.category);
       setActiveCategory(location.state.category);
     }
   }, [location.state]);
 
   // Fetch categories on mount
   useEffect(() => {
-    console.log('🚀 Component mounted, fetching categories...');
     
     const fetchCategories = async () => {
       try {
-        console.log('🔄 Fetching categories from API...');
         const data = await api.getCategories();
-        console.log('✅ Categories received:', data);
         
         const categoryList = data.results || data;
-        console.log('📋 Category list:', categoryList);
         
         setCategories(categoryList);
         
         if (categoryList.length > 0 && !location.state?.category) {
-          console.log('✅ Setting active category to:', categoryList[0].name);
+          // console.log('✅ Setting active category to:', categoryList[0].name);
           setActiveCategory(categoryList[0].name);
         } else if (categoryList.length === 0) {
-          console.warn('⚠️ No categories found');
+          // console.warn('⚠️ No categories found');
           setLoading(false);
         }
       } catch (err) {
-        console.error('❌ Failed to fetch categories:', err);
-        console.error('❌ Error message:', err.message);
-        console.error('❌ Error stack:', err.stack);
+        // console.error('❌ Failed to fetch categories:', err);
+        // console.error('❌ Error message:', err.message);
+        // console.error('❌ Error stack:', err.stack);
         setError('Failed to load categories: ' + err.message);
         setLoading(false);
       }
@@ -81,7 +76,7 @@ export default function CategoryProductsPage({
   useEffect(() => {
     const fetchProducts = async () => {
       if (!activeCategory) {
-        console.log('⚠️ No active category, skipping product fetch');
+        // console.log('⚠️ No active category, skipping product fetch');
         return;
       }
       
@@ -89,23 +84,23 @@ export default function CategoryProductsPage({
       setError(null);
       
       try {
-        console.log('🔄 Fetching products for category:', activeCategory);
+        // console.log('🔄 Fetching products for category:', activeCategory);
         
         const data = await api.getProducts({
           category: activeCategory,
         });
         
-        console.log('✅ Products API response:', data);
+        // console.log('✅ Products API response:', data);
         
         const productList = data.results || data;
-        console.log('📦 Product list:', productList.length, 'products found');
+        // console.log('📦 Product list:', productList.length, 'products found');
         
         setProducts(productList);
         setLoading(false);
       } catch (err) {
-        console.error('❌ Failed to fetch products:', err);
-        console.error('❌ Error message:', err.message);
-        console.error('❌ Error stack:', err.stack);
+        // console.error('❌ Failed to fetch products:', err);
+        // console.error('❌ Error message:', err.message);
+        // console.error('❌ Error stack:', err.stack);
         setError(err.message || 'Failed to load products');
         setLoading(false);
       }
@@ -155,7 +150,7 @@ export default function CategoryProductsPage({
     }
     
     try {
-      console.log('🛒 Adding to cart:', product.name);
+      // console.log('🛒 Adding to cart:', product.name);
       
       await api.addToCart(product.id, 1);
       
@@ -164,9 +159,9 @@ export default function CategoryProductsPage({
       }
       
       showToastMessage(`${product.name} added to cart!`);
-      console.log('✅ Added to cart successfully');
+      // console.log('✅ Added to cart successfully');
     } catch (err) {
-      console.error('❌ Failed to add to cart:', err);
+      // console.error('❌ Failed to add to cart:', err);
       showToastMessage('Failed to add to cart. Please try again.');
     }
   };

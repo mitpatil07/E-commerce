@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     # Local apps
     "accounts",
     "product",
+    "payment",
 ]
 
 AUTH_USER_MODEL = "accounts.User"
@@ -175,11 +176,13 @@ SIMPLE_JWT = {
 CORS_ALLOWED_ORIGINS = [
     "https://www.whatyouwear.store",
     "https://whatyouwear.store",
-    "http://localhost:5173", 
-
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
 ]
 
+CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOW_CREDENTIALS = True
+
 
 CORS_ALLOW_HEADERS = [
     "accept",
@@ -206,8 +209,10 @@ CORS_ALLOW_METHODS = [
 # CSRF (Form & Auth Safety)
 # ========================
 CSRF_TRUSTED_ORIGINS = [
-    'https://api.whatyouwear.store',
-    'https://www.api.whatyouwear.store'
+    "https://api.whatyouwear.store",
+    "https://www.api.whatyouwear.store",
+    "https://www.whatyouwear.store",
+    "https://whatyouwear.store",
 ]
 
 CSRF_COOKIE_SECURE = True
@@ -244,5 +249,9 @@ LOGGING = {
 # ========================
 # Razorpay (Production Safe)
 # ========================
-RAZORPAY_KEY_ID = os.getenv("RAZORPAY_KEY_ID", "")
-RAZORPAY_KEY_SECRET = os.getenv("RAZORPAY_KEY_SECRET", "")
+# RAZORPAY_KEY_ID = os.getenv("RAZORPAY_KEY_ID", "")
+# RAZORPAY_KEY_SECRET = os.getenv("RAZORPAY_KEY_SECRET", "")
+# settings.py
+
+RAZORPAY_KEY_ID = "rzp_test_RZDfGWLWfUuhot"  
+RAZORPAY_KEY_SECRET = "nByz0vrFQwVDigMlCnDOpo8l"

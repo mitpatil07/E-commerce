@@ -57,7 +57,7 @@ export default function CategorySection({ onCategorySelect }) {
   ];
 
   const handleCategoryClick = (category) => {
-    console.log('📂 Category clicked:', category.name);
+    // console.log('📂 Category clicked:', category.name);
     setSelectedCategory(category.id);
     
     // Navigate to category page

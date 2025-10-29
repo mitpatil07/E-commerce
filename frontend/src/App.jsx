@@ -1,4 +1,4 @@
-// src/App.jsx - PRODUCTION CLEAN (NO LOGS)
+// src/App.jsx - CLEAN (Cart page only)
 import { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
@@ -52,6 +52,7 @@ function HomePage({
   };
 
   const handleCartClick = () => {
+    // Open full Cart page (we removed the sidebar)
     navigate('/cart');
   };
 
@@ -77,7 +78,7 @@ function HomePage({
         />
       </div>
 
-      <CategorySection 
+      <CategorySection
         onCategorySelect={handleCategorySelect}
       />
 
@@ -120,6 +121,9 @@ export default function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
 
+  // store full cart data too (so Cart.jsx can use it if you want)
+  const [cart, setCart] = useState([]);
+
   const categories = [
     'All',
     'T-Shirts',
@@ -140,8 +144,10 @@ export default function App() {
   const refreshCartCount = async () => {
     try {
       const cartData = await api.getCart();
+      setCart(cartData.items || []); // keep full cart items
       setCartCount(cartData.total_items || 0);
     } catch (error) {
+      setCart([]);
       setCartCount(0);
     }
   };
@@ -154,16 +160,20 @@ export default function App() {
         product.selectedColor || null,
         product.selectedSize || null
       );
-      
+  
+      // ✅ Re-fetch the cart from backend to stay accurate
       await refreshCartCount();
-      return true;
-      
+      const updatedCart = await api.getCart();
+      setCart(updatedCart.items || []);
+  
+      console.log("✅ Added to cart successfully and synced with backend");
     } catch (error) {
-      alert(error.message || 'Failed to add to cart');
-      throw error;
+      console.error("❌ Failed to add to cart", error);
+      alert(error.message || "Failed to add to cart");
     }
   };
-
+  
+  
   const toggleWishlist = (product) => {
     setWishlist(prev => {
       const exists = prev.find(item => item.id === product.id);
@@ -177,6 +187,25 @@ export default function App() {
 
   const isInWishlist = (productId) => {
     return wishlist.some(item => item.id === productId);
+  };
+
+  // removeFromCart and updateQuantity helpers (used by ProductDetailPage or elsewhere)
+  const removeFromCart = async (itemId) => {
+    try {
+      await api.removeFromCart(itemId);
+      await refreshCartCount();
+    } catch (err) {
+      console.error('Failed to remove from cart', err);
+    }
+  };
+
+  const updateQuantity = async (itemId, quantity) => {
+    try {
+      await api.updateCartItem(itemId, quantity);
+      await refreshCartCount();
+    } catch (err) {
+      console.error('Failed to update cart item', err);
+    }
   };
 
   return (
@@ -206,19 +235,6 @@ export default function App() {
               }
             />
 
-            {/* <Route
-              path="/search"
-              element={
-                <SearchResults 
-                  addToCart={addToCart}
-                  cartCount={cartCount}
-                  wishlist={wishlist}
-                  toggleWishlist={toggleWishlist}
-                  isInWishlist={isInWishlist}
-                />
-              }
-            /> */}
-
             <Route
               path="/category/:categoryName"
               element={
@@ -236,16 +252,30 @@ export default function App() {
               path="/product/:id"
               element={
                 <ProductDetailPage
+                  cart={cart}
                   cartCount={cartCount}
                   wishlist={wishlist}
                   addToCart={addToCart}
                   toggleWishlist={toggleWishlist}
                   isInWishlist={isInWishlist}
+                  removeFromCart={removeFromCart}
+                  updateQuantity={updateQuantity}
                 />
               }
             />
 
-            <Route path="/cart" element={<Cart />} />
+            {/* <Route path="/cart" element={<Cart />} /> */}
+            <Route
+              path="/cart"
+              element={
+                <Cart
+                  cart={cart}
+                  refreshCart={refreshCartCount}
+                  removeFromCart={removeFromCart}
+                  updateQuantity={updateQuantity}
+                />
+              }
+            />
 
             <Route
               path="/profile"

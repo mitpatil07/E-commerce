@@ -29,11 +29,11 @@ export default function ClothingSuggestions({ onProductClick, addToCart }) {
   useEffect(() => {
     const fetchSuggestions = async () => {
       try {
-        console.log('🔄 Fetching product suggestions...');
+        // console.log('🔄 Fetching product suggestions...');
         
         const data = await api.getProducts();
 
-        console.log('✅ Products received:', data);
+        // console.log('✅ Products received:', data);
         
         // Handle paginated response
         const productList = data.results || data;
@@ -45,7 +45,7 @@ export default function ClothingSuggestions({ onProductClick, addToCart }) {
         setSuggestions(limitedProducts);
         setLoading(false);
       } catch (err) {
-        console.error('❌ Failed to fetch suggestions:', err);
+        // console.error('❌ Failed to fetch suggestions:', err);
         setError(err.message);
         setLoading(false);
       }
@@ -67,42 +67,42 @@ export default function ClothingSuggestions({ onProductClick, addToCart }) {
       e.stopPropagation();
     }
     
-    console.log('🛒 ClothingSuggestions: handleAddToCart called for:', product.name);
-    console.log('🔍 addToCart prop type:', typeof addToCart);
-    console.log('🔍 addToCart prop exists:', !!addToCart);
+    // console.log('🛒 ClothingSuggestions: handleAddToCart called for:', product.name);
+    // console.log('🔍 addToCart prop type:', typeof addToCart);
+    // console.log('🔍 addToCart prop exists:', !!addToCart);
     
     // Check if addToCart function is provided
     if (!addToCart || typeof addToCart !== 'function') {
-      console.error('❌ addToCart function is not provided or not a function!');
+      // console.error('❌ addToCart function is not provided or not a function!');
       showToastMessage('Error: Cannot add to cart');
       return;
     }
     
     try {
       // Call the parent's addToCart function with the product
-      console.log('🎯 Calling parent addToCart function...');
+      // console.log('🎯 Calling parent addToCart function...');
       addToCart(product, 1);
-      console.log('✅ Parent addToCart function called successfully');
+      // console.log('✅ Parent addToCart function called successfully');
       
       // Show success message
       showToastMessage(`${product.name} added to cart!`);
     } catch (error) {
-      console.error('❌ Error calling addToCart:', error);
+      // console.error('❌ Error calling addToCart:', error);
       showToastMessage('Failed to add to cart. Please try again.');
     }
   };
 
   const handleProductClick = (product) => {
-    console.log('🖱️ Product clicked:', product);
-    console.log('🔗 Navigating to:', `/product/${product.id}`);
+    // console.log('🖱️ Product clicked:', product);
+    // console.log('🔗 Navigating to:', `/product/${product.id}`);
     
     // If onProductClick prop is provided, use it
     if (onProductClick && typeof onProductClick === 'function') {
-      console.log('✅ Using onProductClick prop');
+      // console.log('✅ Using onProductClick prop');
       onProductClick(product);
     } else {
       // Otherwise, navigate directly to the product detail page
-      console.log('✅ Using navigate function');
+      // console.log('✅ Using navigate function');
       navigate(`/product/${product.id}`);
     }
   };

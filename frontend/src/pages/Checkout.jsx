@@ -23,6 +23,7 @@ export default function Checkout() {
   });
   const [showSuccess, setShowSuccess] = useState(false);
   const navigate = useNavigate();
+  console.log("🌍 VITE_API_BASE_URL =", import.meta.env.VITE_API_BASE_URL);
 
   useEffect(() => {
     // Load Razorpay script
@@ -38,6 +39,133 @@ export default function Checkout() {
       document.body.removeChild(script);
     };
   }, []);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    // DEBUG: Check authentication
+    const token = localStorage.getItem('access_token');
+    const user = localStorage.getItem('user');
+    
+    console.log('🔐 Auth Debug:');
+    console.log('  - Has token:', !!token);
+    console.log('  - Token preview:', token ? token.substring(0, 20) + '...' : 'NONE');
+    console.log('  - Has user:', !!user);
+    console.log('  - User:', user ? JSON.parse(user) : 'NONE');
+    
+    if (!token) {
+      setError('Please login first');
+      setTimeout(() => navigate('/login'), 2000);
+      return;
+    }
+    
+    // Validation
+    if (!formData.shipping_name || !formData.shipping_email || 
+        !formData.shipping_phone || !formData.shipping_address ||
+        !formData.shipping_city || !formData.shipping_state || 
+        !formData.shipping_zip_code) {
+      setError('Please fill in all required fields');
+      return;
+    }
+  
+    setSubmitting(true);
+    setError(null);
+  
+    try {
+      console.log('📦 Creating Razorpay order...');
+      
+      const orderPayload = {
+        shipping_address: {
+          name: formData.shipping_name,
+          email: formData.shipping_email,
+          phone: formData.shipping_phone,
+          address: formData.shipping_address,
+          city: formData.shipping_city,
+          state: formData.shipping_state,
+          zip_code: formData.shipping_zip_code,
+          country: formData.shipping_country
+        }
+      };
+      
+      console.log('📤 Sending payload:', orderPayload);
+      
+      // Step 1: Create Razorpay order
+      const razorpayData = await api.createRazorpayOrder(orderPayload);
+      
+      console.log('✅ Razorpay order created:', razorpayData);
+      
+      // Step 2: Open Razorpay payment modal
+      const options = {
+        key: razorpayData.key,
+        amount: razorpayData.amount,
+        currency: razorpayData.currency,
+        name: 'WhatYouWear',
+        description: 'Order Payment',
+        order_id: razorpayData.razorpay_order_id,
+        handler: async function (response) {
+          console.log('✅ Payment successful:', response);
+          
+          try {
+            // Step 3: Verify payment and create order
+            const orderData = await api.verifyPayment({
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+              shipping_name: formData.shipping_name,
+              shipping_email: formData.shipping_email,
+              shipping_phone: formData.shipping_phone,
+              shipping_address: formData.shipping_address,
+              shipping_city: formData.shipping_city,
+              shipping_state: formData.shipping_state,
+              shipping_zip_code: formData.shipping_zip_code,
+              shipping_country: formData.shipping_country
+            });
+            
+            console.log('✅ Order created:', orderData);
+            setShowSuccess(true);
+            
+            setTimeout(() => {
+              navigate('/orders');
+            }, 2000);
+            
+          } catch (err) {
+            console.error('❌ Verification error:', err);
+            setError(err.message || 'Payment verification failed');
+            setSubmitting(false);
+          }
+        },
+        prefill: {
+          name: formData.shipping_name,
+          email: formData.shipping_email,
+          contact: formData.shipping_phone
+        },
+        notes: {
+          address: formData.shipping_address
+        },
+        theme: {
+          color: '#000000'
+        },
+        modal: {
+          ondismiss: function() {
+            console.log('⚠️ Payment cancelled by user');
+            setSubmitting(false);
+            setError('Payment was cancelled. Please try again.');
+          }
+        }
+      };
+  
+      const razorpay = new window.Razorpay(options);
+      razorpay.open();
+      
+    } catch (err) {
+      console.error('❌ Error creating order:', err);
+      console.error('❌ Error details:', {
+        message: err.message,
+        stack: err.stack
+      });
+      setError(err.message || 'Failed to initiate payment');
+      setSubmitting(false);
+    }
+  };
 
   const fetchCart = async () => {
     try {
@@ -51,7 +179,7 @@ export default function Checkout() {
       setCart(cartData);
       setLoading(false);
     } catch (err) {
-      console.error('Error:', err);
+      // console.error('Error:', err);
       setLoading(false);
     }
   };
@@ -77,86 +205,8 @@ export default function Checkout() {
     setError(null);
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    // Validation
-    if (!formData.shipping_name || !formData.shipping_email || 
-        !formData.shipping_phone || !formData.shipping_address ||
-        !formData.shipping_city || !formData.shipping_state || 
-        !formData.shipping_zip_code) {
-      setError('Please fill in all required fields');
-      return;
-    }
 
-    setSubmitting(true);
-    setError(null);
 
-    try {
-      // Step 1: Create Razorpay order
-      const razorpayData = await api.createRazorpayOrder();
-      
-      // Step 2: Open Razorpay payment modal
-      const options = {
-        key: razorpayData.key,
-        amount: razorpayData.amount,
-        currency: razorpayData.currency,
-        name: 'WhatYouWear',
-        description: 'Order Payment',
-        order_id: razorpayData.razorpay_order_id,
-        handler: async function (response) {
-          console.log('Payment successful:', response);
-          
-          try {
-            // Step 3: Verify payment and create order
-            const orderData = await api.verifyPayment({
-              razorpay_order_id: response.razorpay_order_id,
-              razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_signature: response.razorpay_signature,
-              ...formData
-            });
-            
-            setShowSuccess(true);
-            
-            setTimeout(() => {
-              navigate('/orders');
-            }, 2000);
-            
-          } catch (err) {
-            console.error('Verification error:', err);
-            setError(err.message || 'Payment verification failed');
-            setSubmitting(false);
-          }
-        },
-        prefill: {
-          name: formData.shipping_name,
-          email: formData.shipping_email,
-          contact: formData.shipping_phone
-        },
-        notes: {
-          address: formData.shipping_address
-        },
-        theme: {
-          color: '#000000'
-        },
-        modal: {
-          ondismiss: function() {
-            console.log('Payment cancelled');
-            setSubmitting(false);
-            setError('Payment was cancelled. Please try again.');
-          }
-        }
-      };
-
-      const razorpay = new window.Razorpay(options);
-      razorpay.open();
-      
-    } catch (err) {
-      console.error('Error:', err);
-      setError(err.message || 'Failed to initiate payment');
-      setSubmitting(false);
-    }
-  };
 
   if (loading) {
     return (

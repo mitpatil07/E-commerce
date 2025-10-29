@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Star, ShoppingCart, Minus, Plus, Truck, Shield, RefreshCw, Check, ChevronDown, ChevronUp, Loader2, Heart } from 'lucide-react';
 import Navbar from '../components/Navbar';
-import CartSidebar from '../components/CartSidebar';
+// import CartSidebar from '../components/CartSidebar';
 import Footer from '../components/Footer';
 import ClothingSuggestions from './ClothingSuggestions';
 import api from '../services/api';
@@ -11,6 +11,7 @@ export default function ProductDetailPage({
   cart,
   addToCart,
   showCart,
+  
   setShowCart,
   removeFromCart,
   updateQuantity
@@ -31,6 +32,7 @@ export default function ProductDetailPage({
   });
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
+  
 
   // Fetch product details
   useEffect(() => {
@@ -82,33 +84,33 @@ export default function ProductDetailPage({
     setShowToast(true);
     setTimeout(() => setShowToast(false), 3000);
   };
-
+  
   const handleAddToCart = async () => {
     try {
       console.log('🛒 Adding to cart:', product.name);
-      
-      // Use the API service to add to cart
+  
+      // Send to backend
       await api.addToCart(product.id, quantity);
-      
-      // Also call the parent addToCart function if provided
+  
+      // Update local cart once
       if (addToCart && typeof addToCart === 'function') {
-        for (let i = 0; i < quantity; i++) {
-          addToCart({
-            ...product,
-            selectedColor,
-            selectedSize
-          });
-        }
+        addToCart({
+          ...product,
+          selectedColor,
+          selectedSize,
+          quantity,
+        });
       }
-      
+  
       showToastMessage(`${product.name} added to cart!`);
-      setShowCart(true);
       console.log('✅ Added to cart successfully');
     } catch (err) {
       console.error('❌ Failed to add to cart:', err);
       showToastMessage('Failed to add to cart. Please try again.');
     }
   };
+  
+  
 
   // Loading state
   if (loading) {
@@ -537,7 +539,7 @@ export default function ProductDetailPage({
         </div>
       </div>
 
-      {showCart && (
+      {/* {showCart && (
         <CartSidebar
           cart={cart}
           onClose={() => setShowCart(false)}
@@ -545,7 +547,7 @@ export default function ProductDetailPage({
           onRemoveItem={removeFromCart}
           cartTotal={cartTotal}
         />
-      )}
+      )} */}
       
       <ClothingSuggestions 
         addToCart={addToCart}

@@ -29,7 +29,7 @@ const Login = () => {
     script.onload = () => {
       if (window.google) {
         window.google.accounts.id.initialize({
-          client_id: process.env.REACT_APP_GOOGLE_CLIENT_ID,
+          client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
           callback: handleGoogleLogin
         });
 
@@ -66,7 +66,7 @@ const Login = () => {
         localStorage.setItem('refresh_token', res.data.tokens.refresh);
         localStorage.setItem('user', JSON.stringify(res.data.user));
         
-        console.log('✅ Google login successful, redirecting...');
+        // console.log('✅ Google login successful, redirecting...');
         
         setTimeout(() => {
           window.location.href = '/';
@@ -75,7 +75,7 @@ const Login = () => {
         setError(res.data.message || 'Google login failed');
       }
     } catch (err) {
-      console.error('Google login error:', err);
+      // console.error('Google login error:', err);
       setError(err.response?.data?.message || 'An error occurred during Google login');
     } finally {
       setLoading(false);
@@ -104,33 +104,33 @@ const Login = () => {
     }
 
     try {
-      console.log('🔍 Attempting login...');
+      // console.log('🔍 Attempting login...');
       
       const response = await API.post('accounts/login/', {
         email: formData.email,
         password: formData.password
       });
 
-      console.log('✅ Login response:', response.data);
-      console.log('✅ User logged in:', response.data.user);
+      // console.log('✅ Login response:', response.data);
+      // console.log('✅ User logged in:', response.data.user);
 
       if (response.data.tokens) {
         localStorage.setItem('access_token', response.data.tokens.access);
         localStorage.setItem('refresh_token', response.data.tokens.refresh);
         localStorage.setItem('user', JSON.stringify(response.data.user));
         
-        console.log('✅ Tokens saved successfully');
-        console.log('✅ Access token exists:', !!localStorage.getItem('access_token'));
+        // console.log('✅ Tokens saved successfully');
+        // console.log('✅ Access token exists:', !!localStorage.getItem('access_token'));
         
         setTimeout(() => {
           window.location.href = location.state?.from || '/';
         }, 100);
       } else {
-        console.error('❌ No tokens in response');
+        // console.error('❌ No tokens in response');
         setError('Login failed. Please try again.');
       }
     } catch (err) {
-      console.error('❌ Login error:', err);
+      // console.error('❌ Login error:', err);
       
       if (err.response?.data?.message) {
         setError(err.response.data.message);

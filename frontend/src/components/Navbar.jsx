@@ -26,11 +26,11 @@ export default function Navbar({
     navigate('/');
   };
 
+
   const handleCartClick = () => {
-    if (onCartOpen && typeof onCartOpen === 'function') {
-      onCartOpen();
-    }
+    navigate('/cart');
   };
+  
 
   // Helper function to convert category name to URL-friendly format
   const categoryToUrl = (category) => {

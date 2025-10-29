@@ -29,13 +29,13 @@ export const AuthProvider = ({ children }) => {
       if (accessToken && userData) {
         const parsedUser = JSON.parse(userData);
         setUser(parsedUser);
-        console.log('✅ User is logged in:', parsedUser.email);
+        // console.log('✅ User is logged in:', parsedUser.email);
       } else {
         setUser(null);
-        console.log('❌ User not logged in');
+        // console.log('❌ User not logged in');
       }
     } catch (error) {
-      console.error('Error checking auth:', error);
+      // console.error('Error checking auth:', error);
       setUser(null);
     } finally {
       setLoading(false);
@@ -52,12 +52,12 @@ export const AuthProvider = ({ children }) => {
         localStorage.setItem('user', JSON.stringify(response.data.user));
         
         setUser(response.data.user);
-        console.log('✅ Login successful');
+        // console.log('✅ Login successful');
         return response.data;
       }
       throw new Error('No tokens received');
     } catch (error) {
-      console.error('❌ Login error:', error);
+      // console.error('❌ Login error:', error);
       throw error;
     }
   };
@@ -72,12 +72,12 @@ export const AuthProvider = ({ children }) => {
         localStorage.setItem('user', JSON.stringify(response.data.user));
         
         setUser(response.data.user);
-        console.log('✅ Registration successful');
+        // console.log('✅ Registration successful');
         return response.data;
       }
       throw new Error('No tokens received');
     } catch (error) {
-      console.error('❌ Registration error:', error);
+      // console.error('❌ Registration error:', error);
       throw error;
     }
   };
@@ -90,13 +90,13 @@ export const AuthProvider = ({ children }) => {
         await API.post('accounts/logout/', { refresh: refreshToken });
       }
     } catch (error) {
-      console.error('Logout error:', error);
+      // console.error('Logout error:', error);
     } finally {
       localStorage.removeItem('access_token');
       localStorage.removeItem('refresh_token');
       localStorage.removeItem('user');
       setUser(null);
-      console.log('✅ Logged out successfully');
+      // console.log('✅ Logged out successfully');
     }
   };
 
@@ -110,7 +110,7 @@ export const AuthProvider = ({ children }) => {
       }
       return response.data;
     } catch (error) {
-      console.error('Error updating profile:', error);
+      // console.error('Error updating profile:', error);
       throw error;
     }
   };
