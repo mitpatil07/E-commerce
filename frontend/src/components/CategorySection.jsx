@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { ChevronRight } from 'lucide-react';
 import ClothingShowcase from './ClothingShowcase';
-
+import { useNavigate } from 'react-router-dom';
 export default function CategorySection({ onCategorySelect }) {
   const [selectedCategory, setSelectedCategory] = useState(null);
-
+  const navigate = useNavigate();
   const categories = [
     {
       id: 1,
@@ -57,12 +57,20 @@ export default function CategorySection({ onCategorySelect }) {
   ];
 
   const handleCategoryClick = (category) => {
+    console.log('📂 Category clicked:', category.name);
     setSelectedCategory(category.id);
-    if (onCategorySelect) {
+    
+    // Navigate to category page
+    const categoryUrl = category.name.toLowerCase().replace(/\s+/g, '-');
+    navigate(`/category/${categoryUrl}`, {
+      state: { category: category.name }
+    });
+    
+    // Also call parent handler if provided
+    if (onCategorySelect && typeof onCategorySelect === 'function') {
       onCategorySelect(category);
     }
   };
-
   return (
     <>
       <section className="bg-white">

@@ -1,4 +1,4 @@
-// src/App.jsx - WITHOUT CartSidebar import
+// src/App.jsx - PRODUCTION CLEAN (NO LOGS)
 import { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
@@ -16,6 +16,7 @@ import ScrollToTop from './components/ScrollToTop';
 import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
 import Orders from './pages/Orders';
+// import SearchResults from './pages/SearchResults';
 import { AuthProvider } from './contexts/AuthContext';
 import api from './services/api';
 
@@ -33,12 +34,21 @@ function HomePage({
 }) {
   const navigate = useNavigate();
 
+  useEffect(() => {
+    if (searchQuery && searchQuery.trim() !== '') {
+      navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
+    }
+  }, [searchQuery, navigate]);
+
   const handleProductClick = (product) => {
     navigate(`/product/${product.id}`);
   };
 
   const handleCategorySelect = (category) => {
-    navigate(`/category/${category.name.toLowerCase().replace(/\s+/g, '-')}`);
+    const categoryUrl = category.name.toLowerCase().replace(/\s+/g, '-');
+    navigate(`/category/${categoryUrl}`, {
+      state: { category: category.name }
+    });
   };
 
   const handleCartClick = () => {
@@ -67,7 +77,9 @@ function HomePage({
         />
       </div>
 
-      <CategorySection onCategorySelect={handleCategorySelect} />
+      <CategorySection 
+        onCategorySelect={handleCategorySelect}
+      />
 
       <Footer />
     </>
@@ -130,14 +142,12 @@ export default function App() {
       const cartData = await api.getCart();
       setCartCount(cartData.total_items || 0);
     } catch (error) {
-      console.error('Error fetching cart count:', error);
+      setCartCount(0);
     }
   };
 
   const addToCart = async (product, quantity = 1) => {
     try {
-      console.log('🛒 Adding to cart:', { product, quantity });
-      
       await api.addToCart(
         product.id,
         quantity,
@@ -145,24 +155,29 @@ export default function App() {
         product.selectedSize || null
       );
       
-      console.log('✅ Added to cart successfully');
       await refreshCartCount();
-      // alert('Product added to cart!');
+      return true;
       
     } catch (error) {
-      console.error('❌ Error adding to cart:', error);
-      alert('Error adding to cart: ' + error.message);
+      alert(error.message || 'Failed to add to cart');
+      throw error;
     }
   };
 
   const toggleWishlist = (product) => {
     setWishlist(prev => {
       const exists = prev.find(item => item.id === product.id);
-      return exists ? prev.filter(item => item.id !== product.id) : [...prev, product];
+      if (exists) {
+        return prev.filter(item => item.id !== product.id);
+      } else {
+        return [...prev, product];
+      }
     });
   };
 
-  const isInWishlist = (productId) => wishlist.some(item => item.id === productId);
+  const isInWishlist = (productId) => {
+    return wishlist.some(item => item.id === productId);
+  };
 
   return (
     <BrowserRouter>
@@ -172,14 +187,6 @@ export default function App() {
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
-            <Route
-              path="/profile"
-              element={
-                <PrivateRoute>
-                  <Profile />
-                </PrivateRoute>
-              }
-            />
 
             <Route
               path="/"
@@ -198,6 +205,20 @@ export default function App() {
                 />
               }
             />
+
+            {/* <Route
+              path="/search"
+              element={
+                <SearchResults 
+                  addToCart={addToCart}
+                  cartCount={cartCount}
+                  wishlist={wishlist}
+                  toggleWishlist={toggleWishlist}
+                  isInWishlist={isInWishlist}
+                />
+              }
+            /> */}
+
             <Route
               path="/category/:categoryName"
               element={
@@ -210,6 +231,7 @@ export default function App() {
                 />
               }
             />
+
             <Route
               path="/product/:id"
               element={
@@ -224,6 +246,16 @@ export default function App() {
             />
 
             <Route path="/cart" element={<Cart />} />
+
+            <Route
+              path="/profile"
+              element={
+                <PrivateRoute>
+                  <Profile />
+                </PrivateRoute>
+              }
+            />
+
             <Route
               path="/checkout"
               element={
@@ -232,6 +264,7 @@ export default function App() {
                 </PrivateRoute>
               }
             />
+
             <Route
               path="/orders"
               element={
