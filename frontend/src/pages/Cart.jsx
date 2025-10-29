@@ -50,7 +50,7 @@ export default function Cart() {
   };
 
   const removeItem = async (itemId) => {
-    if (!confirm('Remove this item from cart?')) return;
+    // if (!confirm('Remove this item from cart?')) return;
     
     try {
       console.log('🗑️ Removing item:', itemId);
