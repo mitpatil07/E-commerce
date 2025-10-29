@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { Lock, Mail, Loader2, LogIn } from 'lucide-react';
-import API from '../api/axios';
+import api from '../services/api'; // ✅ Changed to lowercase 'api'
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -57,26 +57,15 @@ const Login = () => {
       setLoading(true);
       setError('');
       
-      const res = await API.post('accounts/google-login/', {
-        token: response.credential
-      });
-
-      if (res.data.tokens) {
-        localStorage.setItem('access_token', res.data.tokens.access);
-        localStorage.setItem('refresh_token', res.data.tokens.refresh);
-        localStorage.setItem('user', JSON.stringify(res.data.user));
-        
-        // console.log('✅ Google login successful, redirecting...');
-        
-        setTimeout(() => {
-          window.location.href = '/';
-        }, 100);
-      } else {
-        setError(res.data.message || 'Google login failed');
-      }
+      const data = await api.googleLogin(response.credential);
+      
+      console.log('✅ Google login successful');
+      
+      setTimeout(() => {
+        window.location.href = '/';
+      }, 100);
     } catch (err) {
-      // console.error('Google login error:', err);
-      setError(err.response?.data?.message || 'An error occurred during Google login');
+      setError(err.message || 'An error occurred during Google login');
     } finally {
       setLoading(false);
     }
@@ -104,42 +93,27 @@ const Login = () => {
     }
 
     try {
-      // console.log('🔍 Attempting login...');
-      
-      const response = await API.post('accounts/login/', {
+      // ✅ Use api.login() - it returns data directly, not { data: ... }
+      const data = await api.login({
         email: formData.email,
         password: formData.password
       });
 
-      // console.log('✅ Login response:', response.data);
-      // console.log('✅ User logged in:', response.data.user);
-
-      if (response.data.tokens) {
-        localStorage.setItem('access_token', response.data.tokens.access);
-        localStorage.setItem('refresh_token', response.data.tokens.refresh);
-        localStorage.setItem('user', JSON.stringify(response.data.user));
-        
-        // console.log('✅ Tokens saved successfully');
-        // console.log('✅ Access token exists:', !!localStorage.getItem('access_token'));
-        
-        setTimeout(() => {
-          window.location.href = location.state?.from || '/';
-        }, 100);
-      } else {
-        // console.error('❌ No tokens in response');
-        setError('Login failed. Please try again.');
-      }
-    } catch (err) {
-      // console.error('❌ Login error:', err);
+      console.log('✅ User logged in:', data.user);
       
-      if (err.response?.data?.message) {
-        setError(err.response.data.message);
-      } else if (err.response?.status === 401) {
+      // ✅ Tokens are already saved by api.login(), just redirect
+      setTimeout(() => {
+        window.location.href = location.state?.from || '/';
+      }, 100);
+      
+    } catch (err) {
+      console.error('❌ Login error:', err);
+      
+      // ✅ Handle errors properly (no err.response since we're using fetch)
+      if (err.message.includes('Invalid')) {
         setError('Invalid email or password');
-      } else if (err.response?.status === 400) {
-        setError('Please check your email and password');
       } else {
-        setError('An error occurred. Please try again.');
+        setError(err.message || 'An error occurred. Please try again.');
       }
     } finally {
       setLoading(false);

@@ -1,18 +1,14 @@
-// src/services/api.js - PRODUCTION CLEAN (NO LOGS)
-
-// const API_BASE_URL = import.meta.env.PROD 
-//   ? 'https://api.whatyouwear.store/api'
-//   : '/api';
-
-// api.js
+// src/services/api.js - Optimized for both local and production
 
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL ||
   (import.meta.env.PROD
     ? 'https://api.whatyouwear.store/api'
-    : 'http://127.0.0.1:8000/api');
+    : '/api'); // ✅ Use proxy in development
 
-    console.log("🌍 Using API_BASE_URL:", API_BASE_URL);
+console.log("🌍 Using API_BASE_URL:", API_BASE_URL);
+console.log("🔧 Environment:", import.meta.env.MODE);
+
 const getCookie = (name) => {
   let cookieValue = null;
   if (document.cookie && document.cookie !== '') {
@@ -122,10 +118,28 @@ const api = {
   },
 
   login: async (credentials) => {
+    console.log('🔐 Attempting login...');
     const response = await fetchWithAuth(`${API_BASE_URL}/accounts/login/`, {
       method: 'POST',
       headers: getAuthHeaders(false),
       body: JSON.stringify(credentials),
+    });
+    console.log('📥 Response status:', response.status);
+    const data = await handleResponse(response);
+    if (data.tokens) {
+      localStorage.setItem('access_token', data.tokens.access);
+      localStorage.setItem('refresh_token', data.tokens.refresh);
+      localStorage.setItem('user', JSON.stringify(data.user));
+    }
+    return data;
+  },
+
+  googleLogin: async (token) => {
+    console.log('🔐 Attempting Google login...');
+    const response = await fetchWithAuth(`${API_BASE_URL}/accounts/google-login/`, {
+      method: 'POST',
+      headers: getAuthHeaders(false),
+      body: JSON.stringify({ token }),
     });
     const data = await handleResponse(response);
     if (data.tokens) {
@@ -147,7 +161,7 @@ const api = {
         });
       }
     } catch (error) {
-      // Silent error
+      console.warn('Logout API call failed, clearing local storage anyway');
     } finally {
       localStorage.removeItem('access_token');
       localStorage.removeItem('refresh_token');
@@ -231,17 +245,14 @@ const api = {
       const response = await fetchWithAuth(`${API_BASE_URL}/cart/current/`, {
         method: 'GET',
         credentials: 'include',
-        headers: getAuthHeaders(true), // ✅ always send token
+        headers: getAuthHeaders(true),
       });
-  
-      // ✅ ensures proper JSON response even after token refresh
       return await handleResponse(response);
     } catch (error) {
       console.warn('⚠️ Failed to load cart:', error.message);
       return { items: [], total_items: 0, total_price: 0 };
     }
   },
-  
 
   addToCart: async (productId, quantity = 1, selectedColor = null, selectedSize = null) => {
     const csrfToken = getCookie('csrftoken');

@@ -6,6 +6,11 @@ import tailwindcss from '@tailwindcss/vite'
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
+    // Add headers to fix Google OAuth COOP errors
+    headers: {
+      'Cross-Origin-Opener-Policy': 'same-origin-allow-popups',
+    },
+    // Proxy configuration for API calls
     proxy: {
       '/api': {
         target: 'https://api.whatyouwear.store',

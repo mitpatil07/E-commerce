@@ -29,8 +29,7 @@ function HomePage({
   selectedCategory,
   setSelectedCategory,
   addToCart,
-  toggleWishlist,
-  isInWishlist
+
 }) {
   const navigate = useNavigate();
 

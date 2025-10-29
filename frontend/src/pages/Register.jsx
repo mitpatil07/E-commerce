@@ -1,8 +1,8 @@
-// Register.jsx - Updated with CategoryProducts theme
+// Register.jsx - Fixed with proper api service
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Lock, Mail, Loader2, UserPlus } from 'lucide-react';
-import API from '../api/axios';
+import api from '../services/api';
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -54,26 +54,17 @@ const Register = () => {
       setLoading(true);
       setError('');
 
-      const res = await API.post('accounts/google-login/', {
-        token: response.credential
-      });
+      // ✅ Use api.googleLogin() - returns data directly
+      const data = await api.googleLogin(response.credential);
 
-      if (res.data.tokens) {
-        localStorage.setItem('access_token', res.data.tokens.access);
-        localStorage.setItem('refresh_token', res.data.tokens.refresh);
-        localStorage.setItem('user', JSON.stringify(res.data.user));
+      console.log('✅ Google signup successful');
 
-        // console.log('✅ Google signup successful, redirecting...');
-
-        setTimeout(() => {
-          window.location.href = '/';
-        }, 100);
-      } else {
-        setError(res.data.message || 'Google signup failed');
-      }
+      setTimeout(() => {
+        window.location.href = '/';
+      }, 100);
     } catch (err) {
-      // console.error('Google signup error:', err);
-      setError(err.response?.data?.message || 'An error occurred during Google signup');
+      console.error('Google signup error:', err);
+      setError(err.message || 'An error occurred during Google signup');
     } finally {
       setLoading(false);
     }
@@ -92,6 +83,7 @@ const Register = () => {
     setLoading(true);
     setError('');
 
+    // Validation
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match');
       setLoading(false);
@@ -105,50 +97,32 @@ const Register = () => {
     }
 
     try {
-      // console.log('🔍 Attempting registration...');
+      console.log('🔍 Attempting registration...');
 
-      const response = await API.post('accounts/register/', {
+      // ✅ Use api.register() - returns data directly
+      const data = await api.register({
         email: formData.email,
         password: formData.password,
         first_name: formData.first_name,
         last_name: formData.last_name
       });
 
-      // console.log('✅ Registration response:', response.data);
-      // console.log('✅ User registered:', response.data.user);
+      console.log('✅ Registration successful:', data.user);
 
-      if (response.data.tokens) {
-        localStorage.setItem('access_token', response.data.tokens.access);
-        localStorage.setItem('refresh_token', response.data.tokens.refresh);
-        localStorage.setItem('user', JSON.stringify(response.data.user));
-
-        // console.log('✅ Registration successful, redirecting...');
-
-        setTimeout(() => {
-          window.location.href = '/';
-        }, 100);
-      } else {
-        navigate('/login', {
-          state: { message: 'Account created successfully! Please login.' }
-        });
-      }
+      // Tokens are already saved by api.register(), just redirect
+      setTimeout(() => {
+        window.location.href = '/';
+      }, 100);
     } catch (err) {
-      // console.error('❌ Registration error:', err);
+      console.error('❌ Registration error:', err);
 
-      if (err.response?.data?.message) {
-        if (typeof err.response.data.message === 'object') {
-          const errors = err.response.data.message;
-          const errorMessages = Object.entries(errors)
-            .map(([field, msgs]) => `${field}: ${Array.isArray(msgs) ? msgs.join(', ') : msgs}`)
-            .join('\n');
-          setError(errorMessages);
-        } else {
-          setError(err.response.data.message);
-        }
-      } else if (err.response?.data) {
-        setError(JSON.stringify(err.response.data));
+      // ✅ Handle errors properly
+      if (err.message.includes('email')) {
+        setError('This email is already registered');
+      } else if (err.message.includes('password')) {
+        setError(err.message);
       } else {
-        setError('An error occurred. Please try again.');
+        setError(err.message || 'An error occurred. Please try again.');
       }
     } finally {
       setLoading(false);
@@ -216,6 +190,7 @@ const Register = () => {
                   name="first_name"
                   value={formData.first_name}
                   onChange={handleChange}
+                  required
                   className="w-full px-3 sm:px-4 py-3 border-2 border-gray-300 focus:ring-2 focus:ring-black focus:border-black outline-none transition font-medium text-sm sm:text-base"
                   placeholder="John"
                 />
@@ -231,6 +206,7 @@ const Register = () => {
                   name="last_name"
                   value={formData.last_name}
                   onChange={handleChange}
+                  required
                   className="w-full px-3 sm:px-4 py-3 border-2 border-gray-300 focus:ring-2 focus:ring-black focus:border-black outline-none transition font-medium text-sm sm:text-base"
                   placeholder="Doe"
                 />

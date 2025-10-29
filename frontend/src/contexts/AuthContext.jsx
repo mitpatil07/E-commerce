@@ -1,6 +1,6 @@
-// src/contexts/AuthContext.jsx
+// src/contexts/AuthContext.jsx - Fixed with proper api service
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import API from '../api/axios';
+import api from '../services/api';
 
 const AuthContext = createContext();
 
@@ -29,13 +29,13 @@ export const AuthProvider = ({ children }) => {
       if (accessToken && userData) {
         const parsedUser = JSON.parse(userData);
         setUser(parsedUser);
-        // console.log('✅ User is logged in:', parsedUser.email);
+        console.log('✅ User is logged in:', parsedUser.email);
       } else {
         setUser(null);
-        // console.log('❌ User not logged in');
+        console.log('❌ User not logged in');
       }
     } catch (error) {
-      // console.error('Error checking auth:', error);
+      console.error('Error checking auth:', error);
       setUser(null);
     } finally {
       setLoading(false);
@@ -44,73 +44,55 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (credentials) => {
     try {
-      const response = await API.post('accounts/login/', credentials);
+      // ✅ api.login() returns data directly
+      const data = await api.login(credentials);
       
-      if (response.data.tokens) {
-        localStorage.setItem('access_token', response.data.tokens.access);
-        localStorage.setItem('refresh_token', response.data.tokens.refresh);
-        localStorage.setItem('user', JSON.stringify(response.data.user));
-        
-        setUser(response.data.user);
-        // console.log('✅ Login successful');
-        return response.data;
-      }
-      throw new Error('No tokens received');
+      setUser(data.user);
+      console.log('✅ Login successful');
+      return data;
     } catch (error) {
-      // console.error('❌ Login error:', error);
+      console.error('❌ Login error:', error);
       throw error;
     }
   };
 
   const register = async (userData) => {
     try {
-      const response = await API.post('accounts/register/', userData);
+      // ✅ api.register() returns data directly
+      const data = await api.register(userData);
       
-      if (response.data.tokens) {
-        localStorage.setItem('access_token', response.data.tokens.access);
-        localStorage.setItem('refresh_token', response.data.tokens.refresh);
-        localStorage.setItem('user', JSON.stringify(response.data.user));
-        
-        setUser(response.data.user);
-        // console.log('✅ Registration successful');
-        return response.data;
-      }
-      throw new Error('No tokens received');
+      setUser(data.user);
+      console.log('✅ Registration successful');
+      return data;
     } catch (error) {
-      // console.error('❌ Registration error:', error);
+      console.error('❌ Registration error:', error);
       throw error;
     }
   };
 
   const logout = async () => {
     try {
-      const refreshToken = localStorage.getItem('refresh_token');
-      
-      if (refreshToken) {
-        await API.post('accounts/logout/', { refresh: refreshToken });
-      }
-    } catch (error) {
-      // console.error('Logout error:', error);
-    } finally {
-      localStorage.removeItem('access_token');
-      localStorage.removeItem('refresh_token');
-      localStorage.removeItem('user');
+      await api.logout();
       setUser(null);
-      // console.log('✅ Logged out successfully');
+      console.log('✅ Logged out successfully');
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Still clear local state even if API call fails
+      setUser(null);
     }
   };
 
   const updateUserProfile = async (profileData) => {
     try {
-      const response = await API.patch('accounts/profile/', profileData);
+      // ✅ api.updateProfile() returns data directly
+      const data = await api.updateProfile(profileData);
       
-      if (response.data.user) {
-        setUser(response.data.user);
-        localStorage.setItem('user', JSON.stringify(response.data.user));
+      if (data.user) {
+        setUser(data.user);
       }
-      return response.data;
+      return data;
     } catch (error) {
-      // console.error('Error updating profile:', error);
+      console.error('Error updating profile:', error);
       throw error;
     }
   };
