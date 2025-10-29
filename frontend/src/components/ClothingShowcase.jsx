@@ -14,7 +14,6 @@ export default function ClothingShowcase() {
   const API_BASE_URL = 'https://api.whatyouwear.store/api';
     // const API_BASE_URL = 'http://127.0.0.1:8000/api';
 
-
   // Shuffle array function
   const shuffleArray = (array) => {
     const shuffled = [...array];
@@ -40,21 +39,8 @@ export default function ClothingShowcase() {
       try {
         console.log('🔄 Fetching showcase products...');
         
-        // const response = await fetch(`${API_BASE_URL}/products/`, {
-        //   method: 'GET',
-        //   credentials: 'include',
-        //   headers: {
-        //     'Content-Type': 'application/json',
-        //   },
-        // });
-
         const data = await api.getProducts();
 
-        // if (!response.ok) {
-        //   throw new Error(`HTTP error! status: ${response.status}`);
-        // }
-
-        // const data = await response.json();
         console.log('✅ Products received for showcase:', data);
         
         // Handle paginated response
@@ -101,12 +87,14 @@ export default function ClothingShowcase() {
   // Loading state
   if (loading) {
     return (
-      <section className="bg-white py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="bg-white py-12 sm:py-16">
+        <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-center py-20">
             <div className="text-center">
-              <Loader2 className="w-10 h-10 animate-spin text-gray-900 mx-auto mb-3" />
-              <p className="text-gray-600 font-medium">Loading showcase...</p>
+              <Loader2 className="w-12 h-12 animate-spin text-black mx-auto mb-4" />
+              <p className="text-black font-bold" style={{ fontFamily: 'Inter, system-ui, -apple-system, sans-serif', letterSpacing: '0.02em' }}>
+                Loading showcase...
+              </p>
             </div>
           </div>
         </div>
@@ -117,17 +105,17 @@ export default function ClothingShowcase() {
   // Error state
   if (error) {
     return (
-      <section className="bg-gray-50 py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="bg-white py-12 sm:py-16">
+        <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center py-20">
             <div className="inline-block p-6 bg-red-100 rounded-2xl mb-4">
               <ShoppingCart className="w-12 h-12 text-red-600" />
             </div>
-            <h3 className="text-xl font-bold text-gray-900 mb-2">Failed to Load Showcase</h3>
+            <h3 className="text-xl font-bold text-black mb-2 uppercase">Failed to Load Showcase</h3>
             <p className="text-gray-600 mb-4">{error}</p>
             <button
               onClick={() => window.location.reload()}
-              className="px-6 py-2 bg-gray-900 text-white rounded-lg font-semibold hover:bg-gray-800 transition"
+              className="px-6 py-3 bg-black text-white rounded-md font-bold hover:bg-gray-900 transition uppercase"
             >
               Retry
             </button>
@@ -140,11 +128,11 @@ export default function ClothingShowcase() {
   // No products state
   if (showcaseProducts.length === 0) {
     return (
-      <section className="bg-gray-50 py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="bg-white py-12 sm:py-16">
+        <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center py-20">
             <ShoppingCart className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-600 font-medium">No products available for showcase</p>
+            <p className="text-gray-600 font-medium uppercase">No products available for showcase</p>
           </div>
         </div>
       </section>
@@ -152,24 +140,54 @@ export default function ClothingShowcase() {
   }
 
   return (
-    <section className="bg-gray-50 py-16">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Optional Header */}
-        <div className="text-center mb-12">
-          <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
+    <section className="bg-white py-12 sm:py-16">
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+        
+        .section-title {
+          font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+          font-weight: 900;
+          letter-spacing: -0.04em;
+          line-height: 1;
+        }
+        
+        .product-name {
+          font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+          font-weight: 600;
+          letter-spacing: -0.01em;
+          line-height: 1.3;
+        }
+        
+        .price-text {
+          font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+          font-weight: 700;
+          letter-spacing: -0.02em;
+        }
+        
+        .button-text {
+          font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+          font-weight: 800;
+          letter-spacing: 0.02em;
+        }
+      `}</style>
+
+      <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header */}
+        <div className="mb-8 sm:mb-12">
+          <h2 className="section-title text-3xl sm:text-4xl lg:text-5xl text-black mb-2 uppercase">
             Featured Collection
           </h2>
-          <p className="text-gray-600 text-lg">
+          <p className="text-gray-600 text-sm sm:text-base uppercase tracking-wide">
             Discover our handpicked selection of trending styles
           </p>
         </div>
 
         {/* Album-style Masonry Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4 auto-rows-[250px]">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 auto-rows-[250px]">
           {showcaseProducts.map((product, index) => (
             <div
               key={product.id}
-              className={`relative overflow-hidden rounded-lg shadow-lg cursor-pointer group ${getSizeClass(product.size)}`}
+              className={`relative overflow-hidden bg-gray-100 cursor-pointer group ${getSizeClass(product.size)}`}
               onMouseEnter={() => setHoveredIndex(index)}
               onMouseLeave={() => setHoveredIndex(null)}
               onClick={() => handleProductClick(product)}
@@ -178,33 +196,33 @@ export default function ClothingShowcase() {
                 src={product.image}
                 alt={product.name}
                 className={`w-full h-full object-cover transition-all duration-700 ${
-                  hoveredIndex === index ? 'scale-110 brightness-75' : 'scale-100'
+                  hoveredIndex === index ? 'scale-110 brightness-90' : 'scale-100'
                 }`}
               />
               
               {/* Hover Overlay with Product Info */}
-              <div className={`absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent transition-opacity duration-300 ${
+              <div className={`absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent transition-opacity duration-300 ${
                 hoveredIndex === index ? 'opacity-100' : 'opacity-0'
               }`}>
-                <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-6 text-white">
-                  <p className="text-xs uppercase tracking-wide mb-1 opacity-90">
+                <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4 md:p-6 text-white">
+                  <p className="text-xs uppercase tracking-wider mb-1 opacity-90 font-medium">
                     {product.category}
                   </p>
-                  <h3 className="text-base sm:text-lg font-bold mb-2 line-clamp-2">
+                  <h3 className="product-name text-sm sm:text-base md:text-lg mb-2 line-clamp-2 uppercase">
                     {product.name}
                   </h3>
-                  <div className="flex items-center justify-between">
-                    <span className="text-xl sm:text-2xl font-bold">
-                      ${parseFloat(product.price).toFixed(2)}
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="price-text text-lg sm:text-xl md:text-2xl">
+                      Rs. {parseFloat(product.price).toFixed(2)}
                     </span>
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
                         handleProductClick(product);
                       }}
-                      className="bg-white text-gray-900 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg font-semibold text-xs sm:text-sm hover:bg-gray-100 transition-all transform hover:scale-105"
+                      className="button-text bg-white text-black px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 rounded-md text-xs sm:text-sm hover:bg-gray-100 transition-all uppercase"
                     >
-                      View Details
+                      View
                     </button>
                   </div>
                 </div>
@@ -212,26 +230,31 @@ export default function ClothingShowcase() {
 
               {/* Out of Stock Badge */}
               {!product.in_stock && (
-                <div className="absolute top-4 right-4 bg-red-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg">
+                <div className="absolute top-2 sm:top-4 right-2 sm:right-4 bg-red-600 text-white px-2 sm:px-3 py-1 text-xs font-bold uppercase">
                   Out of Stock
                 </div>
               )}
 
               {/* Discount Badge */}
               {product.original_price && parseFloat(product.original_price) > parseFloat(product.price) && (
-                <div className="absolute top-4 left-4 bg-green-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg">
+                <div className="absolute top-2 sm:top-4 left-2 sm:left-4 bg-green-600 text-white px-2 sm:px-3 py-1 text-xs font-bold uppercase">
                   {Math.round(((parseFloat(product.original_price) - parseFloat(product.price)) / parseFloat(product.original_price)) * 100)}% OFF
                 </div>
               )}
+
+              {/* Border on hover */}
+              <div className={`absolute inset-0 border-2 border-black transition-opacity duration-300 pointer-events-none ${
+                hoveredIndex === index ? 'opacity-100' : 'opacity-0'
+              }`} />
             </div>
           ))}
         </div>
 
-        {/* Optional CTA */}
-        <div className="text-center mt-12">
+        {/* CTA Button */}
+        <div className="text-center mt-8 sm:mt-12">
           <button
             onClick={() => navigate('/')}
-            className="px-8 py-4 bg-gray-900 text-white rounded-lg font-bold text-lg hover:bg-gray-800 transition-all transform hover:scale-105 shadow-lg"
+            className="button-text px-8 py-3 sm:py-4 bg-black text-white rounded-md font-bold text-sm sm:text-base hover:bg-gray-900 transition-all uppercase"
           >
             Explore All Products
           </button>

@@ -1,4 +1,4 @@
-// Register.jsx - Themed to match Orders page
+// Register.jsx - Updated with CategoryProducts theme
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Lock, Mail, Loader2, UserPlus } from 'lucide-react';
@@ -65,7 +65,6 @@ const Register = () => {
         
         console.log('✅ Google signup successful, redirecting...');
         
-        // Force reload to ensure all components update
         setTimeout(() => {
           window.location.href = '/';
         }, 100);
@@ -125,7 +124,6 @@ const Register = () => {
         
         console.log('✅ Registration successful, redirecting...');
         
-        // Force reload to ensure all components update
         setTimeout(() => {
           window.location.href = '/';
         }, 100);
@@ -159,30 +157,57 @@ const Register = () => {
 
   return (
     <div className="min-h-screen bg-white flex items-center justify-center px-4 py-12">
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+        
+        .page-title {
+          font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+          font-weight: 900;
+          letter-spacing: -0.04em;
+          line-height: 1;
+        }
+        
+        .button-text {
+          font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+          font-weight: 800;
+          letter-spacing: 0.02em;
+        }
+        
+        .label-text {
+          font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+          font-weight: 700;
+          letter-spacing: -0.01em;
+        }
+      `}</style>
+
       <div className="max-w-md w-full">
         {/* Header */}
-        <div className="text-center mb-10">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-black rounded-2xl mb-6">
+        <div className="text-center mb-8 sm:mb-10">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-black mb-6">
             <UserPlus className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-4xl font-bold text-gray-900 mb-3">Create Account</h1>
-          <p className="text-gray-600 text-lg">Join us and start shopping today</p>
+          <h1 className="page-title text-3xl sm:text-4xl lg:text-5xl text-black mb-2 uppercase">
+            Create Account
+          </h1>
+          <p className="text-gray-600 text-sm sm:text-base uppercase tracking-wide">
+            Join us and start shopping today
+          </p>
         </div>
 
         {/* Error Message */}
         {error && (
-          <div className="mb-6 bg-red-50 border-2 border-red-200 rounded-xl p-4">
-            <p className="text-red-800 font-semibold text-center whitespace-pre-line">{error}</p>
+          <div className="mb-6 bg-red-50 border-2 border-red-200 p-4">
+            <p className="text-red-800 font-bold text-center text-sm uppercase whitespace-pre-line">{error}</p>
           </div>
         )}
 
         {/* Register Form */}
-        <div className="bg-white border-2 border-gray-200 rounded-2xl p-8 shadow-sm hover:shadow-lg transition">
+        <div className="bg-white border-2 border-gray-300 p-6 sm:p-8">
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Name Fields */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-3 sm:gap-4">
               <div>
-                <label htmlFor="first_name" className="block text-sm font-bold text-gray-900 mb-2">
+                <label htmlFor="first_name" className="label-text block text-xs sm:text-sm text-black mb-2 uppercase">
                   First Name
                 </label>
                 <input
@@ -191,13 +216,13 @@ const Register = () => {
                   name="first_name"
                   value={formData.first_name}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-gray-900 outline-none transition font-medium"
+                  className="w-full px-3 sm:px-4 py-3 border-2 border-gray-300 focus:ring-2 focus:ring-black focus:border-black outline-none transition font-medium text-sm sm:text-base"
                   placeholder="John"
                 />
               </div>
 
               <div>
-                <label htmlFor="last_name" className="block text-sm font-bold text-gray-900 mb-2">
+                <label htmlFor="last_name" className="label-text block text-xs sm:text-sm text-black mb-2 uppercase">
                   Last Name
                 </label>
                 <input
@@ -206,7 +231,7 @@ const Register = () => {
                   name="last_name"
                   value={formData.last_name}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-gray-900 outline-none transition font-medium"
+                  className="w-full px-3 sm:px-4 py-3 border-2 border-gray-300 focus:ring-2 focus:ring-black focus:border-black outline-none transition font-medium text-sm sm:text-base"
                   placeholder="Doe"
                 />
               </div>
@@ -214,12 +239,12 @@ const Register = () => {
 
             {/* Email Field */}
             <div>
-              <label htmlFor="email" className="block text-sm font-bold text-gray-900 mb-2">
+              <label htmlFor="email" className="label-text block text-xs sm:text-sm text-black mb-2 uppercase">
                 Email Address
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <Mail className="h-5 w-5 text-gray-400" />
+                <div className="absolute inset-y-0 left-0 pl-3 sm:pl-4 flex items-center pointer-events-none">
+                  <Mail className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
                 </div>
                 <input
                   type="email"
@@ -228,7 +253,7 @@ const Register = () => {
                   value={formData.email}
                   onChange={handleChange}
                   required
-                  className="w-full pl-12 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-gray-900 outline-none transition font-medium"
+                  className="w-full pl-10 sm:pl-12 pr-4 py-3 border-2 border-gray-300 focus:ring-2 focus:ring-black focus:border-black outline-none transition font-medium text-sm sm:text-base"
                   placeholder="you@example.com"
                 />
               </div>
@@ -236,12 +261,12 @@ const Register = () => {
 
             {/* Password Field */}
             <div>
-              <label htmlFor="password" className="block text-sm font-bold text-gray-900 mb-2">
+              <label htmlFor="password" className="label-text block text-xs sm:text-sm text-black mb-2 uppercase">
                 Password
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-gray-400" />
+                <div className="absolute inset-y-0 left-0 pl-3 sm:pl-4 flex items-center pointer-events-none">
+                  <Lock className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
                 </div>
                 <input
                   type="password"
@@ -251,7 +276,7 @@ const Register = () => {
                   onChange={handleChange}
                   required
                   minLength={8}
-                  className="w-full pl-12 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-gray-900 outline-none transition font-medium"
+                  className="w-full pl-10 sm:pl-12 pr-4 py-3 border-2 border-gray-300 focus:ring-2 focus:ring-black focus:border-black outline-none transition font-medium text-sm sm:text-base"
                   placeholder="At least 8 characters"
                 />
               </div>
@@ -259,12 +284,12 @@ const Register = () => {
 
             {/* Confirm Password Field */}
             <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-bold text-gray-900 mb-2">
+              <label htmlFor="confirmPassword" className="label-text block text-xs sm:text-sm text-black mb-2 uppercase">
                 Confirm Password
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-gray-400" />
+                <div className="absolute inset-y-0 left-0 pl-3 sm:pl-4 flex items-center pointer-events-none">
+                  <Lock className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
                 </div>
                 <input
                   type="password"
@@ -274,7 +299,7 @@ const Register = () => {
                   onChange={handleChange}
                   required
                   minLength={8}
-                  className="w-full pl-12 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-gray-900 outline-none transition font-medium"
+                  className="w-full pl-10 sm:pl-12 pr-4 py-3 border-2 border-gray-300 focus:ring-2 focus:ring-black focus:border-black outline-none transition font-medium text-sm sm:text-base"
                   placeholder="Confirm your password"
                 />
               </div>
@@ -284,7 +309,7 @@ const Register = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-black text-white py-4 rounded-lg font-bold text-lg hover:bg-gray-800 focus:outline-none focus:ring-4 focus:ring-gray-300 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="button-text w-full bg-black text-white py-3 sm:py-4 rounded-md text-sm sm:text-base hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 uppercase"
             >
               {loading ? (
                 <>
@@ -303,8 +328,8 @@ const Register = () => {
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t-2 border-gray-200"></div>
               </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-4 bg-white text-gray-500 font-semibold">Or sign up with</span>
+              <div className="relative flex justify-center text-xs sm:text-sm">
+                <span className="px-4 bg-white text-gray-500 font-bold uppercase">Or sign up with</span>
               </div>
             </div>
 
@@ -316,9 +341,9 @@ const Register = () => {
         </div>
 
         {/* Login Link */}
-        <p className="mt-8 text-center text-gray-600">
+        <p className="mt-6 sm:mt-8 text-center text-gray-600 text-sm sm:text-base">
           Already have an account?{' '}
-          <Link to="/login" className="font-bold text-gray-900 hover:underline">
+          <Link to="/login" className="font-bold text-black hover:underline uppercase">
             Sign in
           </Link>
         </p>

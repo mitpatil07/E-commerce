@@ -1,4 +1,4 @@
-// src/pages/Profile.jsx - Enhanced with theme and features
+// src/pages/Profile.jsx - Updated with CategoryProducts theme
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
@@ -59,7 +59,6 @@ export default function Profile() {
         api.getOrders().catch(() => [])
       ]);
       
-      
       setStats({
         orders: Array.isArray(ordersData) ? ordersData.length : 0,
         cart: cartData.total_items || 0
@@ -105,7 +104,6 @@ export default function Profile() {
       navigate('/login');
     } catch (error) {
       console.error('Logout error:', error);
-      // Clear local storage anyway
       localStorage.removeItem('access_token');
       localStorage.removeItem('refresh_token');
       localStorage.removeItem('user');
@@ -126,309 +124,364 @@ export default function Profile() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white">
-        <div className="flex items-center justify-center min-h-[60vh]">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+      <>
+        <Navbar />
+        <div className="min-h-screen bg-white flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-4 border-black border-t-transparent mx-auto mb-4"></div>
+            <p className="text-lg font-bold text-black" style={{ fontFamily: 'Inter, system-ui, -apple-system, sans-serif', letterSpacing: '0.02em' }}>
+              Loading profile...
+            </p>
+          </div>
         </div>
         <Footer />
-      </div>
+      </>
     );
   }
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-white">
-        <div className="flex flex-col items-center justify-center min-h-[60vh]">
-          <AlertCircle className="w-16 h-16 text-red-500 mb-4" />
-          <p className="text-xl font-semibold text-gray-900 mb-2">Failed to load profile</p>
-          <button
-            onClick={() => navigate('/login')}
-            className="mt-4 px-6 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition"
-          >
-            Go to Login
-          </button>
+      <>
+        <Navbar />
+        <div className="min-h-screen bg-white">
+          <div className="flex flex-col items-center justify-center min-h-[60vh] px-4">
+            <div className="inline-block p-6 bg-red-100 rounded-2xl mb-4">
+              <AlertCircle className="w-16 h-16 text-red-600" />
+            </div>
+            <p className="text-xl font-bold text-black mb-2 uppercase">Failed to load profile</p>
+            <button
+              onClick={() => navigate('/login')}
+              className="mt-4 px-6 py-3 bg-black text-white rounded-md hover:bg-gray-900 transition font-bold uppercase"
+            >
+              Go to Login
+            </button>
+          </div>
         </div>
         <Footer />
-      </div>
+      </>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-900">My Account</h1>
-          <p className="text-gray-600 mt-2">Manage your profile and view your activity</p>
+    <>
+      <Navbar />
+      
+      <div className="min-h-screen bg-white">
+        <style>{`
+          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+          
+          .page-title {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+            font-weight: 900;
+            letter-spacing: -0.04em;
+            line-height: 1;
+          }
+          
+          .section-title {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+          }
+          
+          .label-text {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+          }
+          
+          .button-text {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+            font-weight: 800;
+            letter-spacing: 0.02em;
+          }
+        `}</style>
+
+        {/* Header Section */}
+        <div className="bg-white border-b border-gray-200">
+          <div className="px-4 py-4 sm:py-6 max-w-screen-2xl mx-auto">
+            <h1 className="page-title text-3xl sm:text-4xl lg:text-5xl text-black mb-2 uppercase">
+              My Account
+            </h1>
+            <p className="text-gray-600 text-sm sm:text-base uppercase tracking-wide">
+              Manage your profile and view your activity
+            </p>
+          </div>
         </div>
 
-        {/* Message Alert */}
-        {message.text && (
-          <div className={`mb-6 p-4 rounded-lg flex items-center gap-3 ${
-            message.type === 'success' 
-              ? 'bg-green-50 border border-green-200 text-green-800' 
-              : 'bg-red-50 border border-red-200 text-red-800'
-          }`}>
-            {message.type === 'success' ? (
-              <CheckCircle className="w-5 h-5" />
-            ) : (
-              <AlertCircle className="w-5 h-5" />
-            )}
-            <span className="font-medium">{message.text}</span>
-          </div>
-        )}
+        {/* Content */}
+        <div className="px-4 py-6 sm:py-8 max-w-screen-2xl mx-auto">
+          {/* Message Alert */}
+          {message.text && (
+            <div className={`mb-6 p-4 flex items-center gap-3 border-2 ${
+              message.type === 'success' 
+                ? 'bg-green-50 border-green-300 text-green-800' 
+                : 'bg-red-50 border-red-300 text-red-800'
+            }`}>
+              {message.type === 'success' ? (
+                <CheckCircle className="w-5 h-5 flex-shrink-0" />
+              ) : (
+                <AlertCircle className="w-5 h-5 flex-shrink-0" />
+              )}
+              <span className="font-bold text-sm uppercase">{message.text}</span>
+            </div>
+          )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Column - Stats Cards */}
-          <div className="lg:col-span-1 space-y-4">
-            {/* Profile Summary Card */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <div className="flex items-center gap-4 mb-6">
-                <div className="w-20 h-20 bg-gradient-to-br from-gray-900 to-gray-700 rounded-full flex items-center justify-center text-white text-2xl font-bold">
-                  {user.first_name?.[0] || user.email?.[0]?.toUpperCase()}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+            {/* Left Column - Stats Cards */}
+            <div className="lg:col-span-1 space-y-4">
+              {/* Profile Summary Card */}
+              <div className="bg-white border-2 border-gray-300 p-6">
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="w-20 h-20 bg-black flex items-center justify-center text-white text-2xl font-bold">
+                    {user.first_name?.[0] || user.email?.[0]?.toUpperCase()}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="section-title text-lg sm:text-xl text-black uppercase truncate">
+                      {user.first_name || user.last_name 
+                        ? `${user.first_name} ${user.last_name}`.trim()
+                        : 'User'
+                      }
+                    </h3>
+                    <p className="text-xs sm:text-sm text-gray-600 truncate">{user.email}</p>
+                    {user.is_google_user && (
+                      <span className="inline-block mt-2 px-2 py-1 bg-blue-100 text-blue-700 text-xs font-bold uppercase border border-blue-300">
+                        Google Account
+                      </span>
+                    )}
+                  </div>
                 </div>
-                <div className="flex-1">
-                  <h3 className="text-xl font-bold text-gray-900">
-                    {user.first_name || user.last_name 
-                      ? `${user.first_name} ${user.last_name}`.trim()
-                      : 'User'
-                    }
-                  </h3>
-                  <p className="text-sm text-gray-500">{user.email}</p>
-                  {user.is_google_user && (
-                    <span className="inline-block mt-2 px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full">
-                      Google Account
-                    </span>
+                
+                <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600 uppercase">
+                  <Calendar className="w-4 h-4" />
+                  <span>Joined {new Date(user.created_at).toLocaleDateString()}</span>
+                </div>
+              </div>
+
+              {/* Quick Stats */}
+              <div className="bg-white border-2 border-gray-300 p-6">
+                <h3 className="section-title text-base sm:text-lg text-black mb-4 uppercase">
+                  Quick Stats
+                </h3>
+                <div className="space-y-3">
+                  <button
+                    onClick={() => navigate('/orders')}
+                    className="w-full flex items-center justify-between p-3 border-2 border-gray-300 hover:border-black transition"
+                  >
+                    <div className="flex items-center gap-3">
+                      <Package className="w-5 h-5 text-black" />
+                      <span className="label-text text-sm text-black uppercase">Orders</span>
+                    </div>
+                    <span className="text-2xl font-bold text-black">{stats.orders}</span>
+                  </button>
+
+                  <button
+                    onClick={() => navigate('/cart')}
+                    className="w-full flex items-center justify-between p-3 border-2 border-gray-300 hover:border-black transition"
+                  >
+                    <div className="flex items-center gap-3">
+                      <ShoppingBag className="w-5 h-5 text-black" />
+                      <span className="label-text text-sm text-black uppercase">Cart Items</span>
+                    </div>
+                    <span className="text-2xl font-bold text-black">{stats.cart}</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Logout Button */}
+              <button
+                onClick={handleLogout}
+                className="button-text w-full flex items-center justify-center gap-2 bg-red-600 text-white py-3 rounded-md hover:bg-red-700 transition text-sm uppercase"
+              >
+                <LogOut className="w-5 h-5" />
+                Logout
+              </button>
+            </div>
+
+            {/* Right Column - Profile Details */}
+            <div className="lg:col-span-2">
+              <div className="bg-white border-2 border-gray-300 p-6 sm:p-8">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-gray-200">
+                  <h2 className="section-title text-xl sm:text-2xl text-black uppercase">
+                    Profile Information
+                  </h2>
+                  {!isEditing && (
+                    <button
+                      onClick={() => setIsEditing(true)}
+                      className="button-text flex items-center justify-center gap-2 px-4 py-2 bg-black text-white rounded-md hover:bg-gray-900 transition text-sm uppercase"
+                    >
+                      <Edit2 className="w-4 h-4" />
+                      Edit Profile
+                    </button>
                   )}
                 </div>
-              </div>
-              
-              <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
-                <Calendar className="w-4 h-4" />
-                <span>Joined {new Date(user.created_at).toLocaleDateString()}</span>
-              </div>
-            </div>
 
-            {/* Quick Stats */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <h3 className="font-bold text-gray-900 mb-4">Quick Stats</h3>
-              <div className="space-y-4">
-                <button
-                  onClick={() => navigate('/orders')}
-                  className="w-full flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition"
-                >
-                  <div className="flex items-center gap-3">
-                    <Package className="w-5 h-5 text-gray-700" />
-                    <span className="font-medium text-gray-900">Orders</span>
+                {!isEditing ? (
+                  <div className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-2">
+                        <label className="label-text flex items-center gap-2 text-xs sm:text-sm text-gray-600 uppercase">
+                          <User className="w-4 h-4" />
+                          First Name
+                        </label>
+                        <p className="text-base sm:text-lg font-bold text-black pl-6 uppercase">
+                          {user.first_name || 'Not provided'}
+                        </p>
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="label-text flex items-center gap-2 text-xs sm:text-sm text-gray-600 uppercase">
+                          <User className="w-4 h-4" />
+                          Last Name
+                        </label>
+                        <p className="text-base sm:text-lg font-bold text-black pl-6 uppercase">
+                          {user.last_name || 'Not provided'}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="label-text flex items-center gap-2 text-xs sm:text-sm text-gray-600 uppercase">
+                        <Mail className="w-4 h-4" />
+                        Email Address
+                      </label>
+                      <p className="text-base sm:text-lg font-bold text-black pl-6">{user.email}</p>
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="label-text flex items-center gap-2 text-xs sm:text-sm text-gray-600 uppercase">
+                        <Phone className="w-4 h-4" />
+                        Phone Number
+                      </label>
+                      <p className="text-base sm:text-lg font-bold text-black pl-6">
+                        {user.phone || 'Not provided'}
+                      </p>
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="label-text flex items-center gap-2 text-xs sm:text-sm text-gray-600 uppercase">
+                        <MapPin className="w-4 h-4" />
+                        Address
+                      </label>
+                      <p className="text-base sm:text-lg font-bold text-black pl-6">
+                        {user.address || 'Not provided'}
+                      </p>
+                    </div>
                   </div>
-                  <span className="text-2xl font-bold text-gray-900">{stats.orders}</span>
-                </button>
+                ) : (
+                  <form onSubmit={handleSubmit} className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div>
+                        <label className="label-text flex items-center gap-2 text-xs sm:text-sm text-black mb-2 uppercase">
+                          <User className="w-4 h-4" />
+                          First Name
+                        </label>
+                        <input
+                          type="text"
+                          name="first_name"
+                          value={formData.first_name}
+                          onChange={handleChange}
+                          placeholder="Enter first name"
+                          className="w-full px-4 py-3 border-2 border-gray-300 focus:border-black focus:ring-2 focus:ring-black outline-none transition text-sm sm:text-base"
+                        />
+                      </div>
 
-                <button
-                  onClick={() => navigate('/cart')}
-                  className="w-full flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition"
-                >
-                  <div className="flex items-center gap-3">
-                    <ShoppingBag className="w-5 h-5 text-gray-700" />
-                    <span className="font-medium text-gray-900">Cart Items</span>
-                  </div>
-                  <span className="text-2xl font-bold text-gray-900">{stats.cart}</span>
-                </button>
-              </div>
-            </div>
+                      <div>
+                        <label className="label-text flex items-center gap-2 text-xs sm:text-sm text-black mb-2 uppercase">
+                          <User className="w-4 h-4" />
+                          Last Name
+                        </label>
+                        <input
+                          type="text"
+                          name="last_name"
+                          value={formData.last_name}
+                          onChange={handleChange}
+                          placeholder="Enter last name"
+                          className="w-full px-4 py-3 border-2 border-gray-300 focus:border-black focus:ring-2 focus:ring-black outline-none transition text-sm sm:text-base"
+                        />
+                      </div>
+                    </div>
 
-            {/* Logout Button */}
-            <button
-              onClick={handleLogout}
-              className="w-full flex items-center justify-center gap-2 bg-red-500 text-white py-3 rounded-lg hover:bg-red-600 transition font-semibold shadow-sm"
-            >
-              <LogOut className="w-5 h-5" />
-              Logout
-            </button>
-          </div>
+                    <div>
+                      <label className="label-text flex items-center gap-2 text-xs sm:text-sm text-black mb-2 uppercase">
+                        <Mail className="w-4 h-4" />
+                        Email Address
+                      </label>
+                      <input
+                        type="email"
+                        value={user.email}
+                        disabled
+                        className="w-full px-4 py-3 border-2 border-gray-300 bg-gray-100 text-gray-500 cursor-not-allowed text-sm sm:text-base"
+                      />
+                      <p className="text-xs text-gray-500 mt-1 uppercase">Email cannot be changed</p>
+                    </div>
 
-          {/* Right Column - Profile Details */}
-          <div className="lg:col-span-2">
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-gray-900">Profile Information</h2>
-                {!isEditing && (
-                  <button
-                    onClick={() => setIsEditing(true)}
-                    className="flex items-center gap-2 px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition"
-                  >
-                    <Edit2 className="w-4 h-4" />
-                    Edit Profile
-                  </button>
+                    <div>
+                      <label className="label-text flex items-center gap-2 text-xs sm:text-sm text-black mb-2 uppercase">
+                        <Phone className="w-4 h-4" />
+                        Phone Number
+                      </label>
+                      <input
+                        type="tel"
+                        name="phone"
+                        value={formData.phone}
+                        onChange={handleChange}
+                        placeholder="Enter phone number"
+                        className="w-full px-4 py-3 border-2 border-gray-300 focus:border-black focus:ring-2 focus:ring-black outline-none transition text-sm sm:text-base"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="label-text flex items-center gap-2 text-xs sm:text-sm text-black mb-2 uppercase">
+                        <MapPin className="w-4 h-4" />
+                        Address
+                      </label>
+                      <textarea
+                        name="address"
+                        value={formData.address}
+                        onChange={handleChange}
+                        placeholder="Enter your address"
+                        rows="4"
+                        className="w-full px-4 py-3 border-2 border-gray-300 focus:border-black focus:ring-2 focus:ring-black outline-none transition resize-none text-sm sm:text-base"
+                      />
+                    </div>
+
+                    <div className="flex flex-col sm:flex-row gap-3 pt-4">
+                      <button
+                        type="submit"
+                        disabled={saving}
+                        className="button-text flex-1 flex items-center justify-center gap-2 bg-black text-white py-3 rounded-md hover:bg-gray-900 transition disabled:opacity-50 disabled:cursor-not-allowed text-sm uppercase"
+                      >
+                        {saving ? (
+                          <>
+                            <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
+                            Saving...
+                          </>
+                        ) : (
+                          <>
+                            <Save className="w-5 h-5" />
+                            Save Changes
+                          </>
+                        )}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleCancel}
+                        disabled={saving}
+                        className="button-text flex-1 flex items-center justify-center gap-2 bg-white border-2 border-gray-300 text-black py-3 rounded-md hover:border-black transition disabled:opacity-50 text-sm uppercase"
+                      >
+                        <X className="w-5 h-5" />
+                        Cancel
+                      </button>
+                    </div>
+                  </form>
                 )}
               </div>
-
-              {!isEditing ? (
-                <div className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <label className="flex items-center gap-2 text-sm font-medium text-gray-500">
-                        <User className="w-4 h-4" />
-                        First Name
-                      </label>
-                      <p className="text-lg font-semibold text-gray-900 pl-6">
-                        {user.first_name || 'Not provided'}
-                      </p>
-                    </div>
-
-                    <div className="space-y-2">
-                      <label className="flex items-center gap-2 text-sm font-medium text-gray-500">
-                        <User className="w-4 h-4" />
-                        Last Name
-                      </label>
-                      <p className="text-lg font-semibold text-gray-900 pl-6">
-                        {user.last_name || 'Not provided'}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="flex items-center gap-2 text-sm font-medium text-gray-500">
-                      <Mail className="w-4 h-4" />
-                      Email Address
-                    </label>
-                    <p className="text-lg font-semibold text-gray-900 pl-6">{user.email}</p>
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="flex items-center gap-2 text-sm font-medium text-gray-500">
-                      <Phone className="w-4 h-4" />
-                      Phone Number
-                    </label>
-                    <p className="text-lg font-semibold text-gray-900 pl-6">
-                      {user.phone || 'Not provided'}
-                    </p>
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="flex items-center gap-2 text-sm font-medium text-gray-500">
-                      <MapPin className="w-4 h-4" />
-                      Address
-                    </label>
-                    <p className="text-lg font-semibold text-gray-900 pl-6">
-                      {user.address || 'Not provided'}
-                    </p>
-                  </div>
-                </div>
-              ) : (
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
-                        <User className="w-4 h-4" />
-                        First Name
-                      </label>
-                      <input
-                        type="text"
-                        name="first_name"
-                        value={formData.first_name}
-                        onChange={handleChange}
-                        placeholder="Enter first name"
-                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-black focus:ring-2 focus:ring-black focus:ring-opacity-20 outline-none transition"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
-                        <User className="w-4 h-4" />
-                        Last Name
-                      </label>
-                      <input
-                        type="text"
-                        name="last_name"
-                        value={formData.last_name}
-                        onChange={handleChange}
-                        placeholder="Enter last name"
-                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-black focus:ring-2 focus:ring-black focus:ring-opacity-20 outline-none transition"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
-                      <Mail className="w-4 h-4" />
-                      Email Address
-                    </label>
-                    <input
-                      type="email"
-                      value={user.email}
-                      disabled
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg bg-gray-100 text-gray-500 cursor-not-allowed"
-                    />
-                    <p className="text-xs text-gray-500 mt-1">Email cannot be changed</p>
-                  </div>
-
-                  <div>
-                    <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
-                      <Phone className="w-4 h-4" />
-                      Phone Number
-                    </label>
-                    <input
-                      type="tel"
-                      name="phone"
-                      value={formData.phone}
-                      onChange={handleChange}
-                      placeholder="Enter phone number"
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-black focus:ring-2 focus:ring-black focus:ring-opacity-20 outline-none transition"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
-                      <MapPin className="w-4 h-4" />
-                      Address
-                    </label>
-                    <textarea
-                      name="address"
-                      value={formData.address}
-                      onChange={handleChange}
-                      placeholder="Enter your address"
-                      rows="4"
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-black focus:ring-2 focus:ring-black focus:ring-opacity-20 outline-none transition resize-none"
-                    />
-                  </div>
-
-                  <div className="flex gap-4 pt-4">
-                    <button
-                      type="submit"
-                      disabled={saving}
-                      className="flex-1 flex items-center justify-center gap-2 bg-black text-white py-3 rounded-lg hover:bg-gray-800 transition font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {saving ? (
-                        <>
-                          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                          Saving...
-                        </>
-                      ) : (
-                        <>
-                          <Save className="w-5 h-5" />
-                          Save Changes
-                        </>
-                      )}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleCancel}
-                      disabled={saving}
-                      className="flex-1 flex items-center justify-center gap-2 bg-gray-200 text-gray-900 py-3 rounded-lg hover:bg-gray-300 transition font-semibold disabled:opacity-50"
-                    >
-                      <X className="w-5 h-5" />
-                      Cancel
-                    </button>
-                  </div>
-                </form>
-              )}
             </div>
           </div>
         </div>
       </div>
 
       <Footer />
-    </div>
+    </>
   );
 }
