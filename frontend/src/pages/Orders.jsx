@@ -1,4 +1,4 @@
-// frontend/src/pages/Orders.jsx - Updated with CategoryProducts theme
+// frontend/src/pages/Orders.jsx
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Package, Loader2, CheckCircle, Clock, Truck, XCircle, CreditCard } from 'lucide-react';
@@ -25,7 +25,6 @@ export default function Orders() {
       setOrders(Array.isArray(data) ? data : data.results || []);
       setLoading(false);
     } catch (err) {
-      // console.error('Error:', err);
       setLoading(false);
     }
   };
@@ -47,23 +46,6 @@ export default function Orders() {
     }
   };
 
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'PENDING':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-300';
-      case 'PROCESSING':
-        return 'bg-blue-100 text-blue-800 border-blue-300';
-      case 'SHIPPED':
-        return 'bg-purple-100 text-purple-800 border-purple-300';
-      case 'DELIVERED':
-        return 'bg-green-100 text-green-800 border-green-300';
-      case 'CANCELLED':
-        return 'bg-red-100 text-red-800 border-red-300';
-      default:
-        return 'bg-gray-100 text-gray-800 border-gray-300';
-    }
-  };
-
   const getPaymentStatusBadge = (paymentStatus) => {
     const styles = {
       PAID: 'bg-green-100 text-green-800 border-2 border-green-300',
@@ -71,9 +53,13 @@ export default function Orders() {
       FAILED: 'bg-red-100 text-red-800 border-2 border-red-300',
       REFUNDED: 'bg-gray-100 text-gray-800 border-2 border-gray-300',
     };
-    
+
     return (
-      <span className={`px-3 py-1 text-xs font-bold uppercase ${styles[paymentStatus] || styles.PENDING}`}>
+      <span
+        className={`px-3 py-1 text-xs font-bold uppercase ${
+          styles[paymentStatus] || styles.PENDING
+        }`}
+      >
         {paymentStatus}
       </span>
     );
@@ -86,7 +72,13 @@ export default function Orders() {
         <div className="min-h-screen bg-white flex items-center justify-center">
           <div className="text-center">
             <Loader2 className="w-12 h-12 animate-spin text-black mx-auto mb-4" />
-            <p className="text-lg font-bold text-black" style={{ fontFamily: 'Inter, system-ui, -apple-system, sans-serif', letterSpacing: '0.02em' }}>
+            <p
+              className="text-lg font-bold text-black"
+              style={{
+                fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
+                letterSpacing: '0.02em',
+              }}
+            >
               Loading orders...
             </p>
           </div>
@@ -99,37 +91,37 @@ export default function Orders() {
   return (
     <>
       <Navbar />
-      
+
       <div className="min-h-screen bg-white">
         <style>{`
           @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
-          
+
           .page-title {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
             font-weight: 900;
             letter-spacing: -0.04em;
             line-height: 1;
           }
-          
+
           .section-title {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
             font-weight: 700;
             letter-spacing: -0.01em;
           }
-          
+
           .product-name {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
             font-weight: 600;
             letter-spacing: -0.01em;
             line-height: 1.3;
           }
-          
+
           .price-text {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
             font-weight: 700;
             letter-spacing: -0.02em;
           }
-          
+
           .button-text {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
             font-weight: 800;
@@ -183,20 +175,59 @@ export default function Orders() {
                         <h3 className="section-title text-lg sm:text-xl text-black uppercase">
                           {order.order_number}
                         </h3>
-                        <div className={`px-2 sm:px-3 py-1 text-xs font-bold border-2 flex items-center gap-2 uppercase ${getStatusColor(order.status)}`}>
-                          {getStatusIcon(order.status)}
-                          {order.status}
+
+                        {/* 🟢 Updated Status Badge */}
+                        <div className="flex items-center gap-2">
+                          <div
+                            className={`flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-bold uppercase transition-all
+                              ${
+                                order.status === 'PENDING'
+                                  ? 'bg-yellow-50 text-yellow-800 border-yellow-300'
+                                  : order.status === 'PROCESSING'
+                                  ? 'bg-blue-50 text-blue-800 border-blue-300'
+                                  : order.status === 'SHIPPED'
+                                  ? 'bg-purple-50 text-purple-800 border-purple-300'
+                                  : order.status === 'DELIVERED'
+                                  ? 'bg-green-50 text-green-800 border-green-300'
+                                  : order.status === 'CANCELLED'
+                                  ? 'bg-red-50 text-red-800 border-red-300'
+                                  : 'bg-gray-50 text-gray-800 border-gray-300'
+                              }`}
+                          >
+                            {getStatusIcon(order.status)}
+                            <span className="tracking-wide">{order.status}</span>
+                          </div>
+
+                          {order.status !== 'CANCELLED' && (
+                            <div className="flex items-center gap-1">
+                              <div
+                                className={`w-2 h-2 rounded-full ${
+                                  order.status === 'PENDING'
+                                    ? 'bg-yellow-400'
+                                    : order.status === 'PROCESSING'
+                                    ? 'bg-blue-400'
+                                    : order.status === 'SHIPPED'
+                                    ? 'bg-purple-400'
+                                    : order.status === 'DELIVERED'
+                                    ? 'bg-green-400'
+                                    : 'bg-gray-400'
+                                } animate-pulse`}
+                              ></div>
+                            </div>
+                          )}
                         </div>
                       </div>
+
                       <p className="text-xs sm:text-sm text-gray-600 uppercase">
-                        Placed on {new Date(order.created_at).toLocaleDateString('en-US', {
+                        Placed on{' '}
+                        {new Date(order.created_at).toLocaleDateString('en-US', {
                           year: 'numeric',
                           month: 'long',
-                          day: 'numeric'
+                          day: 'numeric',
                         })}
                       </p>
                     </div>
-                    
+
                     <div className="text-left sm:text-right">
                       <p className="price-text text-xl sm:text-2xl text-black">
                         Rs. {parseFloat(order.total_amount).toFixed(2)}
@@ -215,23 +246,29 @@ export default function Orders() {
                         Payment Details
                       </h4>
                     </div>
-                    
+
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
                       <div>
-                        <p className="text-xs text-gray-600 mb-1 uppercase font-bold">Payment Status</p>
+                        <p className="text-xs text-gray-600 mb-1 uppercase font-bold">
+                          Payment Status
+                        </p>
                         {getPaymentStatusBadge(order.payment_status)}
                       </div>
-                      
+
                       <div>
-                        <p className="text-xs text-gray-600 mb-1 uppercase font-bold">Payment Method</p>
+                        <p className="text-xs text-gray-600 mb-1 uppercase font-bold">
+                          Payment Method
+                        </p>
                         <p className="text-xs sm:text-sm font-bold text-black uppercase">
                           {order.payment_method}
                         </p>
                       </div>
-                      
+
                       {order.razorpay_payment_id && (
                         <div>
-                          <p className="text-xs text-gray-600 mb-1 uppercase font-bold">Transaction ID</p>
+                          <p className="text-xs text-gray-600 mb-1 uppercase font-bold">
+                            Transaction ID
+                          </p>
                           <p className="text-xs sm:text-sm font-mono text-black truncate">
                             {order.razorpay_payment_id}
                           </p>
@@ -274,7 +311,10 @@ export default function Orders() {
                           </div>
                           <div className="text-right flex-shrink-0">
                             <p className="price-text text-base sm:text-lg text-black">
-                              Rs. {(parseFloat(item.product_price) * item.quantity).toFixed(2)}
+                              Rs.{' '}
+                              {(
+                                parseFloat(item.product_price) * item.quantity
+                              ).toFixed(2)}
                             </p>
                           </div>
                         </div>
@@ -291,14 +331,17 @@ export default function Orders() {
                       <p className="font-bold text-black">{order.shipping_name}</p>
                       <p>{order.shipping_address}</p>
                       <p>
-                        {order.shipping_city}, {order.shipping_state} {order.shipping_zip_code}
+                        {order.shipping_city}, {order.shipping_state}{' '}
+                        {order.shipping_zip_code}
                       </p>
                       <p>{order.shipping_country}</p>
                       <p className="mt-2">
-                        <span className="font-bold text-black">Phone:</span> {order.shipping_phone}
+                        <span className="font-bold text-black">Phone:</span>{' '}
+                        {order.shipping_phone}
                       </p>
                       <p>
-                        <span className="font-bold text-black">Email:</span> {order.shipping_email}
+                        <span className="font-bold text-black">Email:</span>{' '}
+                        {order.shipping_email}
                       </p>
                     </div>
                   </div>
