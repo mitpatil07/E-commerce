@@ -16,6 +16,7 @@ export default function Navbar({
   const [showMobileSearch, setShowMobileSearch] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const navigate = useNavigate();
+
   
   const { user, isAuthenticated: isLoggedIn, logout } = useAuth();
 
