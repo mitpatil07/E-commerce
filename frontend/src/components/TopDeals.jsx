@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { ChevronLeft, ChevronRight, ShoppingCart, Star, Check, Loader2, Heart } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ShoppingCart, Star, Check, Loader2 } from 'lucide-react';
 import api from '../services/api';
 
 export default function TopDeals({ addToCart, onProductClick }) {
@@ -334,15 +334,6 @@ export default function TopDeals({ addToCart, onProductClick }) {
                         loading="lazy"
                       />
                       
-                      {/* Heart Icon */}
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                        }}
-                        className="absolute top-2 sm:top-3 right-2 sm:right-3 w-8 h-8 sm:w-10 sm:h-10 bg-white rounded-full flex items-center justify-center hover:bg-gray-100 transition shadow-md"
-                      >
-                        <Heart className="w-4 h-4 sm:w-5 sm:h-5" />
-                      </button>
 
                       {!deal.in_stock && (
                         <div className="absolute inset-0 bg-black/50 flex items-center justify-center">

@@ -9,7 +9,6 @@ export default function Navbar({
   selectedCategory,
   setSelectedCategory,
   cartCount = 0,
-  onCartOpen,
   searchQuery = '',
   setSearchQuery
 }) {
@@ -246,13 +245,6 @@ export default function Navbar({
                 className="nav-link block px-4 py-3 hover:bg-gray-100 transition-all duration-200 text-black text-sm uppercase"
               >
                 Home
-              </Link>
-              <Link
-                to="/shop"
-                onClick={() => setShowMobileMenu(false)}
-                className="nav-link block px-4 py-3 hover:bg-gray-100 transition-all duration-200 text-black text-sm uppercase"
-              >
-                Shop
               </Link>
               
               {/* Categories in Mobile Menu */}

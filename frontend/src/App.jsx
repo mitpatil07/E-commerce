@@ -87,8 +87,6 @@ function HomePage({
 }
 
 function CategoryPage({
-  cartCount,
-  wishlist,
   addToCart,
   toggleWishlist,
   isInWishlist
@@ -164,7 +162,7 @@ export default function App() {
       await refreshCartCount();
       const updatedCart = await api.getCart();
       setCart(updatedCart.items || []);
-  
+      setCartCount(updatedCart.total_items || 0);
       console.log("✅ Added to cart successfully and synced with backend");
     } catch (error) {
       console.error("❌ Failed to add to cart", error);
