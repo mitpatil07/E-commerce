@@ -74,17 +74,26 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
         return obj
 
     def get_queryset(self):
-        """Filter products based on query parameters"""
+        """Filter products based on query parameters and full-word search"""
         logger.info("📋 ProductViewSet.get_queryset() called")
         queryset = super().get_queryset()
         
         # Log query params
         logger.info(f"Query params: {self.request.query_params}")
         
+        # --- Multi-word search ---
+        search = self.request.query_params.get('search', None)
+        if search:
+            queryset = queryset.filter(
+                Q(name__icontains=search) |
+                Q(description__icontains=search) |
+                Q(category__name__icontains=search)
+            )
+            logger.info(f"🔍 Filtering by search: {search}")
+        
         # Filter by category
         category = self.request.query_params.get('category', None)
         if category and category.lower() != 'all':
-            logger.info(f"🔍 Filtering by category: {category}")
             queryset = queryset.filter(
                 Q(category__slug=category) | Q(category__name__iexact=category)
             )
@@ -106,7 +115,7 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
         logger.info(f"✅ Returning {count} products")
         
         return queryset
-    
+
     def list(self, request, *args, **kwargs):
         """Override list to add logging"""
         logger.info("📋 ProductViewSet.list() called")
@@ -131,22 +140,6 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
-    @action(detail=False, methods=['get'])
-    def featured(self, request):
-        """Get featured products (top rated)"""
-        logger.info("⭐ Featured products requested")
-        try:
-            featured_products = self.get_queryset().filter(rating__gte=4.5)[:8]
-            serializer = self.get_serializer(featured_products, many=True)
-            logger.info(f"✅ Returning {len(serializer.data)} featured products")
-            return Response(serializer.data)
-        except Exception as e:
-            logger.error(f"❌ Error fetching featured products: {str(e)}")
-            return Response(
-                {'error': str(e)},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
-
 
 class CartViewSet(viewsets.ModelViewSet):
     """Cart management"""
@@ -154,185 +147,6 @@ class CartViewSet(viewsets.ModelViewSet):
     
     def get_permissions(self):
         return [AllowAny()]
-
-    def get_queryset(self):
-        if self.request.user.is_authenticated:
-            return Cart.objects.filter(user=self.request.user)
-        
-        session_id = self.request.session.session_key
-        if not session_id:
-            self.request.session.create()
-            session_id = self.request.session.session_key
-        
-        return Cart.objects.filter(session_id=session_id)
-
-    def get_cart(self):
-        """Get or create cart for current user/session"""
-        if self.request.user.is_authenticated:
-            cart, created = Cart.objects.get_or_create(user=self.request.user)
-            logger.info(f"{'Created' if created else 'Retrieved'} cart for user: {self.request.user.email}")
-        else:
-            session_id = self.request.session.session_key
-            if not session_id:
-                self.request.session.create()
-                session_id = self.request.session.session_key
-            cart, created = Cart.objects.get_or_create(session_id=session_id)
-            logger.info(f"{'Created' if created else 'Retrieved'} cart for session: {session_id}")
-        return cart
-
-    @action(detail=False, methods=['get'])
-    def current(self, request):
-        """Get current user's cart"""
-        logger.info("🛒 Getting current cart")
-        try:
-            cart = self.get_cart()
-            serializer = self.get_serializer(cart)
-            logger.info(f"✅ Cart retrieved: {cart.total_items} items, ${cart.total_price}")
-            return Response(serializer.data)
-        except Exception as e:
-            logger.error(f"❌ Error getting cart: {str(e)}")
-            import traceback
-            logger.error(traceback.format_exc())
-            return Response(
-                {'error': str(e)},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
-
-    @action(detail=False, methods=['post'])
-    def add_item(self, request):
-        """Add item to cart"""
-        logger.info(f"➕ Adding item to cart: {request.data}")
-        try:
-            cart = self.get_cart()
-            product_id = request.data.get('product_id')
-            quantity = int(request.data.get('quantity', 1))
-            selected_color = request.data.get('selected_color')
-            selected_size = request.data.get('selected_size')
-
-            # Validate product
-            try:
-                product = Product.objects.get(id=product_id)
-            except Product.DoesNotExist:
-                logger.error(f"❌ Product not found: {product_id}")
-                return Response(
-                    {'error': 'Product not found'},
-                    status=status.HTTP_404_NOT_FOUND
-                )
-
-            if not product.in_stock:
-                logger.error(f"❌ Product out of stock: {product.name}")
-                return Response(
-                    {'error': 'Product is out of stock'},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-
-            # Check if item already exists
-            cart_item, created = CartItem.objects.get_or_create(
-                cart=cart,
-                product=product,
-                selected_color=selected_color,
-                selected_size=selected_size,
-                defaults={'quantity': quantity}
-            )
-
-            if not created:
-                cart_item.quantity += quantity
-                cart_item.save()
-                logger.info(f"✅ Updated existing cart item quantity: {cart_item.quantity}")
-            else:
-                logger.info(f"✅ Created new cart item")
-
-            serializer = CartSerializer(cart)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-            
-        except Exception as e:
-            logger.error(f"❌ Error adding to cart: {str(e)}")
-            import traceback
-            logger.error(traceback.format_exc())
-            return Response(
-                {'error': str(e)},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
-
-    @action(detail=False, methods=['patch'])
-    def update_item(self, request):
-        """Update cart item quantity"""
-        logger.info(f"✏️ Updating cart item: {request.data}")
-        try:
-            cart = self.get_cart()
-            item_id = request.data.get('item_id')
-            quantity = int(request.data.get('quantity'))
-
-            cart_item = CartItem.objects.get(id=item_id, cart=cart)
-            cart_item.quantity = quantity
-            cart_item.save()
-            
-            logger.info(f"✅ Updated cart item quantity to {quantity}")
-            
-            serializer = CartSerializer(cart)
-            return Response(serializer.data)
-            
-        except CartItem.DoesNotExist:
-            logger.error(f"❌ Cart item not found: {item_id}")
-            return Response(
-                {'error': 'Cart item not found'},
-                status=status.HTTP_404_NOT_FOUND
-            )
-        except Exception as e:
-            logger.error(f"❌ Error updating cart item: {str(e)}")
-            return Response(
-                {'error': str(e)},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
-
-    @action(detail=False, methods=['delete'])
-    def remove_item(self, request):
-        """Remove item from cart"""
-        item_id = request.query_params.get('item_id')
-        logger.info(f"🗑️ Removing cart item: {item_id}")
-        
-        try:
-            cart = self.get_cart()
-            cart_item = CartItem.objects.get(id=item_id, cart=cart)
-            cart_item.delete()
-            
-            logger.info(f"✅ Removed cart item")
-            
-            serializer = CartSerializer(cart)
-            return Response(serializer.data)
-            
-        except CartItem.DoesNotExist:
-            logger.error(f"❌ Cart item not found: {item_id}")
-            return Response(
-                {'error': 'Cart item not found'},
-                status=status.HTTP_404_NOT_FOUND
-            )
-        except Exception as e:
-            logger.error(f"❌ Error removing cart item: {str(e)}")
-            return Response(
-                {'error': str(e)},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
-
-    @action(detail=False, methods=['delete'])
-    def clear(self, request):
-        """Clear all items from cart"""
-        logger.info("🗑️ Clearing cart")
-        try:
-            cart = self.get_cart()
-            cart.items.all().delete()
-            
-            logger.info("✅ Cart cleared")
-            
-            serializer = CartSerializer(cart)
-            return Response(serializer.data)
-        except Exception as e:
-            logger.error(f"❌ Error clearing cart: {str(e)}")
-            return Response(
-                {'error': str(e)},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
-
 
 
 class OrderViewSet(viewsets.ModelViewSet):

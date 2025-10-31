@@ -19,6 +19,8 @@ import Orders from './pages/Orders';
 // import SearchResults from './pages/SearchResults';
 import { AuthProvider } from './contexts/AuthContext';
 import api from './services/api';
+import SearchResults from './pages/SearchResults';
+
 
 function HomePage({
   categories,
@@ -211,6 +213,8 @@ export default function App() {
         <ScrollToTop />
         <div className="min-h-screen  bg-white border-y border-gray-200">
           <Routes>
+          <Route path="/search" element={<SearchResults />} />
+
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
 

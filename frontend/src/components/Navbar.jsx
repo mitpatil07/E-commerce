@@ -17,6 +17,12 @@ export default function Navbar({
   const [showUserMenu, setShowUserMenu] = useState(false);
   const navigate = useNavigate();
 
+  const handleSearchKeyDown = (e) => {
+    if (e.key === "Enter" && searchQuery.trim()) {
+      navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
+      setShowMobileSearch(false);
+    }
+  };
   
   const { user, isAuthenticated: isLoggedIn, logout } = useAuth();
 
@@ -121,6 +127,7 @@ export default function Navbar({
                   placeholder="SEARCH FOR PRODUCTS..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery && setSearchQuery(e.target.value)}
+                  onKeyDown={handleSearchKeyDown}
                   className="w-full pl-12 pr-4 py-2.5 lg:py-3 border-2 border-gray-300 focus:border-black focus:outline-none transition-all duration-200 bg-white text-sm font-bold uppercase placeholder:text-gray-400"
                 />
               </div>
@@ -228,6 +235,7 @@ export default function Navbar({
                   placeholder="SEARCH PRODUCTS..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery && setSearchQuery(e.target.value)}
+                  onKeyDown={handleSearchKeyDown}
                   className="w-full pl-12 pr-4 py-2.5 border-2 border-gray-300 focus:border-black focus:outline-none transition-all duration-200 bg-white text-sm font-bold uppercase placeholder:text-gray-400"
                   autoFocus
                 />
