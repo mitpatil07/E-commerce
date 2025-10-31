@@ -167,27 +167,6 @@ class Order(models.Model):
         ('cancelled', 'Cancelled'),
     ]
     
-    payment_method = models.CharField(
-        max_length=50, 
-        default='razorpay',
-        choices=[
-            ('razorpay', 'Razorpay'),
-            ('cod', 'Cash on Delivery'),
-        ]
-    )
-    payment_status = models.CharField(
-        max_length=20,
-        default='pending',
-        choices=[
-            ('pending', 'Pending'),
-            ('completed', 'Completed'),
-            ('failed', 'Failed'),
-        ]
-    )
-    razorpay_order_id = models.CharField(max_length=100, blank=True, null=True)
-    razorpay_payment_id = models.CharField(max_length=100, blank=True, null=True)
-    
-    
     PAYMENT_STATUS_CHOICES = [
         ('PENDING', 'Pending'),
         ('PAID', 'Paid'),
@@ -215,16 +194,33 @@ class Order(models.Model):
     shipping_country = models.CharField(max_length=100, default='India')
     
     # Payment Information
-    payment_method = models.CharField(max_length=50, blank=True)
+    payment_method = models.CharField(max_length=50, default='Razorpay')  # Generic method
     is_paid = models.BooleanField(default=False)
     payment_status = models.CharField(
         max_length=20, 
         choices=PAYMENT_STATUS_CHOICES, 
         default='PENDING'
     )
+    
+    # Razorpay IDs
     razorpay_order_id = models.CharField(max_length=100, blank=True, null=True)
     razorpay_payment_id = models.CharField(max_length=100, blank=True, null=True)
     razorpay_signature = models.CharField(max_length=255, blank=True, null=True)
+    
+    # ✅ NEW: Actual payment method from Razorpay
+    actual_payment_method = models.CharField(
+        max_length=50, 
+        blank=True, 
+        null=True,
+        help_text="Actual payment method: card, upi, netbanking, wallet, etc."
+    )
+    
+    # ✅ NEW: Payment method details
+    payment_method_details = models.JSONField(
+        blank=True, 
+        null=True,
+        help_text="Additional details like card type, bank name, UPI app, etc."
+    )
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -234,7 +230,46 @@ class Order(models.Model):
 
     def __str__(self):
         return f"Order {self.order_number}"
-
+    
+    def get_display_payment_method(self):
+        """Return user-friendly payment method string"""
+        if not self.actual_payment_method:
+            return self.payment_method
+        
+        method = self.actual_payment_method.upper()
+        
+        # Add more details if available
+        if self.payment_method_details:
+            details = self.payment_method_details
+            
+            if method == 'CARD':
+                card_type = details.get('card_type', '').upper()
+                card_network = details.get('network', '').upper()
+                if card_type and card_network:
+                    return f"{card_network} {card_type} Card"
+                elif card_network:
+                    return f"{card_network} Card"
+                return "Card"
+            
+            elif method == 'UPI':
+                vpa = details.get('vpa', '')
+                if vpa:
+                    # Extract UPI app from VPA (e.g., "user@paytm" -> "Paytm")
+                    app = vpa.split('@')[-1].capitalize() if '@' in vpa else ''
+                    return f"UPI ({app})" if app else "UPI"
+                return "UPI"
+            
+            elif method == 'NETBANKING':
+                bank = details.get('bank', '').upper()
+                return f"Net Banking ({bank})" if bank else "Net Banking"
+            
+            elif method == 'WALLET':
+                wallet = details.get('wallet', '').capitalize()
+                return f"{wallet} Wallet" if wallet else "Wallet"
+        
+        return method.replace('_', ' ').title()
+    
+    
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items')
     product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True)

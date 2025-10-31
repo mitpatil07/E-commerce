@@ -1,7 +1,14 @@
-// src/components/Footer.jsx - Updated with CategoryProducts theme
+// src/components/Footer.jsx - Updated with H&M inspired accordion style
+import React from 'react';
 import { Facebook, Twitter, Instagram, Linkedin, Send } from 'lucide-react';
 
 export default function Footer() {
+  const [openSection, setOpenSection] = React.useState(null);
+
+  const toggleSection = (section) => {
+    setOpenSection(openSection === section ? null : section);
+  };
+
   return (
     <footer className="bg-black text-white border-t-2 border-gray-800">
       <style>{`
@@ -25,10 +32,95 @@ export default function Footer() {
           font-weight: 600;
           letter-spacing: 0.01em;
         }
+
+        .accordion-content {
+          max-height: 0;
+          overflow: hidden;
+          transition: max-height 0.3s ease-in-out;
+        }
+
+        .accordion-content.open {
+          max-height: 500px;
+        }
       `}</style>
 
       <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8">
+        {/* Mobile Accordion Layout */}
+        <div className="block lg:hidden space-y-4">
+          {/* Shop Accordion */}
+          <div className="border-b border-gray-800">
+            <button
+              onClick={() => toggleSection('shop')}
+              className="w-full flex justify-between items-center py-4 text-left"
+            >
+              <span className="section-heading text-base text-white uppercase">Shop</span>
+              <span className="text-2xl">{openSection === 'shop' ? '−' : '+'}</span>
+            </button>
+            <div className={`accordion-content ${openSection === 'shop' ? 'open' : ''}`}>
+              <ul className="space-y-3 text-gray-400 pb-4">
+                <li>
+                  <a href="#" className="footer-link text-sm hover:text-white transition-colors duration-300 uppercase">
+                    T-Shirts
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="footer-link text-sm hover:text-white transition-colors duration-300 uppercase">
+                    Hoodies
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="footer-link text-sm hover:text-white transition-colors duration-300 uppercase">
+                    Jeans
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="footer-link text-sm hover:text-white transition-colors duration-300 uppercase">
+                    Accessories
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+
+          {/* Help Accordion */}
+          <div className="border-b border-gray-800">
+            <button
+              onClick={() => toggleSection('help')}
+              className="w-full flex justify-between items-center py-4 text-left"
+            >
+              <span className="section-heading text-base text-white uppercase">Help</span>
+              <span className="text-2xl">{openSection === 'help' ? '−' : '+'}</span>
+            </button>
+            <div className={`accordion-content ${openSection === 'help' ? 'open' : ''}`}>
+              <ul className="space-y-3 text-gray-400 pb-4">
+                <li>
+                  <a href="#" className="footer-link text-sm hover:text-white transition-colors duration-300 uppercase">
+                    Help Center
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="footer-link text-sm hover:text-white transition-colors duration-300 uppercase">
+                    Shipping Info
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="footer-link text-sm hover:text-white transition-colors duration-300 uppercase">
+                    Returns
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="footer-link text-sm hover:text-white transition-colors duration-300 uppercase">
+                    Contact Us
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        {/* Desktop Grid Layout */}
+        <div className="hidden lg:grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8">
           
           {/* Brand & Social Section */}
           <div className="col-span-2 lg:col-span-2">
@@ -147,18 +239,41 @@ export default function Footer() {
           </div>
         </div>
 
+        {/* Brand Logo and Social - Mobile */}
+        <div className="block lg:hidden mt-8 mb-8">
+          <h3 className="footer-title text-3xl text-white mb-6 uppercase">
+            Whatyouwear
+          </h3>
+          <div className="flex space-x-6">
+            <a href="#" aria-label="Instagram" className="text-white hover:text-gray-400 transition-colors">
+              <Instagram className="w-6 h-6" />
+            </a>
+            <a href="#" aria-label="Twitter" className="text-white hover:text-gray-400 transition-colors">
+              <Twitter className="w-6 h-6" />
+            </a>
+            <a href="#" aria-label="Facebook" className="text-white hover:text-gray-400 transition-colors">
+              <Facebook className="w-6 h-6" />
+            </a>
+            <a href="#" aria-label="LinkedIn" className="text-white hover:text-gray-400 transition-colors">
+              <Linkedin className="w-6 h-6" />
+            </a>
+          </div>
+        </div>
+
         {/* Bottom Bar */}
-        <div className="border-t-2 border-gray-800 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center text-xs sm:text-sm text-gray-400">
-          <p className="footer-link uppercase">
-            &copy; {new Date().getFullYear()} Whatyouwear. All Rights Reserved.
-          </p>
-          <div className="flex space-x-4 sm:space-x-6 mt-4 md:mt-0">
-            <a href="#" className="footer-link hover:text-white transition-colors uppercase">
-              Privacy Policy
-            </a>
-            <a href="#" className="footer-link hover:text-white transition-colors uppercase">
-              Terms of Service
-            </a>
+        <div className="border-t-2 border-gray-800 mt-12 pt-8">
+          <div className="flex flex-col md:flex-row justify-between items-center text-xs sm:text-sm text-gray-400">
+            <p className="footer-link uppercase mb-4 md:mb-0">
+              The content of this site is copyright-protected and is the property of Whatyouwear.
+            </p>
+            <div className="flex space-x-4 sm:space-x-6">
+              <a href="#" className="footer-link hover:text-white transition-colors uppercase">
+                Privacy Policy
+              </a>
+              <a href="#" className="footer-link hover:text-white transition-colors uppercase">
+                Terms of Service
+              </a>
+            </div>
           </div>
         </div>
       </div>

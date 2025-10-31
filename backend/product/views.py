@@ -155,8 +155,17 @@ class OrderViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        return Order.objects.filter(user=self.request.user)
-
+        return Order.objects.filter(user=self.request.user).prefetch_related(
+            'items',
+            'items__product',
+            'items__product__images'
+        )
+    def get_serializer_context(self):
+        # ✅ This ensures request context is passed to serializers
+        context = super().get_serializer_context()
+        context['request'] = self.request
+        return context
+    
     def create(self, request):
         """Create a new order from cart"""
         cart = Cart.objects.filter(user=request.user).first()

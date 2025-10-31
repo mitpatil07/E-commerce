@@ -1,4 +1,4 @@
-# backend/product/serializers.py - FIXED VERSION WITH PROPER IMAGE URLS
+# backend/product/serializers.py - FIXED VERSION WITH ORDER ITEM IMAGES
 
 from rest_framework import serializers
 from .models import (
@@ -71,7 +71,7 @@ class CategorySerializer(serializers.ModelSerializer):
 class ProductListSerializer(serializers.ModelSerializer):
     category = serializers.CharField(source='category.name')
     image = serializers.SerializerMethodField()
-    images = serializers.SerializerMethodField()  # ✅ Added full images array
+    images = serializers.SerializerMethodField()
     colors = ProductColorSerializer(many=True, read_only=True)
     sizes = ProductSizeSerializer(many=True, read_only=True)
 
@@ -109,7 +109,7 @@ class ProductListSerializer(serializers.ModelSerializer):
 
 class ProductDetailSerializer(serializers.ModelSerializer):
     category = serializers.CharField(source='category.name')
-    category_name = serializers.CharField(source='category.name')  # Added for compatibility
+    category_name = serializers.CharField(source='category.name')
     image = serializers.SerializerMethodField()
     images = serializers.SerializerMethodField()
     colors = ProductColorSerializer(many=True, read_only=True)
@@ -181,31 +181,64 @@ class CartSerializer(serializers.ModelSerializer):
         fields = ['id', 'items', 'total_price', 'total_items', 'created_at', 'updated_at']
 
 
+# ✅ FIXED: OrderItemSerializer now includes product image
 class OrderItemSerializer(serializers.ModelSerializer):
     subtotal = serializers.DecimalField(max_digits=10, decimal_places=2, read_only=True)
+    product_image = serializers.SerializerMethodField()
 
     class Meta:
         model = OrderItem
         fields = [
-            'id', 'product_name', 'product_price', 'quantity',
+            'id', 'product_name', 'product_price', 'product_image', 'quantity',
             'selected_color', 'selected_size', 'subtotal'
         ]
+    
+    def get_product_image(self, obj):
+        """Get the product's primary image URL"""
+        request = self.context.get('request')
+        
+        # If the product still exists, get its primary image
+        if obj.product:
+            primary_image = obj.product.images.filter(is_primary=True).first()
+            if not primary_image:
+                primary_image = obj.product.images.first()
+            
+            if primary_image:
+                serializer = ProductImageSerializer(primary_image, context={'request': request})
+                return serializer.data.get('image_url')
+        
+        # Fallback to None if no image found
+        return None
 
 
 class OrderSerializer(serializers.ModelSerializer):
-    items = OrderItemSerializer(many=True, read_only=True)
+    items = serializers.SerializerMethodField()
+    payment_method = serializers.SerializerMethodField()  # ✅ Override
 
     class Meta:
         model = Order
         fields = [
-            'id', 'order_number', 'total_amount', 'status',
+            'id', 'order_number', 'total_amount', 'status', 'payment_status',
+            'payment_method', 'razorpay_payment_id',
             'shipping_name', 'shipping_email', 'shipping_phone',
             'shipping_address', 'shipping_city', 'shipping_state',
             'shipping_zip_code', 'shipping_country',
             'items', 'created_at', 'updated_at'
         ]
         read_only_fields = ['order_number', 'created_at', 'updated_at']
-
+    
+    def get_items(self, obj):
+        items = obj.items.all()
+        serializer = OrderItemSerializer(
+            items, 
+            many=True, 
+            context={'request': self.context.get('request')}
+        )
+        return serializer.data
+    
+    def get_payment_method(self, obj):
+        """Return user-friendly payment method string"""
+        return obj.get_display_payment_method()
 
 class ReviewSerializer(serializers.ModelSerializer):
     user = serializers.CharField(source='user.username', read_only=True)
@@ -214,3 +247,4 @@ class ReviewSerializer(serializers.ModelSerializer):
         model = Review
         fields = ['id', 'user', 'rating', 'comment', 'created_at', 'updated_at']
         read_only_fields = ['created_at', 'updated_at']
+
