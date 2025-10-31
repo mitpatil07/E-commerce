@@ -331,7 +331,7 @@ export default function Checkout() {
                         onChange={handleChange}
                         required
                         className="w-full px-4 py-3 border-2 border-gray-300 focus:ring-2 focus:ring-black focus:border-black outline-none transition text-sm"
-                        placeholder="Enter Name"
+                        // placeholder="Enter Name"
                       />
                     </div>
 
@@ -346,7 +346,7 @@ export default function Checkout() {
                         onChange={handleChange}
                         required
                         className="w-full px-4 py-3 border-2 border-gray-300 focus:ring-2 focus:ring-black focus:border-black outline-none transition text-sm"
-                        placeholder="john@example.com"
+                        // placeholder="john@example.com"
                       />
                     </div>
 
@@ -361,7 +361,7 @@ export default function Checkout() {
                         onChange={handleChange}
                         required
                         className="w-full px-4 py-3 border-2 border-gray-300 focus:ring-2 focus:ring-black focus:border-black outline-none transition text-sm"
-                        placeholder="+91 9876543210"
+                        // placeholder="+91 9876543210"
                       />
                     </div>
                   </div>
@@ -390,7 +390,7 @@ export default function Checkout() {
                         required
                         rows="3"
                         className="w-full px-4 py-3 border-2 border-gray-300 focus:ring-2 focus:ring-black focus:border-black outline-none transition text-sm"
-                        placeholder="123 Main Street, Apartment 4B"
+                        // placeholder="123 Main Street, Apartment 4B"
                       />
                     </div>
 
@@ -406,7 +406,7 @@ export default function Checkout() {
                           onChange={handleChange}
                           required
                           className="w-full px-4 py-3 border-2 border-gray-300 focus:ring-2 focus:ring-black focus:border-black outline-none transition text-sm"
-                          placeholder="Mumbai"
+                          // placeholder="Mumbai"
                         />
                       </div>
 
@@ -421,7 +421,7 @@ export default function Checkout() {
                           onChange={handleChange}
                           required
                           className="w-full px-4 py-3 border-2 border-gray-300 focus:ring-2 focus:ring-black focus:border-black outline-none transition text-sm"
-                          placeholder="Maharashtra"
+                          // placeholder="Maharashtra"
                         />
                       </div>
 
@@ -436,7 +436,7 @@ export default function Checkout() {
                           onChange={handleChange}
                           required
                           className="w-full px-4 py-3 border-2 border-gray-300 focus:ring-2 focus:ring-black focus:border-black outline-none transition text-sm"
-                          placeholder="400001"
+                          // placeholder="400001"
                         />
                       </div>
 

@@ -380,7 +380,7 @@ export default function Profile() {
                           name="first_name"
                           value={formData.first_name}
                           onChange={handleChange}
-                          placeholder="Enter first name"
+                          // placeholder="Enter first name"
                           className="w-full px-4 py-3 border-2 border-gray-300 focus:border-black focus:ring-2 focus:ring-black outline-none transition text-sm sm:text-base"
                         />
                       </div>
@@ -395,7 +395,7 @@ export default function Profile() {
                           name="last_name"
                           value={formData.last_name}
                           onChange={handleChange}
-                          placeholder="Enter last name"
+                          // placeholder="Enter last name"
                           className="w-full px-4 py-3 border-2 border-gray-300 focus:border-black focus:ring-2 focus:ring-black outline-none transition text-sm sm:text-base"
                         />
                       </div>
@@ -425,7 +425,7 @@ export default function Profile() {
                         name="phone"
                         value={formData.phone}
                         onChange={handleChange}
-                        placeholder="Enter phone number"
+                        // placeholder="Enter phone number"
                         className="w-full px-4 py-3 border-2 border-gray-300 focus:border-black focus:ring-2 focus:ring-black outline-none transition text-sm sm:text-base"
                       />
                     </div>
@@ -439,7 +439,7 @@ export default function Profile() {
                         name="address"
                         value={formData.address}
                         onChange={handleChange}
-                        placeholder="Enter your address"
+                        // placeholder="Enter your address"
                         rows="4"
                         className="w-full px-4 py-3 border-2 border-gray-300 focus:border-black focus:ring-2 focus:ring-black outline-none transition resize-none text-sm sm:text-base"
                       />

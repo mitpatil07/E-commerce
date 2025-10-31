@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { ShoppingCart, Search, Menu, User, X, LogOut } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import logo from '../assets/wyw_logo.png';
 
 export default function Navbar({
   categories = [],
@@ -23,7 +24,7 @@ export default function Navbar({
       setShowMobileSearch(false);
     }
   };
-  
+
   const { user, isAuthenticated: isLoggedIn, logout } = useAuth();
 
   const handleLogout = async () => {
@@ -36,7 +37,7 @@ export default function Navbar({
   const handleCartClick = () => {
     navigate('/cart');
   };
-  
+
 
   // Helper function to convert category name to URL-friendly format
   const categoryToUrl = (category) => {
@@ -85,18 +86,12 @@ export default function Navbar({
                   <Menu className="w-5 h-5 sm:w-6 sm:h-6" />
                 )}
               </button>
-              
               <Link to="/" className="flex items-center">
-                <span
-                  className="text-xl sm:text-2xl md:text-3xl lg:text-4xl text-transparent bg-clip-text bg-gradient-to-r from-gray-900 via-gray-700 to-gray-900 font-semibold tracking-wide whitespace-nowrap"
-                  style={{
-                    fontFamily: "'Great Vibes', cursive",
-                    fontWeight: 500,
-                    letterSpacing: '0.5px',
-                  }}
-                >
-                  WhatYouWear
-                </span>
+                <img
+                  src={logo}
+                  alt="WhatYouWear Logo"
+                  className="h-10 w-auto sm:h-12 md:h-12 lg:h-16 object-contain pl-16"
+                />
               </Link>
 
               {/* Desktop Category Navigation - Next to Logo */}
@@ -106,11 +101,10 @@ export default function Navbar({
                     key={category}
                     to={`/category/${categoryToUrl(category)}`}
                     onClick={() => setSelectedCategory && setSelectedCategory(category)}
-                    className={`nav-link px-3 py-2 text-xs uppercase transition-all duration-200 border-2 ${
-                      selectedCategory === category 
-                        ? 'bg-black text-white border-black' 
+                    className={`nav-link px-3 py-2 text-xs uppercase transition-all duration-200 border-2 ${selectedCategory === category
+                        ? 'bg-black text-white border-black'
                         : 'text-black border-transparent hover:border-black'
-                    }`}
+                      }`}
                   >
                     {category}
                   </Link>
@@ -166,7 +160,7 @@ export default function Navbar({
                         </p>
                         <p className="text-xs text-gray-500 truncate">{user?.email}</p>
                       </div>
-                      
+
                       <Link
                         to="/profile"
                         onClick={() => setShowUserMenu(false)}
@@ -255,7 +249,7 @@ export default function Navbar({
               >
                 Home
               </Link>
-              
+
               {/* Categories in Mobile Menu */}
               {categories && categories.length > 0 && (
                 <div className="pt-2 pb-1">
@@ -270,11 +264,10 @@ export default function Navbar({
                         setSelectedCategory && setSelectedCategory(category);
                         setShowMobileMenu(false);
                       }}
-                      className={`nav-link block w-full text-left px-4 py-2.5 transition-all duration-200 text-sm uppercase ${
-                        selectedCategory === category
+                      className={`nav-link block w-full text-left px-4 py-2.5 transition-all duration-200 text-sm uppercase ${selectedCategory === category
                           ? 'bg-black text-white'
                           : 'text-black hover:bg-gray-100'
-                      }`}
+                        }`}
                     >
                       {category}
                     </Link>
@@ -291,7 +284,7 @@ export default function Navbar({
                     </p>
                     <p className="text-xs text-gray-500">{user?.email}</p>
                   </div>
-                  
+
                   <Link
                     to="/profile"
                     onClick={() => setShowMobileMenu(false)}

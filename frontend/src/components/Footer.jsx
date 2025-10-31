@@ -1,6 +1,12 @@
-// src/components/Footer.jsx - Updated with H&M inspired accordion style
-import React from 'react';
-import { Facebook, Twitter, Instagram, Linkedin, Send } from 'lucide-react';
+// src/components/Footer.jsx
+import React from "react";
+import {
+  Facebook,
+  Twitter,
+  Instagram,
+  Linkedin,
+} from "lucide-react";
+import logo from "../assets/wyw_logo.png";
 
 export default function Footer() {
   const [openSection, setOpenSection] = React.useState(null);
@@ -10,267 +16,178 @@ export default function Footer() {
   };
 
   return (
-    <footer className="bg-black text-white border-t-2 border-gray-800">
+    <footer className="bg-black text-white border-t border-gray-800">
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
-        
-        .footer-title {
+        .footer-title, .section-heading, .footer-link {
           font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+        }
+        .footer-title {
           font-weight: 900;
           letter-spacing: -0.04em;
-          line-height: 1;
         }
-        
         .section-heading {
-          font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
           font-weight: 800;
           letter-spacing: 0.02em;
         }
-        
         .footer-link {
-          font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
           font-weight: 600;
           letter-spacing: 0.01em;
         }
-
         .accordion-content {
           max-height: 0;
           overflow: hidden;
           transition: max-height 0.3s ease-in-out;
         }
-
         .accordion-content.open {
           max-height: 500px;
         }
       `}</style>
 
-      <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
-        {/* Mobile Accordion Layout */}
+      <div className="max-w-screen-2xl mx-auto px-6 lg:px-12 py-12 lg:py-16">
+
+        {/* ---------- MOBILE VIEW ---------- */}
         <div className="block lg:hidden space-y-4">
-          {/* Shop Accordion */}
-          <div className="border-b border-gray-800">
-            <button
-              onClick={() => toggleSection('shop')}
-              className="w-full flex justify-between items-center py-4 text-left"
-            >
-              <span className="section-heading text-base text-white uppercase">Shop</span>
-              <span className="text-2xl">{openSection === 'shop' ? '−' : '+'}</span>
-            </button>
-            <div className={`accordion-content ${openSection === 'shop' ? 'open' : ''}`}>
-              <ul className="space-y-3 text-gray-400 pb-4">
-                <li>
-                  <a href="#" className="footer-link text-sm hover:text-white transition-colors duration-300 uppercase">
-                    T-Shirts
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="footer-link text-sm hover:text-white transition-colors duration-300 uppercase">
-                    Hoodies
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="footer-link text-sm hover:text-white transition-colors duration-300 uppercase">
-                    Jeans
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="footer-link text-sm hover:text-white transition-colors duration-300 uppercase">
-                    Accessories
-                  </a>
-                </li>
-              </ul>
+
+          {/* Accordion Section Generator */}
+          {[
+            {
+              key: "shop",
+              title: "Shop",
+              items: ["T-Shirts", "Hoodies", "Jeans", "Accessories"],
+            },
+            {
+              key: "help",
+              title: "Help",
+              items: ["Help Center", "Shipping Info", "Returns", "Contact Us"],
+            },
+          ].map(({ key, title, items }) => (
+            <div key={key} className="border-b border-gray-800">
+              <button
+                onClick={() => toggleSection(key)}
+                className="w-full flex justify-between items-center py-4 text-left"
+              >
+                <span className="section-heading text-base uppercase">{title}</span>
+                <span className="text-2xl">{openSection === key ? "−" : "+"}</span>
+              </button>
+
+              <div className={`accordion-content ${openSection === key ? "open" : ""}`}>
+                <ul className="space-y-3 text-gray-400 pb-4">
+                  {items.map((item) => (
+                    <li key={item}>
+                      <a
+                        href="#"
+                        className="footer-link text-sm hover:text-white transition-colors duration-300 uppercase"
+                      >
+                        {item}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </div>
-          </div>
+          ))}
 
-
-          {/* Help Accordion */}
-          <div className="border-b border-gray-800">
-            <button
-              onClick={() => toggleSection('help')}
-              className="w-full flex justify-between items-center py-4 text-left"
-            >
-              <span className="section-heading text-base text-white uppercase">Help</span>
-              <span className="text-2xl">{openSection === 'help' ? '−' : '+'}</span>
-            </button>
-            <div className={`accordion-content ${openSection === 'help' ? 'open' : ''}`}>
-              <ul className="space-y-3 text-gray-400 pb-4">
-                <li>
-                  <a href="#" className="footer-link text-sm hover:text-white transition-colors duration-300 uppercase">
-                    Help Center
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="footer-link text-sm hover:text-white transition-colors duration-300 uppercase">
-                    Shipping Info
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="footer-link text-sm hover:text-white transition-colors duration-300 uppercase">
-                    Returns
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="footer-link text-sm hover:text-white transition-colors duration-300 uppercase">
-                    Contact Us
-                  </a>
-                </li>
-              </ul>
+          {/* Mobile Logo + Socials */}
+          <div className="mt-10 flex flex-col items-center">
+            <img
+              src={logo}
+              alt="WhatYouWear Logo"
+              className="h-18 w-auto object-contain mb-5"
+            />
+            <div className="flex space-x-6">
+              {[Instagram, Twitter, Facebook, Linkedin].map((Icon, i) => (
+                <a
+                  key={i}
+                  href="#"
+                  className="text-white hover:text-gray-400 transition-colors"
+                >
+                  <Icon className="w-6 h-6" />
+                </a>
+              ))}
             </div>
           </div>
         </div>
 
-        {/* Desktop Grid Layout */}
-        <div className="hidden lg:grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8">
-          
-          {/* Brand & Social Section */}
-          <div className="col-span-2 lg:col-span-2">
-            <h3 className="footer-title text-2xl sm:text-3xl text-white mb-4 uppercase">
-              Whatyouwear
-            </h3>
-            <p className="text-gray-400 max-w-xs mb-6 text-sm sm:text-base uppercase tracking-wide">
+        {/* ---------- DESKTOP VIEW ---------- */}
+        <div className="hidden lg:grid grid-cols-4 ml-32">
+          {/* Brand & Description */}
+          <div className="col-span-2">
+            <img
+              src={logo}
+              alt="WhatYouWear Logo"
+              className="h-18 w-auto object-contain mb-6"
+            />
+            <p className="text-gray-400 text-sm max-w-xs mb-6 uppercase tracking-wide">
               Your one-stop shop for curated fashion and style.
             </p>
+
             <div className="flex space-x-4">
-              <a 
-                href="#" 
-                aria-label="Facebook" 
-                className="w-10 h-10 sm:w-12 sm:h-12 bg-white text-black flex items-center justify-center hover:bg-gray-200 transition-colors duration-300"
-              >
-                <Facebook className="w-5 h-5 sm:w-6 sm:h-6" />
-              </a>
-              <a 
-                href="#" 
-                aria-label="Twitter" 
-                className="w-10 h-10 sm:w-12 sm:h-12 bg-white text-black flex items-center justify-center hover:bg-gray-200 transition-colors duration-300"
-              >
-                <Twitter className="w-5 h-5 sm:w-6 sm:h-6" />
-              </a>
-              <a 
-                href="#" 
-                aria-label="Instagram" 
-                className="w-10 h-10 sm:w-12 sm:h-12 bg-white text-black flex items-center justify-center hover:bg-gray-200 transition-colors duration-300"
-              >
-                <Instagram className="w-5 h-5 sm:w-6 sm:h-6" />
-              </a>
-              <a 
-                href="#" 
-                aria-label="LinkedIn" 
-                className="w-10 h-10 sm:w-12 sm:h-12 bg-white text-black flex items-center justify-center hover:bg-gray-200 transition-colors duration-300"
-              >
-                <Linkedin className="w-5 h-5 sm:w-6 sm:h-6" />
-              </a>
+              {[Facebook, Twitter, Instagram, Linkedin].map((Icon, i) => (
+                <a
+                  key={i}
+                  href="#"
+                  aria-label={Icon.name}
+                  className="w-10 h-10 bg-white text-black flex items-center justify-center hover:bg-gray-200 transition-colors duration-300"
+                >
+                  <Icon className="w-5 h-5" />
+                </a>
+              ))}
             </div>
           </div>
 
-          {/* Link Columns */}
+          {/* Shop Links */}
           <div>
-            <h4 className="section-heading text-sm sm:text-base text-white mb-4 uppercase">Shop</h4>
+            <h4 className="section-heading text-base mb-4 uppercase">Shop</h4>
             <ul className="space-y-3 text-gray-400">
-              <li>
-                <a href="#" className="footer-link text-xs sm:text-sm hover:text-white transition-colors duration-300 uppercase">
-                  T-Shirts
-                </a>
-              </li>
-              <li>
-                <a href="#" className="footer-link text-xs sm:text-sm hover:text-white transition-colors duration-300 uppercase">
-                  Hoodies
-                </a>
-              </li>
-              <li>
-                <a href="#" className="footer-link text-xs sm:text-sm hover:text-white transition-colors duration-300 uppercase">
-                  Jeans
-                </a>
-              </li>
-              <li>
-                <a href="#" className="footer-link text-xs sm:text-sm hover:text-white transition-colors duration-300 uppercase">
-                  Accessories
-                </a>
-              </li>
+              {["T-Shirts", "Hoodies", "Jeans", "Accessories"].map((item) => (
+                <li key={item}>
+                  <a
+                    href="#"
+                    className="footer-link text-sm hover:text-white transition-colors uppercase"
+                  >
+                    {item}
+                  </a>
+                </li>
+              ))}
             </ul>
           </div>
 
+          {/* Support Links */}
           <div>
-            <h4 className="section-heading text-sm sm:text-base text-white mb-4 uppercase">Support</h4>
+            <h4 className="section-heading text-base mb-4 uppercase">Support</h4>
             <ul className="space-y-3 text-gray-400">
-              <li>
-                <a href="#" className="footer-link text-xs sm:text-sm hover:text-white transition-colors duration-300 uppercase">
-                  Help Center
-                </a>
-              </li>
-              <li>
-                <a href="#" className="footer-link text-xs sm:text-sm hover:text-white transition-colors duration-300 uppercase">
-                  Shipping Info
-                </a>
-              </li>
-              <li>
-                <a href="#" className="footer-link text-xs sm:text-sm hover:text-white transition-colors duration-300 uppercase">
-                  Returns
-                </a>
-              </li>
-              <li>
-                <a href="#" className="footer-link text-xs sm:text-sm hover:text-white transition-colors duration-300 uppercase">
-                  Contact Us
-                </a>
-              </li>
+              {["Help Center", "Shipping Info", "Returns", "Contact Us"].map((item) => (
+                <li key={item}>
+                  <a
+                    href="#"
+                    className="footer-link text-sm hover:text-white transition-colors uppercase"
+                  >
+                    {item}
+                  </a>
+                </li>
+              ))}
             </ul>
           </div>
-
-          {/* Newsletter Section */}
-          <div className="col-span-2 md:col-span-4 lg:col-span-1">
-            <h4 className="section-heading text-sm sm:text-base text-white mb-4 uppercase">
-              Stay in the Loop
-            </h4>
-            <p className="text-gray-400 mb-4 text-xs sm:text-sm uppercase tracking-wide">
-              Subscribe for the latest deals
-            </p>
-            <div className="relative">
-              <input 
-                type="email" 
-                placeholder="YOUR EMAIL"
-                className="w-full bg-white border-2 border-gray-300 text-black px-4 py-2.5 sm:py-3 focus:outline-none focus:ring-2 focus:ring-white focus:border-white placeholder:text-gray-400 placeholder:uppercase text-xs sm:text-sm font-bold"
-              />
-              <button 
-                aria-label="Subscribe to newsletter"
-                className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-white bg-black hover:bg-gray-800 transition-all duration-300"
-              >
-                <Send className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
         </div>
 
-        {/* Brand Logo and Social - Mobile */}
-        <div className="block lg:hidden mt-8 mb-8">
-          <h3 className="footer-title text-3xl text-white mb-6 uppercase">
-            Whatyouwear
-          </h3>
-          <div className="flex space-x-6">
-            <a href="#" aria-label="Instagram" className="text-white hover:text-gray-400 transition-colors">
-              <Instagram className="w-6 h-6" />
-            </a>
-            <a href="#" aria-label="Twitter" className="text-white hover:text-gray-400 transition-colors">
-              <Twitter className="w-6 h-6" />
-            </a>
-            <a href="#" aria-label="Facebook" className="text-white hover:text-gray-400 transition-colors">
-              <Facebook className="w-6 h-6" />
-            </a>
-            <a href="#" aria-label="LinkedIn" className="text-white hover:text-gray-400 transition-colors">
-              <Linkedin className="w-6 h-6" />
-            </a>
-          </div>
-        </div>
-
-        {/* Bottom Bar */}
-        <div className="border-t-2 border-gray-800 mt-12 pt-8">
+        {/* ---------- BOTTOM COPYRIGHT BAR ---------- */}
+        <div className="border-t border-gray-800 mt-12 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center text-xs sm:text-sm text-gray-400">
-            <p className="footer-link uppercase mb-4 md:mb-0">
-              The content of this site is copyright-protected and is the property of Whatyouwear.
+            <p className="footer-link uppercase mb-4 md:mb-0 text-center md:text-left">
+              © {new Date().getFullYear()} WhatYouWear — All rights reserved.
             </p>
             <div className="flex space-x-4 sm:space-x-6">
-              <a href="#" className="footer-link hover:text-white transition-colors uppercase">
+              <a
+                href="#"
+                className="footer-link hover:text-white transition-colors uppercase"
+              >
                 Privacy Policy
               </a>
-              <a href="#" className="footer-link hover:text-white transition-colors uppercase">
+              <a
+                href="#"
+                className="footer-link hover:text-white transition-colors uppercase"
+              >
                 Terms of Service
               </a>
             </div>

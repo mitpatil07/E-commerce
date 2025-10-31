@@ -192,7 +192,7 @@ const Register = () => {
                   onChange={handleChange}
                   required
                   className="w-full px-3 sm:px-4 py-3 border-2 border-gray-300 focus:ring-2 focus:ring-black focus:border-black outline-none transition font-medium text-sm sm:text-base"
-                  placeholder="John"
+                  // placeholder="John"
                 />
               </div>
 
@@ -208,7 +208,7 @@ const Register = () => {
                   onChange={handleChange}
                   required
                   className="w-full px-3 sm:px-4 py-3 border-2 border-gray-300 focus:ring-2 focus:ring-black focus:border-black outline-none transition font-medium text-sm sm:text-base"
-                  placeholder="Doe"
+                  // placeholder="Doe"
                 />
               </div>
             </div>
@@ -230,7 +230,7 @@ const Register = () => {
                   onChange={handleChange}
                   required
                   className="w-full pl-10 sm:pl-12 pr-4 py-3 border-2 border-gray-300 focus:ring-2 focus:ring-black focus:border-black outline-none transition font-medium text-sm sm:text-base"
-                  placeholder="you@example.com"
+                  // placeholder="you@example.com"
                 />
               </div>
             </div>
@@ -253,7 +253,7 @@ const Register = () => {
                   required
                   minLength={8}
                   className="w-full pl-10 sm:pl-12 pr-4 py-3 border-2 border-gray-300 focus:ring-2 focus:ring-black focus:border-black outline-none transition font-medium text-sm sm:text-base"
-                  placeholder="At least 8 characters"
+                  // placeholder="At least 8 characters"
                 />
               </div>
             </div>
@@ -276,7 +276,7 @@ const Register = () => {
                   required
                   minLength={8}
                   className="w-full pl-10 sm:pl-12 pr-4 py-3 border-2 border-gray-300 focus:ring-2 focus:ring-black focus:border-black outline-none transition font-medium text-sm sm:text-base"
-                  placeholder="Confirm your password"
+                  // placeholder="Confirm your password"
                 />
               </div>
             </div>

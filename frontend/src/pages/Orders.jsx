@@ -142,7 +142,7 @@ export default function Orders() {
     }
 
     if (!imageUrl) {
-      console.warn('⚠️ No image found for item:', item.product_name || item.id);
+      // console.warn('⚠️ No image found for item:', item.product_name || item.id);
       return PLACEHOLDER;
     }
 

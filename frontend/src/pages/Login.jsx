@@ -193,7 +193,6 @@ const Login = () => {
                   onChange={handleChange}
                   required
                   className="w-full pl-10 sm:pl-12 pr-4 py-3 border-2 border-gray-300 focus:ring-2 focus:ring-black focus:border-black outline-none transition font-medium text-sm sm:text-base"
-                  placeholder="you@example.com"
                 />
               </div>
             </div>
@@ -215,7 +214,6 @@ const Login = () => {
                   onChange={handleChange}
                   required
                   className="w-full pl-10 sm:pl-12 pr-4 py-3 border-2 border-gray-300 focus:ring-2 focus:ring-black focus:border-black outline-none transition font-medium text-sm sm:text-base"
-                  placeholder="Enter your password"
                 />
               </div>
             </div>
