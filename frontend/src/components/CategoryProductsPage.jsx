@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { ShoppingCart, Star, Check, Loader2, Heart } from 'lucide-react';
+import { ShoppingCart, Star, Check, Loader2 } from 'lucide-react';
 import Navbar from './Navbar';
 import Footer from './Footer';
 import api from '../services/api';
@@ -258,7 +258,7 @@ export default function CategoryProductsPage({
         {showToast && (
           <div className="fixed top-20 sm:top-24 right-4 z-50 animate-in slide-in-from-right duration-300">
             <div className="bg-black text-white px-6 py-4 rounded-lg shadow-2xl flex items-center gap-3">
-              <Check className="w-5 h-5" />
+              <Check className="w-10 h-10" />
               <span className="font-bold text-sm">{toastMessage}</span>
             </div>
           </div>
@@ -430,15 +430,7 @@ export default function CategoryProductsPage({
                     className="w-full h-full object-cover"
                     loading="lazy"
                   />
-                  {/* Heart Icon */}
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                    }}
-                    className="absolute top-2 sm:top-3 right-2 sm:right-3 w-8 h-8 sm:w-10 sm:h-10 bg-white rounded-full flex items-center justify-center hover:bg-gray-100 transition shadow-md"
-                  >
-                    <Heart className="w-4 h-4 sm:w-5 sm:h-5" />
-                  </button>
+
                 </div>
 
                 {/* Product Info */}

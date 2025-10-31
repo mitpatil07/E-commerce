@@ -1,147 +1,284 @@
-import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
-import { useState, useEffect } from 'react';
-import TopDeals from './TopDeals';
-import CategorySection from './CategorySection';
+import { ArrowRight } from 'lucide-react';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
-export default function HeroSection() {
-  const [currentSlide, setCurrentSlide] = useState(0);
+export default function FullScreenCategoryHero() {
+  const navigate = useNavigate();
+  const [hoveredCategory, setHoveredCategory] = useState(null);
 
-  const slides = [
+  const categories = [
     {
       id: 1,
-      image: 'https://cdn.shopify.com/s/files/1/0070/7032/articles/how_20to_20start_20a_20clothing_20brand_01a87777-0df1-4ac7-ae83-bfa1c8de72c2.png?v=1758058287',
-      title: 'Men\'s Fashion',
-      subtitle: 'Summer Collection',
-      description: 'Discover the latest trends with up to 50% off on premium menswear'
+      name: "Hoodies",
+      image: "https://www.dhresource.com/webp/m/0x0/f2/albu/g18/M01/A3/01/rBVapGDZhImAWZJ4AAIejsIWKLQ193.jpg",
+      description: "Premium comfort meets street style",
+      tagline: "Stay Cozy",
     },
     {
       id: 2,
-      image: 'https://static.vecteezy.com/system/resources/thumbnails/070/206/608/small/trendy-white-t-shirt-hanging-on-stylish-background-photo.jpg',
-      title: 'Formal Wear',
-      subtitle: 'For Every Occasion',
-      description: 'Premium quality suits and shirts designed for the modern man'
+      name: "T-Shirts",
+      image: "https://www.cleanipedia.com/images/yvwvo5xgjuhg/3tqC3rlQmQmHrSfjtQXxA9/0fbceabb7d7b191b0bdbe628b1fb0096/My5fQ29tZm9ydF9Ib3dfdG9fVW53cmlua2xlX0Nsb3RoZXNfR2VuaXVzX0F0LUhvbWVfVGlwcy1IZXJvLmpwZw/600w/assorted-children's-clothing-hanging-on-a-clothes-rack-against-a-yellow-background..avif",
+      description: "Essential basics for every wardrobe",
+      tagline: "Classic Comfort",
     },
     {
       id: 3,
-      image: 'https://t3.ftcdn.net/jpg/14/18/73/78/360_F_1418737848_7RGfcexg9yjRKgttCe6cUeSPdshsI3G5.jpg',
-      title: 'Casual Comfort',
-      subtitle: 'Made Perfect',
-      description: 'Effortless style meets exceptional comfort in men\'s casual wear'
+      name: "Jeans",
+      image: "https://www.cabionline.com/wp-content/uploads/2025/07/F25-Denim-Guide-share.jpg",
+      description: "Perfect fit, timeless style",
+      tagline: "Denim Days",
     },
     {
       id: 4,
-      image: 'https://images.unsplash.com/photo-1622445275463-afa2ab738c34?w=1200&h=800&fit=crop',
-      title: 'Urban Trends',
-      subtitle: 'Street Style',
-      description: 'Bold designs for the confident modern man'
+      name: "Jerseys",
+      image: "https://www.thesun.co.uk/wp-content/uploads/2018/06/nintchdbpict000409186926.jpg?strip=all&w=960",
+      description: "Game-ready athletic wear",
+      tagline: "Sport in Style",
     }
   ];
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % slides.length);
-    }, 5000);
-    return () => clearInterval(interval);
-  }, [slides.length]);
-
-  const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % slides.length);
-  };
-
-  const prevSlide = () => {
-    setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
+  const handleCategoryClick = (category) => {
+    const categoryUrl = category.name.toLowerCase().replace(/\s+/g, '-');
+    navigate(`/category/${categoryUrl}`, {
+      state: { category: category.name }
+    });
   };
 
   return (
-    <>
-      <section className="relative h-160 overflow-hidden">
-        {/* Slider Images */}
-        <div className="absolute inset-0">
-          {slides.map((slide, index) => (
-            <div
-              key={slide.id}
-              className={`absolute inset-0 transition-opacity duration-1000 ${index === currentSlide ? 'opacity-100' : 'opacity-0'
-                }`}
-            >
-              <img
-                src={slide.image}
-                alt={slide.title}
-                className="w-full h-full object-cover"
-              />
-              {/* Dark Overlay for Text Readability */}
-              <div className="absolute inset-0 bg-black/40"></div>
-            </div>
-          ))}
-        </div>
+    <div className="relative bg-white">
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
+        
+        * {
+          font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+        }
+        
+        .category-title {
+          font-weight: 900;
+          letter-spacing: -0.02em;
+          line-height: 0.95;
+        }
+        
+        @keyframes fadeInUp {
+          from {
+            opacity: 0;
+            transform: translateY(30px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        
+        .animate-fadeInUp {
+          animation: fadeInUp 0.6s ease-out forwards;
+        }
+      `}</style>
 
-        {/* Animated Background Elements */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute -top-40 -right-40 w-80 h-80 bg-white/10 rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-white/10 rounded-full blur-3xl animate-pulse"></div>
+      {/* Hero Section */}
+      <section className="relative h-screen bg-black overflow-hidden">
+        {/* Background Image */}
+        <div className="absolute inset-0">
+          <img
+            src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1920&h=1080&fit=crop"
+            alt="Fashion store"
+            className="w-full h-full object-cover opacity-40"
+          />
         </div>
 
         {/* Content */}
-        <div className="relative z-10 h-full flex items-center">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center w-full">
-            <div className="animate-fadeIn text-white">
-              <span className="inline-block bg-white/20 backdrop-blur-sm text-white px-6 py-2 rounded-full text-sm font-semibold mb-6">
-                ✨ New Collection 2025
+        <div className="relative z-10 h-full flex flex-col items-center justify-center text-white px-6">
+          <div className="text-center max-w-4xl">
+            <div className="mb-6 opacity-0 animate-fadeInUp" style={{animationDelay: '0.2s'}}>
+              <span className="text-xs font-semibold uppercase tracking-widest">
+                Discover Your Style
               </span>
-
-              <h1 className="text-5xl md:text-7xl font-black mb-6 leading-tight">
-                {slides[currentSlide].title}
-                <br />
-                <span className="bg-clip-text text-transparent bg-gradient-to-r from-yellow-200 to-pink-200">
-                  {slides[currentSlide].subtitle}
-                </span>
-              </h1>
-
-              <p className="text-xl md:text-2xl mb-10 text-white/90 max-w-2xl mx-auto font-light">
-                {slides[currentSlide].description}
-              </p>
-
-              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                <button className="group bg-white text-indigo-600 px-8 py-4 rounded-full font-bold text-lg hover:bg-gray-100 transition-all shadow-2xl hover:scale-105 flex items-center gap-2">
-                  Shop Now
-                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                </button>
-              </div>
-
             </div>
+            
+            <h1 className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-black uppercase mb-8 opacity-0 animate-fadeInUp" style={{animationDelay: '0.4s', fontWeight: 900, letterSpacing: '-0.02em'}}>
+              WHAT YOU WEAR
+            </h1>
+            
+            <p className="text-lg sm:text-xl md:text-2xl mb-12 text-white/80 font-light opacity-0 animate-fadeInUp" style={{animationDelay: '0.6s'}}>
+              Premium streetwear collection crafted for your lifestyle
+            </p>
+            
+            <button className="bg-white text-black px-10 py-5 font-bold text-base uppercase hover:bg-gray-200 transition-all duration-300 opacity-0 animate-fadeInUp" style={{animationDelay: '0.8s'}}>
+              Explore Collection
+            </button>
           </div>
         </div>
+      </section>
 
-        {/* Navigation Arrows */}
-        <button
-          onClick={prevSlide}
-          className="absolute left-4 top-1/2 -translate-y-1/2 z-20 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white p-3 rounded-full transition-all hover:scale-110"
-          aria-label="Previous slide"
-        >
-          <ChevronLeft className="w-6 h-6" />
-        </button>
-        <button
-          onClick={nextSlide}
-          className="absolute right-4 top-1/2 -translate-y-1/2 z-20 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white p-3 rounded-full transition-all hover:scale-110"
-          aria-label="Next slide"
-        >
-          <ChevronRight className="w-6 h-6" />
-        </button>
-
-        {/* Dot Indicators */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex gap-3">
-          {slides.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => setCurrentSlide(index)}
-              className={`transition-all rounded-full ${index === currentSlide
-                  ? 'w-12 h-3 bg-white'
-                  : 'w-3 h-3 bg-white/50 hover:bg-white/70'
-                }`}
-              aria-label={`Go to slide ${index + 1}`}
-            ></button>
-          ))}
+      {/* Featured Categories Title */}
+      <section className="py-20 px-6 text-center bg-white">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-5xl sm:text-6xl md:text-7xl font-black uppercase mb-6" style={{letterSpacing: '-0.02em'}}>
+            Featured Collection
+          </h2>
+          <p className="text-lg text-gray-600 font-light">
+            Discover our handpicked selection of trending styles
+          </p>
         </div>
       </section>
-    </>
+
+      {/* Category Grid */}
+      <div className="md:p-4">
+        {/* First Category - Full Width */}
+        <div
+          onClick={() => handleCategoryClick(categories[0])}
+          onMouseEnter={() => setHoveredCategory(categories[0].id)}
+          onMouseLeave={() => setHoveredCategory(null)}
+          className="relative h-screen md:h-[80vh] cursor-pointer overflow-hidden group md:mb-4"
+        >
+          <div className="absolute inset-0">
+            <img
+              src={categories[0].image}
+              alt={categories[0].name}
+              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+            />
+            <div className={`absolute inset-0 bg-black transition-opacity duration-500 ${
+              hoveredCategory === categories[0].id ? 'opacity-40' : 'opacity-50'
+            }`}></div>
+          </div>
+
+          <div className="relative z-10 h-full flex flex-col justify-end p-8 sm:p-12 text-white">
+            <div className="mb-3">
+              <span className="text-xs font-semibold uppercase tracking-widest opacity-80">
+                {categories[0].tagline}
+              </span>
+            </div>
+
+            <h3 className="category-title text-5xl sm:text-6xl md:text-7xl mb-4 uppercase">
+              {categories[0].name}
+            </h3>
+
+            <p className="text-base mb-6 text-white/90 max-w-md font-light">
+              {categories[0].description}
+            </p>
+
+            <button className="inline-flex items-center gap-3 bg-white text-black px-8 py-4 font-bold text-sm uppercase hover:bg-gray-100 transition-all duration-300 self-start group-hover:gap-5">
+              Shop {categories[0].name}
+              <ArrowRight className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" />
+            </button>
+
+            <div className="absolute bottom-8 right-8 sm:bottom-12 sm:right-12">
+              <div className="text-white/20 text-7xl sm:text-8xl font-black">
+                01
+              </div>
+            </div>
+          </div>
+
+          <div className={`absolute inset-0 border-2 border-white transition-opacity duration-300 pointer-events-none ${
+            hoveredCategory === categories[0].id ? 'opacity-50' : 'opacity-0'
+          }`}></div>
+        </div>
+
+        {/* Second and Third Categories - Side by Side on Desktop */}
+        <div className="md:grid md:grid-cols-2 md:gap-4 md:mb-4">
+          {categories.slice(1, 3).map((category, index) => (
+            <div
+              key={category.id}
+              onClick={() => handleCategoryClick(category)}
+              onMouseEnter={() => setHoveredCategory(category.id)}
+              onMouseLeave={() => setHoveredCategory(null)}
+              className="relative h-screen md:h-[65vh] cursor-pointer overflow-hidden group"
+            >
+              <div className="absolute inset-0">
+                <img
+                  src={category.image}
+                  alt={category.name}
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                />
+                <div className={`absolute inset-0 bg-black transition-opacity duration-500 ${
+                  hoveredCategory === category.id ? 'opacity-40' : 'opacity-50'
+                }`}></div>
+              </div>
+
+              <div className="relative z-10 h-full flex flex-col justify-end p-8 sm:p-12 text-white">
+                <div className="mb-3">
+                  <span className="text-xs font-semibold uppercase tracking-widest opacity-80">
+                    {category.tagline}
+                  </span>
+                </div>
+
+                <h3 className="category-title text-5xl sm:text-6xl md:text-7xl mb-4 uppercase">
+                  {category.name}
+                </h3>
+
+                <p className="text-base mb-6 text-white/90 max-w-md font-light">
+                  {category.description}
+                </p>
+
+                <button className="inline-flex items-center gap-3 bg-white text-black px-8 py-4 font-bold text-sm uppercase hover:bg-gray-100 transition-all duration-300 self-start group-hover:gap-5">
+                  Shop {category.name}
+                  <ArrowRight className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" />
+                </button>
+
+                <div className="absolute bottom-8 right-8 sm:bottom-12 sm:right-12">
+                  <div className="text-white/20 text-7xl sm:text-8xl font-black">
+                    0{index + 2}
+                  </div>
+                </div>
+              </div>
+
+              <div className={`absolute inset-0 border-2 border-white transition-opacity duration-300 pointer-events-none ${
+                hoveredCategory === category.id ? 'opacity-50' : 'opacity-0'
+              }`}></div>
+            </div>
+          ))}
+        </div>
+
+        {/* Fourth Category - Full Width */}
+        <div
+          onClick={() => handleCategoryClick(categories[3])}
+          onMouseEnter={() => setHoveredCategory(categories[3].id)}
+          onMouseLeave={() => setHoveredCategory(null)}
+          className="relative h-screen md:h-[60vh] cursor-pointer overflow-hidden group"
+        >
+          <div className="absolute inset-0">
+            <img
+              src={categories[3].image}
+              alt={categories[3].name}
+              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+            />
+            <div className={`absolute inset-0 bg-black transition-opacity duration-500 ${
+              hoveredCategory === categories[3].id ? 'opacity-40' : 'opacity-50'
+            }`}></div>
+          </div>
+
+          <div className="relative z-10 h-full flex flex-col justify-end p-8 sm:p-12 text-white">
+            <div className="mb-3">
+              <span className="text-xs font-semibold uppercase tracking-widest opacity-80">
+                {categories[3].tagline}
+              </span>
+            </div>
+
+            <h3 className="category-title text-5xl sm:text-6xl md:text-7xl mb-4 uppercase">
+              {categories[3].name}
+            </h3>
+
+            <p className="text-base mb-6 text-white/90 max-w-md font-light">
+              {categories[3].description}
+            </p>
+
+            <button className="inline-flex items-center gap-3 bg-white text-black px-8 py-4 font-bold text-sm uppercase hover:bg-gray-100 transition-all duration-300 self-start group-hover:gap-5">
+              Shop {categories[3].name}
+              <ArrowRight className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" />
+            </button>
+
+            <div className="absolute bottom-8 right-8 sm:bottom-12 sm:right-12">
+              <div className="text-white/20 text-7xl sm:text-8xl font-black">
+                04
+              </div>
+            </div>
+          </div>
+
+          <div className={`absolute inset-0 border-2 border-white transition-opacity duration-300 pointer-events-none ${
+            hoveredCategory === categories[3].id ? 'opacity-50' : 'opacity-0'
+          }`}></div>
+        </div>
+      </div>
+    </div>
   );
 }

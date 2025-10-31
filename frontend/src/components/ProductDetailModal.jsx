@@ -1,8 +1,11 @@
+// ===================================
+// FIXED ProductDetailPage.jsx - Image Display
+// ===================================
+
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Star, ShoppingCart, Minus, Plus, Truck, Shield, RefreshCw, Check, ChevronDown, ChevronUp, Loader2, Heart } from 'lucide-react';
+import { ArrowLeft, Star, ShoppingCart, Minus, Plus, Check, ChevronDown, ChevronUp, Loader2 } from 'lucide-react';
 import Navbar from '../components/Navbar';
-// import CartSidebar from '../components/CartSidebar';
 import Footer from '../components/Footer';
 import ClothingSuggestions from './ClothingSuggestions';
 import api from '../services/api';
@@ -10,11 +13,7 @@ import api from '../services/api';
 export default function ProductDetailPage({
   cart,
   addToCart,
-  showCart,
-  
   setShowCart,
-  removeFromCart,
-  updateQuantity
 }) {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -32,7 +31,6 @@ export default function ProductDetailPage({
   });
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
-  
 
   // Fetch product details
   useEffect(() => {
@@ -50,15 +48,16 @@ export default function ProductDetailPage({
         console.log('🔄 Fetching product details for ID:', id);
         const data = await api.getProductById(id);
         console.log('✅ Product data received:', data);
+        console.log('📸 Product images:', data.images);
         
         setProduct(data);
         
         // Set default selections
         if (data.colors && data.colors.length > 0) {
-          setSelectedColor(data.colors[0]);
+          setSelectedColor(data.colors[0].color_name || data.colors[0]);
         }
         if (data.sizes && data.sizes.length > 0) {
-          setSelectedSize(data.sizes[0]);
+          setSelectedSize(data.sizes[0].size_name || data.sizes[0]);
         }
         
         setLoading(false);
@@ -90,7 +89,7 @@ export default function ProductDetailPage({
       console.log('🛒 Adding to cart:', product.name);
   
       // Send to backend
-      await api.addToCart(product.id, quantity);
+      await api.addToCart(product.id, quantity, selectedColor, selectedSize);
   
       // Update local cart once
       if (addToCart && typeof addToCart === 'function') {
@@ -109,8 +108,6 @@ export default function ProductDetailPage({
       showToastMessage('Failed to add to cart. Please try again.');
     }
   };
-  
-  
 
   // Loading state
   if (loading) {
@@ -190,9 +187,34 @@ export default function ProductDetailPage({
     );
   }
 
-  const images = product.images || [product.image];
+  // ✅ FIX: Extract image URLs properly from the images array
+  const getImageUrl = (imageData) => {
+    if (!imageData) return '/placeholder-image.jpg';
+    
+    // If it's already a string URL, return it
+    if (typeof imageData === 'string') return imageData;
+    
+    // If it's an object with image_url property, return that
+    if (imageData.image_url) return imageData.image_url;
+    
+    // Fallback
+    return '/placeholder-image.jpg';
+  };
+
+  // ✅ FIX: Build images array with proper URLs
+  const images = product.images && product.images.length > 0 
+    ? product.images.map(img => getImageUrl(img))
+    : [product.primary_image || '/placeholder-image.jpg'];
+
+  // Get current main image
+  const currentMainImage = images[selectedImage] || images[0] || '/placeholder-image.jpg';
+
   const cartTotal = cart?.reduce((sum, item) => sum + item.price * item.quantity, 0) || 0;
   const cartCount = cart?.reduce((sum, item) => sum + item.quantity, 0) || 0;
+
+  // Extract color and size names
+  const colors = product.colors?.map(c => c.color_name || c) || [];
+  const sizes = product.sizes?.map(s => s.size_name || s) || [];
 
   return (
     <div className="min-h-screen bg-white">
@@ -262,18 +284,19 @@ export default function ProductDetailPage({
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-12">
           {/* Left Column - Images */}
           <div className="space-y-3">
-            {/* Main Image */}
+            {/* Main Image - ✅ FIXED */}
             <div className="relative bg-gray-50 overflow-hidden aspect-[3/4]">
               <img
-                src={images[selectedImage]}
+                src={currentMainImage}
                 alt={product.name}
                 className="w-full h-full object-cover"
+                onError={(e) => {
+                  console.error('Failed to load image:', currentMainImage);
+                  e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="500"%3E%3Crect width="400" height="500" fill="%23f0f0f0"/%3E%3Ctext x="50%25" y="50%25" text-anchor="middle" dy=".3em" fill="%23999" font-size="20"%3EImage Not Available%3C/text%3E%3C/svg%3E';
+                }}
               />
 
-              {/* Heart Icon */}
-              <button className="absolute top-3 right-3 w-10 h-10 bg-white rounded-full flex items-center justify-center hover:bg-gray-100 transition shadow-md">
-                <Heart className="w-5 h-5" />
-              </button>
+
 
               {!product.in_stock && (
                 <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
@@ -284,10 +307,10 @@ export default function ProductDetailPage({
               )}
             </div>
 
-            {/* Thumbnail Images */}
+            {/* Thumbnail Images - ✅ FIXED */}
             {images.length > 1 && (
               <div className="grid grid-cols-4 gap-2">
-                {images.map((img, idx) => (
+                {images.map((imgUrl, idx) => (
                   <button
                     key={idx}
                     onClick={() => setSelectedImage(idx)}
@@ -298,9 +321,12 @@ export default function ProductDetailPage({
                     }`}
                   >
                     <img
-                      src={img}
+                      src={imgUrl}
                       alt={`View ${idx + 1}`}
                       className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="80" height="80"%3E%3Crect width="80" height="80" fill="%23f0f0f0"/%3E%3C/svg%3E';
+                      }}
                     />
                   </button>
                 ))}
@@ -314,7 +340,7 @@ export default function ProductDetailPage({
               {/* Header */}
               <div>
                 <p className="text-xs text-gray-500 uppercase tracking-widest mb-2 font-black" style={{ letterSpacing: '0.1em' }}>
-                  {product.category}
+                  {product.category_name || product.category}
                 </p>
                 <h1 className="product-name-main text-2xl sm:text-3xl lg:text-4xl text-black mb-4 uppercase">
                   {product.name}
@@ -348,7 +374,7 @@ export default function ProductDetailPage({
                       ))}
                     </div>
                     <span className="text-sm text-gray-600 font-medium">
-                      {product.rating} {product.reviews ? `(${product.reviews})` : ''}
+                      {product.rating} {product.reviews_count ? `(${product.reviews_count})` : ''}
                     </span>
                   </div>
                 )}
@@ -362,14 +388,14 @@ export default function ProductDetailPage({
                 </div>
               )}
 
-              {/* Color Selection */}
-              {product.colors && product.colors.length > 0 && (
+              {/* Color Selection - ✅ FIXED */}
+              {colors.length > 0 && (
                 <div>
                   <label className="section-label block text-xs text-black mb-3 uppercase">
                     Color: <span className="font-normal">{selectedColor}</span>
                   </label>
                   <div className="flex gap-2 flex-wrap">
-                    {product.colors.map((color) => (
+                    {colors.map((color) => (
                       <button
                         key={color}
                         onClick={() => setSelectedColor(color)}
@@ -386,14 +412,14 @@ export default function ProductDetailPage({
                 </div>
               )}
 
-              {/* Size Selection */}
-              {product.sizes && product.sizes.length > 0 && (
+              {/* Size Selection - ✅ FIXED */}
+              {sizes.length > 0 && (
                 <div>
                   <label className="section-label block text-xs text-black mb-3 uppercase">
                     Size: <span className="font-normal">{selectedSize}</span>
                   </label>
                   <div className="flex gap-2 flex-wrap">
-                    {product.sizes.map((size) => (
+                    {sizes.map((size) => (
                       <button
                         key={size}
                         onClick={() => setSelectedSize(size)}
@@ -470,33 +496,6 @@ export default function ProductDetailPage({
                       <p className="text-sm text-gray-600 leading-relaxed">
                         {product.description || 'Premium quality product crafted with attention to detail.'}
                       </p>
-
-                      {product.article_number && (
-                        <p className="text-xs text-gray-500 font-medium">
-                          Art. No.: {product.article_number}
-                        </p>
-                      )}
-
-                      <div className="space-y-2">
-                        {product.product_type && (
-                          <div className="flex gap-4">
-                            <span className="text-xs font-bold text-black w-28">PRODUCT TYPE:</span>
-                            <span className="text-xs text-gray-600">{product.product_type}</span>
-                          </div>
-                        )}
-                        {product.description_details && (
-                          <div className="flex gap-4">
-                            <span className="text-xs font-bold text-black w-28">DESCRIPTION:</span>
-                            <span className="text-xs text-gray-600">{product.description_details}</span>
-                          </div>
-                        )}
-                        {product.imported !== undefined && (
-                          <div className="flex gap-4">
-                            <span className="text-xs font-bold text-black w-28">IMPORTED:</span>
-                            <span className="text-xs text-gray-600">{product.imported ? 'Yes' : 'No'}</span>
-                          </div>
-                        )}
-                      </div>
                     </div>
                   )}
                 </div>
@@ -523,7 +522,7 @@ export default function ProductDetailPage({
                           {product.specifications.map((spec, idx) => (
                             <li key={idx} className="text-xs text-gray-600 flex items-start gap-2">
                               <span className="text-gray-400">•</span>
-                              {spec}
+                              {spec.specification || spec}
                             </li>
                           ))}
                         </ul>
@@ -539,16 +538,6 @@ export default function ProductDetailPage({
         </div>
       </div>
 
-      {/* {showCart && (
-        <CartSidebar
-          cart={cart}
-          onClose={() => setShowCart(false)}
-          onUpdateQuantity={updateQuantity}
-          onRemoveItem={removeFromCart}
-          cartTotal={cartTotal}
-        />
-      )} */}
-      
       <ClothingSuggestions 
         addToCart={addToCart}
         onProductClick={(product) => navigate(`/product/${product.id}`)}
