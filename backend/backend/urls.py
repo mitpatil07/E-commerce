@@ -13,6 +13,7 @@ urlpatterns = [
     path('api/payment/', include('payment.urls')),
 ]
 
-if settings.DEBUG:
+
+if settings.DEBUG or True:  # Always include for now
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

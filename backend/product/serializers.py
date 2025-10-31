@@ -1,4 +1,4 @@
-# backend/product/serializers.py - FIXED VERSION
+# backend/product/serializers.py - FIXED VERSION WITH PROPER IMAGE URLS
 
 from rest_framework import serializers
 from .models import (
@@ -8,9 +8,25 @@ from .models import (
 
 
 class ProductImageSerializer(serializers.ModelSerializer):
+    image_url = serializers.SerializerMethodField()
+    
     class Meta:
         model = ProductImage
         fields = ['id', 'image_url', 'is_primary', 'order']
+    
+    def get_image_url(self, obj):
+        """Return uploaded image URL or external URL"""
+        request = self.context.get('request')
+        
+        # For uploaded images
+        if obj.image:
+            if request:
+                return request.build_absolute_uri(obj.image.url)
+            # Fallback without request
+            return f"http://127.0.0.1:8000{obj.image.url}"
+        
+        # For external URLs
+        return obj.image_url or None
 
 
 class ProductColorSerializer(serializers.ModelSerializer):
@@ -55,26 +71,45 @@ class CategorySerializer(serializers.ModelSerializer):
 class ProductListSerializer(serializers.ModelSerializer):
     category = serializers.CharField(source='category.name')
     image = serializers.SerializerMethodField()
+    images = serializers.SerializerMethodField()  # ✅ Added full images array
     colors = ProductColorSerializer(many=True, read_only=True)
     sizes = ProductSizeSerializer(many=True, read_only=True)
 
     class Meta:
         model = Product
         fields = [
-            'id', 'name', 'slug', 'price', 'category', 'image',
+            'id', 'name', 'slug', 'price', 'category', 'image', 'images',
             'rating', 'reviews_count', 'in_stock', 'colors', 'sizes'
         ]
 
     def get_image(self, obj):
+        """Get primary image URL using ProductImageSerializer"""
+        request = self.context.get('request')
+        
+        # Try to get primary image first
         primary_image = obj.images.filter(is_primary=True).first()
+        if not primary_image:
+            # Fall back to first image
+            primary_image = obj.images.first()
+        
         if primary_image:
-            return primary_image.image_url
-        first_image = obj.images.first()
-        return first_image.image_url if first_image else None
+            # Use ProductImageSerializer to get proper URL
+            serializer = ProductImageSerializer(primary_image, context={'request': request})
+            return serializer.data.get('image_url')
+        
+        return None
+
+    def get_images(self, obj):
+        """Get all product images with proper URLs"""
+        request = self.context.get('request')
+        images = obj.images.all().order_by('order')
+        serializer = ProductImageSerializer(images, many=True, context={'request': request})
+        return serializer.data
 
 
 class ProductDetailSerializer(serializers.ModelSerializer):
     category = serializers.CharField(source='category.name')
+    category_name = serializers.CharField(source='category.name')  # Added for compatibility
     image = serializers.SerializerMethodField()
     images = serializers.SerializerMethodField()
     colors = ProductColorSerializer(many=True, read_only=True)
@@ -92,21 +127,32 @@ class ProductDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = [
-            'id', 'name', 'slug', 'price', 'original_price', 'category', 
+            'id', 'name', 'slug', 'price', 'original_price', 'category', 'category_name',
             'description', 'rating', 'reviews_count', 'reviews', 'in_stock', 
             'image', 'images', 'colors', 'sizes', 'specifications', 
             'material', 'created_at'
         ]
 
     def get_image(self, obj):
+        """Get primary image URL using ProductImageSerializer"""
+        request = self.context.get('request')
+        
         primary_image = obj.images.filter(is_primary=True).first()
+        if not primary_image:
+            primary_image = obj.images.first()
+        
         if primary_image:
-            return primary_image.image_url
-        first_image = obj.images.first()
-        return first_image.image_url if first_image else None
+            serializer = ProductImageSerializer(primary_image, context={'request': request})
+            return serializer.data.get('image_url')
+        
+        return None
 
     def get_images(self, obj):
-        return [img.image_url for img in obj.images.all().order_by('order')]
+        """Get all product images as objects with full URLs"""
+        request = self.context.get('request')
+        images = obj.images.all().order_by('order')
+        serializer = ProductImageSerializer(images, many=True, context={'request': request})
+        return serializer.data
     
     def get_reviews(self, obj):
         return obj.reviews_count if obj.reviews_count > 0 else None
@@ -121,7 +167,7 @@ class CartItemSerializer(serializers.ModelSerializer):
         model = CartItem
         fields = [
             'id', 'product', 'product_id', 'quantity',
-            'selected_color', 'selected_size', 'subtotal', 'added_at'  # ✅ CHANGED from created_at to added_at
+            'selected_color', 'selected_size', 'subtotal', 'added_at'
         ]
 
 
@@ -133,7 +179,6 @@ class CartSerializer(serializers.ModelSerializer):
     class Meta:
         model = Cart
         fields = ['id', 'items', 'total_price', 'total_items', 'created_at', 'updated_at']
-
 
 
 class OrderItemSerializer(serializers.ModelSerializer):

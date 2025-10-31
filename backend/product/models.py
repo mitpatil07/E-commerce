@@ -54,8 +54,9 @@ class Product(models.Model):
 
 
 class ProductImage(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='images')
-    image_url = models.URLField(max_length=500)
+    product = models.ForeignKey('Product', on_delete=models.CASCADE, related_name='images')
+    image = models.ImageField(upload_to='products/%Y/%m/%d/', blank=True, null=True)
+    image_url = models.URLField(max_length=500, blank=True, null=True)
     is_primary = models.BooleanField(default=False)
     order = models.IntegerField(default=0)
 
@@ -64,6 +65,14 @@ class ProductImage(models.Model):
 
     def __str__(self):
         return f"{self.product.name} - Image {self.order}"
+    
+    def get_image_url(self):
+        """Return uploaded image URL or external URL"""
+        if self.image:
+            return self.image.url
+        return self.image_url or ''
+
+
 
 
 class ProductColor(models.Model):
