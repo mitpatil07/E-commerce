@@ -1,13 +1,11 @@
-// ===================================
-// FIXED ProductDetailPage.jsx - Image Display
-// ===================================
-
+// ProductDetailPage.jsx - FIXED with working search everywhere
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Star, ShoppingCart, Minus, Plus, Check, ChevronDown, ChevronUp, Loader2 } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import ClothingSuggestions from './ClothingSuggestions';
+import SearchResultsPopup from '../pages/SearchResults';
 import api from '../services/api';
 
 export default function ProductDetailPage({
@@ -31,6 +29,41 @@ export default function ProductDetailPage({
   });
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
+  
+  // ✅ Search functionality
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showSearchPopup, setShowSearchPopup] = useState(false);
+  const [debouncedQuery, setDebouncedQuery] = useState('');
+
+  // ✅ Debounce search query
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (searchQuery && searchQuery.trim().length >= 2) {
+        setDebouncedQuery(searchQuery);
+        setShowSearchPopup(true);
+      } else {
+        setShowSearchPopup(false);
+        setDebouncedQuery('');
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  // ✅ Search handlers
+  const handleProductClick = (product) => {
+    setShowSearchPopup(false);
+    setSearchQuery('');
+    navigate(`/product/${product.id}`);
+  };
+
+  const closeSearchPopup = () => {
+    setShowSearchPopup(false);
+    setSearchQuery('');
+  };
+
+  // Calculate cart count
+  const cartCount = cart?.reduce((sum, item) => sum + item.quantity, 0) || 0;
 
   // Fetch product details
   useEffect(() => {
@@ -48,7 +81,6 @@ export default function ProductDetailPage({
         console.log('🔄 Fetching product details for ID:', id);
         const data = await api.getProductById(id);
         console.log('✅ Product data received:', data);
-        console.log('📸 Product images:', data.images);
         
         setProduct(data);
         
@@ -88,10 +120,8 @@ export default function ProductDetailPage({
     try {
       console.log('🛒 Adding to cart:', product.name);
   
-      // Send to backend
       await api.addToCart(product.id, quantity, selectedColor, selectedSize);
   
-      // Update local cart once
       if (addToCart && typeof addToCart === 'function') {
         addToCart({
           ...product,
@@ -109,32 +139,57 @@ export default function ProductDetailPage({
     }
   };
 
+  const getImageUrl = (imageData) => {
+    if (!imageData) return '/placeholder-image.jpg';
+    if (typeof imageData === 'string') return imageData;
+    if (imageData.image_url) return imageData.image_url;
+    return '/placeholder-image.jpg';
+  };
+
+  const images = product?.images && product.images.length > 0 
+    ? product.images.map(img => getImageUrl(img))
+    : [product?.primary_image || '/placeholder-image.jpg'];
+
+  const currentMainImage = images[selectedImage] || images[0] || '/placeholder-image.jpg';
+  const colors = product?.colors?.map(c => c.color_name || c) || [];
+  const sizes = product?.sizes?.map(s => s.size_name || s) || [];
+
+  // Common style
+  const commonStyle = `
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+    .product-title { font-family: 'Inter', sans-serif; font-weight: 700; }
+    .product-name-main { font-family: 'Inter', sans-serif; font-weight: 700; letter-spacing: -0.03em; line-height: 1.1; }
+    .price-text { font-family: 'Inter', sans-serif; font-weight: 700; letter-spacing: -0.02em; }
+    .section-label { font-family: 'Inter', sans-serif; font-weight: 800; letter-spacing: 0.05em; }
+  `;
+
   // Loading state
   if (loading) {
     return (
       <div className="min-h-screen bg-white">
-        <style>{`
-          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
-          
-          .product-title {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-            font-weight: 700;
-            letter-spacing: -0.02em;
-          }
-        `}</style>
+        <style>{commonStyle}</style>
         <Navbar
           categories={[]}
-          selectedCategory=""
-          setSelectedCategory={() => {}}
-          searchQuery=""
-          setSearchQuery={() => {}}
-          cartCount={cart?.reduce((sum, item) => sum + item.quantity, 0) || 0}
-          onCartOpen={() => setShowCart(true)}
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          cartCount={cartCount}
+          onCartOpen={() => setShowCart && setShowCart(true)}
         />
+        
+        {/* Search Results Popup */}
+        {showSearchPopup && (
+          <SearchResultsPopup
+            query={debouncedQuery}
+            onProductClick={handleProductClick}
+            onClose={closeSearchPopup}
+            addToCart={addToCart}
+          />
+        )}
+
         <div className="min-h-[60vh] flex items-center justify-center">
           <div className="text-center">
             <Loader2 className="w-12 h-12 animate-spin text-black mx-auto mb-4" />
-            <p className="text-lg font-bold text-black product-title">Loading product details...</p>
+            <p className="text-lg font-bold text-black">Loading product details...</p>
           </div>
         </div>
         <Footer />
@@ -146,15 +201,25 @@ export default function ProductDetailPage({
   if (error || !product) {
     return (
       <div className="min-h-screen bg-white">
+        <style>{commonStyle}</style>
         <Navbar
           categories={[]}
-          selectedCategory=""
-          setSelectedCategory={() => {}}
-          searchQuery=""
-          setSearchQuery={() => {}}
-          cartCount={cart?.reduce((sum, item) => sum + item.quantity, 0) || 0}
-          onCartOpen={() => setShowCart(true)}
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          cartCount={cartCount}
+          onCartOpen={() => setShowCart && setShowCart(true)}
         />
+
+        {/* Search Results Popup */}
+        {showSearchPopup && (
+          <SearchResultsPopup
+            query={debouncedQuery}
+            onProductClick={handleProductClick}
+            onClose={closeSearchPopup}
+            addToCart={addToCart}
+          />
+        )}
+
         <div className="min-h-[60vh] flex items-center justify-center">
           <div className="text-center p-8">
             <div className="inline-block p-6 bg-red-100 rounded-2xl mb-4">
@@ -187,75 +252,28 @@ export default function ProductDetailPage({
     );
   }
 
-  // ✅ FIX: Extract image URLs properly from the images array
-  const getImageUrl = (imageData) => {
-    if (!imageData) return '/placeholder-image.jpg';
-    
-    // If it's already a string URL, return it
-    if (typeof imageData === 'string') return imageData;
-    
-    // If it's an object with image_url property, return that
-    if (imageData.image_url) return imageData.image_url;
-    
-    // Fallback
-    return '/placeholder-image.jpg';
-  };
-
-  // ✅ FIX: Build images array with proper URLs
-  const images = product.images && product.images.length > 0 
-    ? product.images.map(img => getImageUrl(img))
-    : [product.primary_image || '/placeholder-image.jpg'];
-
-  // Get current main image
-  const currentMainImage = images[selectedImage] || images[0] || '/placeholder-image.jpg';
-
-  const cartTotal = cart?.reduce((sum, item) => sum + item.price * item.quantity, 0) || 0;
-  const cartCount = cart?.reduce((sum, item) => sum + item.quantity, 0) || 0;
-
-  // Extract color and size names
-  const colors = product.colors?.map(c => c.color_name || c) || [];
-  const sizes = product.sizes?.map(s => s.size_name || s) || [];
-
+  // Main product page
   return (
     <div className="min-h-screen bg-white">
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
-        
-        .product-title {
-          font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-          font-weight: 700;
-          letter-spacing: -0.02em;
-        }
-        
-        .product-name-main {
-          font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-          font-weight: 700;
-          letter-spacing: -0.03em;
-          line-height: 1.1;
-        }
-        
-        .price-text {
-          font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-          font-weight: 700;
-          letter-spacing: -0.02em;
-        }
-        
-        .section-label {
-          font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-          font-weight: 800;
-          letter-spacing: 0.05em;
-        }
-      `}</style>
+      <style>{commonStyle}</style>
 
+      {/* Navbar with search */}
       <Navbar
-        categories={[]}
-        selectedCategory=""
-        setSelectedCategory={() => {}}
-        searchQuery=""
-        setSearchQuery={() => {}}
+        categories={['T-Shirts', 'Hoodies', 'Track Pants', 'Polo Shirts']}
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
         cartCount={cartCount}
-        onCartOpen={() => setShowCart(true)}
       />
+
+      {/* Search Results Popup */}
+      {showSearchPopup && (
+        <SearchResultsPopup
+          query={debouncedQuery}
+          onProductClick={handleProductClick}
+          onClose={closeSearchPopup}
+          addToCart={addToCart}
+        />
+      )}
 
       {/* Toast Notification */}
       {showToast && (
@@ -284,20 +302,15 @@ export default function ProductDetailPage({
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-12">
           {/* Left Column - Images */}
           <div className="space-y-3">
-            {/* Main Image - ✅ FIXED */}
             <div className="relative bg-gray-50 overflow-hidden aspect-[3/4]">
               <img
                 src={currentMainImage}
                 alt={product.name}
                 className="w-full h-full object-cover"
                 onError={(e) => {
-                  console.error('Failed to load image:', currentMainImage);
                   e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="500"%3E%3Crect width="400" height="500" fill="%23f0f0f0"/%3E%3Ctext x="50%25" y="50%25" text-anchor="middle" dy=".3em" fill="%23999" font-size="20"%3EImage Not Available%3C/text%3E%3C/svg%3E';
                 }}
               />
-
-
-
               {!product.in_stock && (
                 <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
                   <span className="bg-white text-black px-6 py-3 rounded-md font-bold">
@@ -307,7 +320,6 @@ export default function ProductDetailPage({
               )}
             </div>
 
-            {/* Thumbnail Images - ✅ FIXED */}
             {images.length > 1 && (
               <div className="grid grid-cols-4 gap-2">
                 {images.map((imgUrl, idx) => (
@@ -315,9 +327,7 @@ export default function ProductDetailPage({
                     key={idx}
                     onClick={() => setSelectedImage(idx)}
                     className={`relative bg-gray-50 overflow-hidden aspect-square border-2 transition ${
-                      selectedImage === idx
-                        ? 'border-black'
-                        : 'border-transparent hover:border-gray-300'
+                      selectedImage === idx ? 'border-black' : 'border-transparent hover:border-gray-300'
                     }`}
                   >
                     <img
@@ -337,7 +347,6 @@ export default function ProductDetailPage({
           {/* Right Column - Product Info */}
           <div className="lg:sticky lg:top-24 lg:self-start">
             <div className="space-y-6">
-              {/* Header */}
               <div>
                 <p className="text-xs text-gray-500 uppercase tracking-widest mb-2 font-black" style={{ letterSpacing: '0.1em' }}>
                   {product.category_name || product.category}
@@ -346,7 +355,6 @@ export default function ProductDetailPage({
                   {product.name}
                 </h1>
 
-                {/* Price */}
                 <div className="flex items-baseline gap-3 mb-4">
                   <span className="price-text text-3xl sm:text-4xl text-black">
                     Rs. {parseFloat(product.price).toFixed(2)}
@@ -358,7 +366,6 @@ export default function ProductDetailPage({
                   )}
                 </div>
 
-                {/* Rating & Reviews */}
                 {product.rating && (
                   <div className="flex items-center gap-2">
                     <div className="flex items-center gap-0.5">
@@ -388,7 +395,6 @@ export default function ProductDetailPage({
                 </div>
               )}
 
-              {/* Color Selection - ✅ FIXED */}
               {colors.length > 0 && (
                 <div>
                   <label className="section-label block text-xs text-black mb-3 uppercase">
@@ -412,7 +418,6 @@ export default function ProductDetailPage({
                 </div>
               )}
 
-              {/* Size Selection - ✅ FIXED */}
               {sizes.length > 0 && (
                 <div>
                   <label className="section-label block text-xs text-black mb-3 uppercase">
@@ -436,7 +441,6 @@ export default function ProductDetailPage({
                 </div>
               )}
 
-              {/* Quantity */}
               <div>
                 <label className="section-label block text-xs text-black mb-3 uppercase">
                   Quantity
@@ -458,7 +462,6 @@ export default function ProductDetailPage({
                 </div>
               </div>
 
-              {/* Action Buttons */}
               <div className="space-y-3 pt-4">
                 <button
                   onClick={handleAddToCart}
@@ -474,17 +477,13 @@ export default function ProductDetailPage({
                 </button>
               </div>
 
-              {/* Expandable Sections */}
               <div className="border-t border-gray-200 mt-6">
-                {/* DESCRIPTION Section */}
                 <div className="border-b border-gray-200">
                   <button
                     onClick={() => toggleSection('description')}
                     className="w-full py-5 flex items-center justify-between text-left hover:bg-gray-50 transition"
                   >
-                    <span className="section-label text-xs text-black uppercase">
-                      Description
-                    </span>
+                    <span className="section-label text-xs text-black uppercase">Description</span>
                     {expandedSections.description ? (
                       <ChevronUp className="w-5 h-5 text-gray-400" />
                     ) : (
@@ -500,15 +499,12 @@ export default function ProductDetailPage({
                   )}
                 </div>
 
-                {/* MATERIALS Section */}
                 <div className="border-b border-gray-200">
                   <button
                     onClick={() => toggleSection('materials')}
                     className="w-full py-5 flex items-center justify-between text-left hover:bg-gray-50 transition"
                   >
-                    <span className="section-label text-xs text-black uppercase">
-                      Materials
-                    </span>
+                    <span className="section-label text-xs text-black uppercase">Materials</span>
                     {expandedSections.materials ? (
                       <ChevronUp className="w-5 h-5 text-gray-400" />
                     ) : (
@@ -527,7 +523,7 @@ export default function ProductDetailPage({
                           ))}
                         </ul>
                       ) : (
-                        <p className="text-xs text-gray-600">Material information not available for this product.</p>
+                        <p className="text-xs text-gray-600">Material information not available.</p>
                       )}
                     </div>
                   )}

@@ -1,4 +1,4 @@
-// src/App.jsx - WITH POPUP SEARCH
+// src/App.jsx - FIXED with search on all pages
 import { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
@@ -115,14 +115,41 @@ function HomePage({
 }
 
 function CategoryPage({
+  cartCount,
   addToCart,
   toggleWishlist,
-  isInWishlist
+  isInWishlist,
+  searchQuery,
+  setSearchQuery
 }) {
   const navigate = useNavigate();
+  const [showSearchPopup, setShowSearchPopup] = useState(false);
+  const [debouncedQuery, setDebouncedQuery] = useState('');
+
+  // Debounce search query
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (searchQuery && searchQuery.trim().length >= 2) {
+        setDebouncedQuery(searchQuery);
+        setShowSearchPopup(true);
+      } else {
+        setShowSearchPopup(false);
+        setDebouncedQuery('');
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   const handleProductClick = (product) => {
+    setShowSearchPopup(false);
+    setSearchQuery('');
     navigate(`/product/${product.id}`);
+  };
+
+  const closeSearchPopup = () => {
+    setShowSearchPopup(false);
+    setSearchQuery('');
   };
 
   const handleClose = () => {
@@ -130,13 +157,28 @@ function CategoryPage({
   };
 
   return (
-    <CategoryProductsPage
-      onClose={handleClose}
-      onProductClick={handleProductClick}
-      addToCart={addToCart}
-      toggleWishlist={toggleWishlist}
-      isInWishlist={isInWishlist}
-    />
+    <>
+      <CategoryProductsPage
+        onClose={handleClose}
+        onProductClick={handleProductClick}
+        addToCart={addToCart}
+        toggleWishlist={toggleWishlist}
+        isInWishlist={isInWishlist}
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        cartCount={cartCount}
+      />
+
+      {/* Search Results Popup Overlay */}
+      {showSearchPopup && (
+        <SearchResultsPopup
+          query={debouncedQuery}
+          onProductClick={handleProductClick}
+          onClose={closeSearchPopup}
+          addToCart={addToCart}
+        />
+      )}
+    </>
   );
 }
 
@@ -264,6 +306,8 @@ export default function App() {
                   addToCart={addToCart}
                   toggleWishlist={toggleWishlist}
                   isInWishlist={isInWishlist}
+                  searchQuery={searchQuery}
+                  setSearchQuery={setSearchQuery}
                 />
               }
             />

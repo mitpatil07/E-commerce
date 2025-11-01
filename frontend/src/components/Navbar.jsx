@@ -1,4 +1,4 @@
-// Navbar.jsx - Fixed for popup search
+// Navbar.jsx - Clean production version
 import { Link, useNavigate } from 'react-router-dom';
 import { ShoppingCart, Search, Menu, User, X, LogOut } from 'lucide-react';
 import { useState } from 'react';
@@ -18,12 +18,17 @@ export default function Navbar({
   const [showUserMenu, setShowUserMenu] = useState(false);
   const navigate = useNavigate();
 
-  // ✅ FIXED: Don't navigate, just let the popup handle it
+  const handleSearchChange = (e) => {
+    const value = e.target.value;
+    if (setSearchQuery && typeof setSearchQuery === 'function') {
+      setSearchQuery(value);
+    }
+  };
+
   const handleSearchKeyDown = (e) => {
     if (e.key === "Enter" && searchQuery.trim()) {
-      // Don't navigate - the popup will automatically show
-      setShowMobileSearch(false); // Just close mobile search
-      e.preventDefault(); // Prevent form submission
+      setShowMobileSearch(false);
+      e.preventDefault();
     }
   };
 
@@ -39,7 +44,6 @@ export default function Navbar({
     navigate('/cart');
   };
 
-  // Helper function to convert category name to URL-friendly format
   const categoryToUrl = (category) => {
     return category.toLowerCase().replace(/\s+/g, '-');
   };
@@ -94,7 +98,7 @@ export default function Navbar({
                 />
               </Link>
 
-              {/* Desktop Category Navigation - Next to Logo */}
+              {/* Desktop Category Navigation */}
               <div className="hidden lg:flex items-center gap-1 ml-8">
                 {categories && categories.filter(cat => cat !== 'All').slice(0, 4).map((category) => (
                   <Link
@@ -120,7 +124,7 @@ export default function Navbar({
                   type="text"
                   placeholder="SEARCH FOR PRODUCTS..."
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery && setSearchQuery(e.target.value)}
+                  onChange={handleSearchChange}
                   onKeyDown={handleSearchKeyDown}
                   className="w-full pl-12 pr-4 py-2.5 lg:py-3 border-2 border-gray-300 focus:border-black focus:outline-none transition-all duration-200 bg-white text-sm font-bold uppercase placeholder:text-gray-400"
                 />
@@ -151,7 +155,6 @@ export default function Navbar({
                     </span>
                   </button>
 
-                  {/* Dropdown Menu */}
                   {showUserMenu && (
                     <div className="absolute right-0 mt-2 w-48 bg-white border-2 border-gray-300 py-2 z-50">
                       <div className="px-4 py-2 border-b-2 border-gray-200">
@@ -228,7 +231,7 @@ export default function Navbar({
                   type="text"
                   placeholder="SEARCH PRODUCTS..."
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery && setSearchQuery(e.target.value)}
+                  onChange={handleSearchChange}
                   onKeyDown={handleSearchKeyDown}
                   className="w-full pl-12 pr-4 py-2.5 border-2 border-gray-300 focus:border-black focus:outline-none transition-all duration-200 bg-white text-sm font-bold uppercase placeholder:text-gray-400"
                   autoFocus
@@ -250,7 +253,6 @@ export default function Navbar({
                 Home
               </Link>
 
-              {/* Categories in Mobile Menu */}
               {categories && categories.length > 0 && (
                 <div className="pt-2 pb-1">
                   <div className="px-4 py-2 text-xs font-bold text-gray-500 uppercase tracking-wider">
@@ -275,7 +277,6 @@ export default function Navbar({
                 </div>
               )}
 
-              {/* User Menu in Mobile */}
               {isLoggedIn ? (
                 <>
                   <div className="px-4 py-3 bg-gray-100 border-2 border-gray-300">
@@ -334,7 +335,6 @@ export default function Navbar({
         )}
       </nav>
 
-      {/* Click outside to close user menu */}
       {showUserMenu && (
         <div
           className="fixed inset-0 z-40"
