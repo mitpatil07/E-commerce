@@ -106,8 +106,8 @@ export default function Navbar({
                     to={`/category/${categoryToUrl(category)}`}
                     onClick={() => setSelectedCategory && setSelectedCategory(category)}
                     className={`nav-link px-3 py-2 text-xs uppercase transition-all duration-200 border-2 ${selectedCategory === category
-                        ? 'bg-black text-white border-black'
-                        : 'text-black border-transparent hover:border-black'
+                      ? 'bg-black text-white border-black'
+                      : 'text-black border-transparent hover:border-black'
                       }`}
                   >
                     {category}
@@ -144,52 +144,61 @@ export default function Navbar({
 
               {/* User Menu - Desktop */}
               {isLoggedIn ? (
-                <div className="hidden lg:block relative">
-                  <button
-                    onClick={() => setShowUserMenu(!showUserMenu)}
-                    className="nav-link flex items-center gap-2 px-3 py-2 hover:bg-gray-100 transition-all duration-200 text-xs uppercase"
-                  >
-                    <User className="w-5 h-5" />
-                    <span>
-                      {user?.first_name || user?.email?.split('@')[0] || 'User'}
-                    </span>
-                  </button>
+  <div className="hidden lg:block relative">
+    <button
+      onClick={() => setShowUserMenu(!showUserMenu)}
+      className="flex items-center gap-2 px-4 py-2.5 rounded-full border border-gray-300 hover:border-gray-400 transition-all duration-200 bg-white shadow-sm hover:shadow-md"
+    >
+      <User className="w-5 h-5 text-gray-700" />
+      <span className="text-sm font-semibold text-gray-800 tracking-wide uppercase">
+        {user?.first_name || user?.email?.split('@')[0] || 'User'}
+      </span>
+    </button>
 
-                  {showUserMenu && (
-                    <div className="absolute right-0 mt-2 w-48 bg-white border-2 border-gray-300 py-2 z-50">
-                      <div className="px-4 py-2 border-b-2 border-gray-200">
-                        <p className="text-sm font-bold text-black truncate uppercase">
-                          {user?.first_name} {user?.last_name}
-                        </p>
-                        <p className="text-xs text-gray-500 truncate">{user?.email}</p>
-                      </div>
+    {showUserMenu && (
+      <div className="absolute right-0 mt-3 w-64 bg-white border border-gray-200 rounded-2xl shadow-xl overflow-hidden animate-in fade-in duration-150 z-50">
+        {/* User Header */}
+        <div className="px-4 py-3 bg-gray-50 border-b border-gray-200">
+          <p className="text-sm font-semibold text-gray-900 truncate uppercase">
+            {user?.first_name} {user?.last_name}
+          </p>
+          <p className="text-xs text-gray-500 truncate">{user?.email}</p>
+        </div>
 
-                      <Link
-                        to="/profile"
-                        onClick={() => setShowUserMenu(false)}
-                        className="nav-link block px-4 py-2 text-xs text-black hover:bg-gray-100 transition-colors duration-200 uppercase"
-                      >
-                        My Profile
-                      </Link>
-                      <Link
-                        to="/orders"
-                        onClick={() => setShowUserMenu(false)}
-                        className="nav-link block px-4 py-2 text-xs text-black hover:bg-gray-100 transition-colors duration-200 uppercase"
-                      >
-                        My Orders
-                      </Link>
-                      <hr className="my-1 border-gray-200" />
-                      <button
-                        onClick={handleLogout}
-                        className="nav-link w-full text-left px-4 py-2 text-xs text-red-600 hover:bg-gray-100 flex items-center gap-2 transition-colors duration-200 uppercase"
-                      >
-                        <LogOut className="w-4 h-4" />
-                        Logout
-                      </button>
-                    </div>
-                  )}
-                </div>
-              ) : (
+        {/* Menu Options */}
+        <div className="py-2">
+          <Link
+            to="/profile"
+            onClick={() => setShowUserMenu(false)}
+            className="flex items-center gap-3 px-5 py-2.5 text-sm text-gray-700 hover:bg-gray-100 transition-all duration-150 font-medium"
+          >
+            <User className="w-4 h-4 text-gray-600" />
+            My Profile
+          </Link>
+
+          <Link
+            to="/orders"
+            onClick={() => setShowUserMenu(false)}
+            className="flex items-center gap-3 px-5 py-2.5 text-sm text-gray-700 hover:bg-gray-100 transition-all duration-150 font-medium"
+          >
+            <ShoppingCart className="w-4 h-4 text-gray-600" />
+            My Orders
+          </Link>
+
+          <hr className="my-2 border-gray-200" />
+
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-3 w-full text-left px-5 py-2.5 text-sm font-semibold text-red-600 hover:bg-gray-100 transition-all duration-150"
+          >
+            <LogOut className="w-4 h-4" />
+            Logout
+          </button>
+        </div>
+      </div>
+    )}
+  </div>
+)  : (
                 <div className="hidden lg:flex items-center gap-2">
                   <Link
                     to="/login"
@@ -267,8 +276,8 @@ export default function Navbar({
                         setShowMobileMenu(false);
                       }}
                       className={`nav-link block w-full text-left px-4 py-2.5 transition-all duration-200 text-sm uppercase ${selectedCategory === category
-                          ? 'bg-black text-white'
-                          : 'text-black hover:bg-gray-100'
+                        ? 'bg-black text-white'
+                        : 'text-black hover:bg-gray-100'
                         }`}
                     >
                       {category}
