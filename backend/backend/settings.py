@@ -9,7 +9,7 @@ load_dotenv(BASE_DIR / '.env')
 # ========================
 # ✅ Security
 # ========================
-SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "1sqdq*qxk7gcfre+m-2rm!hx=t(g#ss)pfc4d)pkaf4l=a$eoj")
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 DEBUG = os.getenv("DEBUG", "False") == "True"
 
 ALLOWED_HOSTS = [
@@ -254,13 +254,11 @@ LOGGING = {
 # ========================
 # Razorpay Configuration
 # ========================
-RAZORPAY_KEY_ID = os.getenv("RAZORPAY_KEY_ID", "rzp_test_RZDfGWLWfUuhot")
-RAZORPAY_KEY_SECRET = os.getenv("RAZORPAY_KEY_SECRET", "nByz0vrFQwVDigMlCnDOpo8l")
+RAZORPAY_KEY_ID = os.getenv("RAZORPAY_KEY_ID")
+RAZORPAY_KEY_SECRET = os.getenv("RAZORPAY_KEY_SECRET")
 
 # Log what's being used (helpful for debugging)
 import logging
 logger = logging.getLogger(__name__)
 key_type = "TEST" if "test" in RAZORPAY_KEY_ID else "LIVE"
 logger.info(f"🔐 Using Razorpay {key_type} keys: {RAZORPAY_KEY_ID[:15]}...")
-# RAZORPAY_KEY_ID = "rzp_test_RZDfGWLWfUuhot"  
-# RAZORPAY_KEY_SECRET = "nByz0vrFQwVDigMlCnDOpo8l"
