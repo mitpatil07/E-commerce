@@ -16,7 +16,7 @@ export default function Footer() {
   };
 
   return (
-    <footer className="bg-black text-white border-t border-gray-800">
+    <footer className="bg-white text-black border-t border-gray-200">
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
         .footer-title, .section-heading, .footer-link {
@@ -62,7 +62,7 @@ export default function Footer() {
               items: ["Help Center", "Shipping Info", "Returns", "Contact Us"],
             },
           ].map(({ key, title, items }) => (
-            <div key={key} className="border-b border-gray-800">
+            <div key={key} className="border-b border-gray-200">
               <button
                 onClick={() => toggleSection(key)}
                 className="w-full flex justify-between items-center py-4 text-left"
@@ -72,12 +72,12 @@ export default function Footer() {
               </button>
 
               <div className={`accordion-content ${openSection === key ? "open" : ""}`}>
-                <ul className="space-y-3 text-gray-400 pb-4">
+                <ul className="space-y-3 text-gray-600 pb-4">
                   {items.map((item) => (
                     <li key={item}>
                       <a
                         href="#"
-                        className="footer-link text-sm hover:text-white transition-colors duration-300 uppercase"
+                        className="footer-link text-sm hover:text-black transition-colors duration-300 uppercase"
                       >
                         {item}
                       </a>
@@ -100,7 +100,7 @@ export default function Footer() {
                 <a
                   key={i}
                   href="#"
-                  className="text-white hover:text-gray-400 transition-colors"
+                  className="text-black hover:text-gray-600 transition-colors"
                 >
                   <Icon className="w-6 h-6" />
                 </a>
@@ -118,7 +118,7 @@ export default function Footer() {
               alt="WhatYouWear Logo"
               className="h-18 w-auto object-contain mb-6"
             />
-            <p className="text-gray-400 text-sm max-w-xs mb-6 uppercase tracking-wide">
+            <p className="text-gray-600 text-sm max-w-xs mb-6 uppercase tracking-wide">
               Your one-stop shop for curated fashion and style.
             </p>
 
@@ -128,7 +128,7 @@ export default function Footer() {
                   key={i}
                   href="#"
                   aria-label={Icon.name}
-                  className="w-10 h-10 bg-white text-black flex items-center justify-center hover:bg-gray-200 transition-colors duration-300"
+                  className="w-10 h-10 bg-black text-white flex items-center justify-center hover:bg-gray-800 transition-colors duration-300"
                 >
                   <Icon className="w-5 h-5" />
                 </a>
@@ -139,12 +139,12 @@ export default function Footer() {
           {/* Shop Links */}
           <div>
             <h4 className="section-heading text-base mb-4 uppercase">Shop</h4>
-            <ul className="space-y-3 text-gray-400">
+            <ul className="space-y-3 text-gray-600">
               {["T-Shirts", "Hoodies", "Jeans", "Accessories"].map((item) => (
                 <li key={item}>
                   <a
                     href="#"
-                    className="footer-link text-sm hover:text-white transition-colors uppercase"
+                    className="footer-link text-sm hover:text-black transition-colors uppercase"
                   >
                     {item}
                   </a>
@@ -156,12 +156,12 @@ export default function Footer() {
           {/* Support Links */}
           <div>
             <h4 className="section-heading text-base mb-4 uppercase">Support</h4>
-            <ul className="space-y-3 text-gray-400">
+            <ul className="space-y-3 text-gray-600">
               {["Help Center", "Shipping Info", "Returns", "Contact Us"].map((item) => (
                 <li key={item}>
                   <a
                     href="#"
-                    className="footer-link text-sm hover:text-white transition-colors uppercase"
+                    className="footer-link text-sm hover:text-black transition-colors uppercase"
                   >
                     {item}
                   </a>
@@ -172,21 +172,21 @@ export default function Footer() {
         </div>
 
         {/* ---------- BOTTOM COPYRIGHT BAR ---------- */}
-        <div className="border-t border-gray-800 mt-12 pt-8">
-          <div className="flex flex-col md:flex-row justify-between items-center text-xs sm:text-sm text-gray-400">
+        <div className="border-t border-gray-200 mt-12 pt-8">
+          <div className="flex flex-col md:flex-row justify-between items-center text-xs sm:text-sm text-gray-600">
             <p className="footer-link uppercase mb-4 md:mb-0 text-center md:text-left">
               © {new Date().getFullYear()} WhatYouWear — All rights reserved.
             </p>
             <div className="flex space-x-4 sm:space-x-6">
               <a
                 href="#"
-                className="footer-link hover:text-white transition-colors uppercase"
+                className="footer-link hover:text-black transition-colors uppercase"
               >
                 Privacy Policy
               </a>
               <a
                 href="#"
-                className="footer-link hover:text-white transition-colors uppercase"
+                className="footer-link hover:text-black transition-colors uppercase"
               >
                 Terms of Service
               </a>

@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Lock, Mail, Loader2, UserPlus } from 'lucide-react';
 import api from '../services/api';
+import Footer from '../components/Footer';
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -130,6 +131,7 @@ const Register = () => {
   };
 
   return (
+    <>
     <div className="min-h-screen bg-white flex items-center justify-center px-4 py-12">
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
@@ -325,6 +327,8 @@ const Register = () => {
         </p>
       </div>
     </div>
+    <Footer/>
+    </>
   );
 };
 

@@ -1,4 +1,4 @@
-// Navbar.jsx - Updated with CategoryProducts theme
+// Navbar.jsx - Fixed for popup search
 import { Link, useNavigate } from 'react-router-dom';
 import { ShoppingCart, Search, Menu, User, X, LogOut } from 'lucide-react';
 import { useState } from 'react';
@@ -18,10 +18,12 @@ export default function Navbar({
   const [showUserMenu, setShowUserMenu] = useState(false);
   const navigate = useNavigate();
 
+  // ✅ FIXED: Don't navigate, just let the popup handle it
   const handleSearchKeyDown = (e) => {
     if (e.key === "Enter" && searchQuery.trim()) {
-      navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
-      setShowMobileSearch(false);
+      // Don't navigate - the popup will automatically show
+      setShowMobileSearch(false); // Just close mobile search
+      e.preventDefault(); // Prevent form submission
     }
   };
 
@@ -33,11 +35,9 @@ export default function Navbar({
     navigate('/');
   };
 
-
   const handleCartClick = () => {
     navigate('/cart');
   };
-
 
   // Helper function to convert category name to URL-friendly format
   const categoryToUrl = (category) => {

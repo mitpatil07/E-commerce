@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { Lock, Mail, Loader2, LogIn } from 'lucide-react';
 import api from '../services/api'; // ✅ Changed to lowercase 'api'
+import Footer from '../components/Footer';
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -121,7 +122,9 @@ const Login = () => {
   };
 
   return (
+    <>
     <div className="min-h-screen bg-white flex items-center justify-center px-4 py-12">
+      
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
         
@@ -142,9 +145,9 @@ const Login = () => {
           font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
           font-weight: 700;
           letter-spacing: -0.01em;
-        }
-      `}</style>
-
+          }
+          `}</style>
+          
       <div className="max-w-md w-full">
         {/* Header */}
         <div className="text-center mb-8 sm:mb-10">
@@ -262,6 +265,8 @@ const Login = () => {
         </p>
       </div>
     </div>
+    <Footer/>
+    </>
   );
 };
 

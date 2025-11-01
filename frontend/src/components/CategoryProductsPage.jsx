@@ -54,16 +54,11 @@ export default function CategoryProductsPage({
         setCategories(categoryList);
         
         if (categoryList.length > 0 && !location.state?.category) {
-          // console.log('✅ Setting active category to:', categoryList[0].name);
           setActiveCategory(categoryList[0].name);
         } else if (categoryList.length === 0) {
-          // console.warn('⚠️ No categories found');
           setLoading(false);
         }
       } catch (err) {
-        // console.error('❌ Failed to fetch categories:', err);
-        // console.error('❌ Error message:', err.message);
-        // console.error('❌ Error stack:', err.stack);
         setError('Failed to load categories: ' + err.message);
         setLoading(false);
       }
@@ -76,7 +71,6 @@ export default function CategoryProductsPage({
   useEffect(() => {
     const fetchProducts = async () => {
       if (!activeCategory) {
-        // console.log('⚠️ No active category, skipping product fetch');
         return;
       }
       
@@ -84,23 +78,15 @@ export default function CategoryProductsPage({
       setError(null);
       
       try {
-        // console.log('🔄 Fetching products for category:', activeCategory);
-        
         const data = await api.getProducts({
           category: activeCategory,
         });
         
-        // console.log('✅ Products API response:', data);
-        
         const productList = data.results || data;
-        // console.log('📦 Product list:', productList.length, 'products found');
         
         setProducts(productList);
         setLoading(false);
       } catch (err) {
-        // console.error('❌ Failed to fetch products:', err);
-        // console.error('❌ Error message:', err.message);
-        // console.error('❌ Error stack:', err.stack);
         setError(err.message || 'Failed to load products');
         setLoading(false);
       }
@@ -150,8 +136,6 @@ export default function CategoryProductsPage({
     }
     
     try {
-      // console.log('🛒 Adding to cart:', product.name);
-      
       await api.addToCart(product.id, 1);
       
       if (addToCart && typeof addToCart === 'function') {
@@ -159,9 +143,7 @@ export default function CategoryProductsPage({
       }
       
       showToastMessage(`${product.name} added to cart!`);
-      // console.log('✅ Added to cart successfully');
     } catch (err) {
-      // console.error('❌ Failed to add to cart:', err);
       showToastMessage('Failed to add to cart. Please try again.');
     }
   };
@@ -174,7 +156,7 @@ export default function CategoryProductsPage({
         <div className="min-h-screen bg-white flex items-center justify-center">
           <div className="text-center">
             <Loader2 className="w-12 h-12 animate-spin text-black mx-auto mb-4" />
-            <p className="text-lg font-bold text-black" style={{ fontFamily: 'system-ui, -apple-system, sans-serif', letterSpacing: '0.02em' }}>
+            <p className="text-lg font-bold text-black uppercase tracking-wide">
               Loading products...
             </p>
           </div>
@@ -191,14 +173,14 @@ export default function CategoryProductsPage({
         <Navbar />
         <div className="min-h-screen bg-white flex items-center justify-center">
           <div className="text-center p-8">
-            <div className="inline-block p-6 bg-red-100 rounded-2xl mb-4">
+            <div className="inline-block p-6 bg-red-100 rounded-lg mb-4">
               <ShoppingCart className="w-16 h-16 text-red-600" />
             </div>
-            <h2 className="text-2xl font-bold text-black mb-2">Failed to Load Products</h2>
+            <h2 className="text-2xl font-black text-black mb-2 uppercase">Failed to Load Products</h2>
             <p className="text-gray-600 mb-6">{error}</p>
             <button
               onClick={() => window.location.reload()}
-              className="px-6 py-3 bg-black text-white rounded-lg font-bold hover:bg-gray-900 transition"
+              className="px-6 py-3 bg-black text-white font-bold hover:bg-gray-900 transition uppercase"
             >
               Retry
             </button>
@@ -216,75 +198,46 @@ export default function CategoryProductsPage({
         setShowSortMenu(false);
         setShowFilterMenu(false);
       }}>
-        <style>{`
-          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
-          
-          .product-title {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-            font-weight: 900;
-            letter-spacing: -0.04em;
-            line-height: 1;
-          }
-          
-          .category-btn {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-            font-weight: 800;
-            letter-spacing: 0.02em;
-          }
-          
-          .product-name {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-            font-weight: 600;
-            letter-spacing: -0.01em;
-            line-height: 1.3;
-          }
-          
-          .price-text {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-            font-weight: 700;
-            letter-spacing: -0.02em;
-          }
-          
-          .scrollbar-hide::-webkit-scrollbar {
-            display: none;
-          }
-          .scrollbar-hide {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-          }
-        `}</style>
-
         {/* Toast Notification */}
         {showToast && (
           <div className="fixed top-20 sm:top-24 right-4 z-50 animate-in slide-in-from-right duration-300">
-            <div className="bg-black text-white px-6 py-4 rounded-lg shadow-2xl flex items-center gap-3">
-              <Check className="w-10 h-10" />
-              <span className="font-bold text-sm">{toastMessage}</span>
+            <div className="bg-black text-white px-6 py-4 shadow-2xl flex items-center gap-3">
+              <Check className="w-5 h-5" />
+              <span className="font-bold text-sm uppercase">{toastMessage}</span>
             </div>
           </div>
         )}
 
         {/* Header Section */}
         <div className="bg-white border-b border-gray-200">
-          <div className="px-4 py-4 sm:py-6 max-w-screen-2xl mx-auto">
+          <div className="py-6 px-4">
             {/* Title */}
             <div className="mb-4">
-              <h1 className="product-title text-3xl sm:text-4xl lg:text-5xl text-black uppercase mb-2">
+              <h1 className="text-4xl md:text-5xl font-black text-black uppercase tracking-tight mb-2">
                 {activeCategory || 'All Products'}
               </h1>
             </div>
             
             {/* Category Pills */}
             <div className="overflow-x-auto -mx-4 px-4 scrollbar-hide">
+              <style>{`
+                .scrollbar-hide::-webkit-scrollbar {
+                  display: none;
+                }
+                .scrollbar-hide {
+                  -ms-overflow-style: none;
+                  scrollbar-width: none;
+                }
+              `}</style>
               <div className="flex gap-2 pb-2">
                 {categoryCounts.map((category) => (
                   <button
                     key={category.id || category.name}
                     onClick={() => setActiveCategory(category.name)}
-                    className={`category-btn flex-shrink-0 px-4 py-2 rounded-md text-xs transition-all duration-200 whitespace-nowrap uppercase ${
+                    className={`flex-shrink-0 px-4 py-2 text-xs font-bold transition-all duration-200 whitespace-nowrap uppercase ${
                       activeCategory === category.name
                         ? 'bg-black text-white'
-                        : 'bg-white text-black border border-gray-300 hover:border-black'
+                        : 'bg-white text-black border-2 border-gray-300 hover:border-black'
                     }`}
                   >
                     {category.name}
@@ -297,7 +250,7 @@ export default function CategoryProductsPage({
 
         {/* Sort By & Filter Bar */}
         <div className="bg-white border-b border-gray-200 sticky top-0 z-20" onClick={(e) => e.stopPropagation()}>
-          <div className="px-4 py-3 max-w-screen-2xl mx-auto">
+          <div className="py-3 px-4">
             <div className="flex items-center justify-between gap-4">
               {/* Sort By Dropdown */}
               <div className="relative">
@@ -306,14 +259,14 @@ export default function CategoryProductsPage({
                     setShowSortMenu(!showSortMenu);
                     setShowFilterMenu(false);
                   }}
-                  className="flex items-center gap-2 px-4 py-2 text-sm font-bold border border-gray-300 rounded-md hover:border-black transition"
+                  className="flex items-center gap-2 px-4 py-2 text-sm font-bold border-2 border-gray-300 hover:border-black transition uppercase"
                 >
                   SORT BY
                   <span className="text-lg">{showSortMenu ? '−' : '+'}</span>
                 </button>
                 
                 {showSortMenu && (
-                  <div className="absolute top-full left-0 mt-2 w-56 bg-white border border-gray-300 rounded-md shadow-lg z-50">
+                  <div className="absolute top-full left-0 mt-2 w-56 bg-white border-2 border-gray-300 shadow-lg z-50">
                     <div className="py-2">
                       {[
                         { value: 'featured', label: 'Featured' },
@@ -327,8 +280,8 @@ export default function CategoryProductsPage({
                             setSortBy(option.value);
                             setShowSortMenu(false);
                           }}
-                          className={`w-full text-left px-4 py-2 text-sm font-medium hover:bg-gray-100 transition ${
-                            sortBy === option.value ? 'bg-gray-100 font-bold' : ''
+                          className={`w-full text-left px-4 py-2 text-sm font-bold hover:bg-gray-100 transition uppercase ${
+                            sortBy === option.value ? 'bg-gray-100' : ''
                           }`}
                         >
                           {option.label}
@@ -346,7 +299,7 @@ export default function CategoryProductsPage({
                     setShowFilterMenu(!showFilterMenu);
                     setShowSortMenu(false);
                   }}
-                  className="flex items-center gap-2 px-4 py-2 text-sm font-bold border border-gray-300 rounded-md hover:border-black transition"
+                  className="flex items-center gap-2 px-4 py-2 text-sm font-bold border-2 border-gray-300 hover:border-black transition uppercase"
                 >
                   FILTER
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -355,13 +308,13 @@ export default function CategoryProductsPage({
                 </button>
                 
                 {showFilterMenu && (
-                  <div className="absolute top-full right-0 mt-2 w-72 bg-white border border-gray-300 rounded-md shadow-lg z-50">
+                  <div className="absolute top-full right-0 mt-2 w-72 bg-white border-2 border-gray-300 shadow-lg z-50">
                     <div className="p-4">
                       <div className="mb-4">
                         <h3 className="text-sm font-bold mb-3 uppercase">Price Range</h3>
                         <div className="space-y-3">
                           <div>
-                            <label className="text-xs font-medium text-gray-600 mb-1 block">
+                            <label className="text-xs font-bold text-gray-600 mb-1 block uppercase">
                               Min: ${priceRange[0]}
                             </label>
                             <input
@@ -374,7 +327,7 @@ export default function CategoryProductsPage({
                             />
                           </div>
                           <div>
-                            <label className="text-xs font-medium text-gray-600 mb-1 block">
+                            <label className="text-xs font-bold text-gray-600 mb-1 block uppercase">
                               Max: ${priceRange[1]}
                             </label>
                             <input
@@ -394,13 +347,13 @@ export default function CategoryProductsPage({
                           onClick={() => {
                             setPriceRange([0, 500]);
                           }}
-                          className="flex-1 px-4 py-2 text-sm font-bold border border-gray-300 rounded-md hover:border-black transition"
+                          className="flex-1 px-4 py-2 text-sm font-bold border-2 border-gray-300 hover:border-black transition uppercase"
                         >
                           RESET
                         </button>
                         <button
                           onClick={() => setShowFilterMenu(false)}
-                          className="flex-1 px-4 py-2 text-sm font-bold bg-black text-white rounded-md hover:bg-gray-900 transition"
+                          className="flex-1 px-4 py-2 text-sm font-bold bg-black text-white hover:bg-gray-900 transition uppercase"
                         >
                           APPLY
                         </button>
@@ -414,53 +367,52 @@ export default function CategoryProductsPage({
         </div>
 
         {/* Products Grid */}
-        <div className="px-2 sm:px-4 lg:px-8 py-4 sm:py-6 max-w-screen-2xl mx-auto">
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-4 lg:gap-6">
+        <div className="py-8 px-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
             {sortedProducts.map((product) => (
               <div
                 key={product.id}
-                className="group bg-white cursor-pointer"
+                className="group bg-white cursor-pointer flex flex-col"
                 onClick={() => onProductClick && onProductClick(product)}
               >
                 {/* Image Container */}
-                <div className="relative aspect-[3/4] overflow-hidden bg-gray-100 mb-2">
+                <div className="relative aspect-[3/4] overflow-hidden bg-gray-100 mb-3">
                   <img
                     src={product.image}
                     alt={product.name}
                     className="w-full h-full object-cover"
                     loading="lazy"
                   />
-
                 </div>
 
-                {/* Product Info */}
-                <div className="px-1 sm:px-2">
-                  <h3 className="product-name text-sm sm:text-base lg:text-lg text-black mb-1 sm:mb-2 uppercase line-clamp-2">
+                {/* Product Info - Flexbox to push button to bottom */}
+                <div className="flex flex-col flex-1">
+                  <h3 className="text-sm font-bold text-black mb-2 uppercase line-clamp-2">
                     {product.name}
                   </h3>
                   
                   {/* Price */}
-                  <div className="flex items-center gap-2 mb-1 sm:mb-2">
-                    <p className="price-text text-base sm:text-lg lg:text-xl text-black">
+                  <div className="mb-2">
+                    <p className="text-lg font-black text-black">
                       Rs. {parseFloat(product.price).toFixed(2)}
                     </p>
                   </div>
 
                   {/* Color Options */}
-                  <div className="flex items-center gap-1 sm:gap-2 mb-2 sm:mb-3">
+                  <div className="flex items-center gap-2 mb-3">
                     <div className="flex gap-1">
-                      <div className="w-3 h-3 sm:w-4 sm:h-4 bg-gray-800 rounded-full border border-gray-300"></div>
-                      <div className="w-3 h-3 sm:w-4 sm:h-4 bg-gray-400 rounded-full border border-gray-300"></div>
-                      <div className="w-3 h-3 sm:w-4 sm:h-4 bg-blue-900 rounded-full border border-gray-300"></div>
+                      <div className="w-4 h-4 bg-gray-800 rounded-full border border-gray-300"></div>
+                      <div className="w-4 h-4 bg-gray-400 rounded-full border border-gray-300"></div>
+                      <div className="w-4 h-4 bg-blue-900 rounded-full border border-gray-300"></div>
                     </div>
-                    <span className="text-xs sm:text-sm text-gray-600">+3</span>
+                    <span className="text-xs font-bold text-gray-600">+3</span>
                   </div>
 
-                  {/* Add to Cart Button */}
+                  {/* Add to Cart Button - mt-auto pushes it to bottom */}
                   <button
                     onClick={(e) => handleAddToCart(product, e)}
                     disabled={!product.in_stock}
-                    className={`w-full py-2 sm:py-3 rounded-md text-xs sm:text-sm font-bold transition ${
+                    className={`w-full py-3 text-sm font-bold transition mt-auto uppercase ${
                       product.in_stock 
                         ? 'bg-black text-white hover:bg-gray-900'
                         : 'bg-gray-200 text-gray-400 cursor-not-allowed'
@@ -475,12 +427,12 @@ export default function CategoryProductsPage({
 
           {/* No Results */}
           {sortedProducts.length === 0 && (
-            <div className="text-center py-16 sm:py-24">
-              <div className="inline-block p-8 bg-gray-100 rounded-2xl mb-6">
+            <div className="text-center py-24">
+              <div className="inline-block p-8 bg-gray-100 mb-6">
                 <ShoppingCart className="w-16 h-16 text-gray-400" />
               </div>
-              <p className="text-black text-2xl font-bold mb-2">No products found</p>
-              <p className="text-gray-600">Try adjusting your filters or selecting a different category</p>
+              <p className="text-black text-2xl font-black mb-2 uppercase">No products found</p>
+              <p className="text-gray-600 uppercase">Try adjusting your filters or selecting a different category</p>
             </div>
           )}
         </div>

@@ -76,18 +76,18 @@ export default function FullScreenCategoryHero() {
       `}</style>
 
       {/* Hero Section */}
-      <section className="relative h-screen bg-black overflow-hidden">
+      {/* <section className="relative h-screen bg-black overflow-hidden"> */}
         {/* Background Image */}
-        <div className="absolute inset-0">
+        {/* <div className="absolute inset-0">
           <img
             src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1920&h=1080&fit=crop"
             alt="Fashion store"
             className="w-full h-full object-cover opacity-40"
           />
-        </div>
+        </div> */}
 
         {/* Content */}
-        <div className="relative z-10 h-full flex flex-col items-center justify-center text-white px-6">
+        {/* <div className="relative z-10 h-full flex flex-col items-center justify-center text-white px-6">
           <div className="text-center max-w-4xl">
             <div className="mb-6 opacity-0 animate-fadeInUp" style={{animationDelay: '0.2s'}}>
               <span className="text-xs font-semibold uppercase tracking-widest">
@@ -107,20 +107,55 @@ export default function FullScreenCategoryHero() {
               Explore Collection
             </button>
           </div>
+        </div> */}
+      {/* </section> */}
+
+      
+      <section className="relative h-screen bg-white overflow-hidden">
+        {/* Background Image - Subtle */}
+        <div className="absolute inset-0">
+          <img
+            src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1920&h=1080&fit=crop"
+            alt="Fashion store"
+            className="w-full h-full object-cover opacity-20"
+          />
+        </div>
+
+        {/* Content */}
+        <div className="relative z-10 h-full flex flex-col items-start justify-center px-4 sm:px-6 md:px-8 lg:px-12">
+          <div className="max-w-4xl">
+            <h1 className="text-5xl sm:text-4xl md:text-5xl lg:text-6xl font-black uppercase mb-2 opacity-0 animate-fadeInUp leading-none tracking-tight" style={{animationDelay: '0.2s', fontWeight: 900, color: '#E50010'}}>
+              FLAT 15%* OFF
+            </h1>
+            
+            <h2 className="text-4xl sm:text-4xl md:text-5xl lg:text-6xl font-black uppercase mb-12 opacity-0 animate-fadeInUp leading-none tracking-tight" style={{animationDelay: '0.3s', fontWeight: 900, color: '#E50010'}}>
+              LAST 48 HRS
+            </h2>
+            
+            <p className="text-2xl sm:text-3xl md:text-3xl mb-12 font-normal opacity-0 animate-fadeInUp text-gray-800" style={{animationDelay: '0.5s'}}>
+              Flat 90% off on weekends
+            </p>
+            
+          </div>
         </div>
       </section>
 
       {/* Featured Categories Title */}
-      <section className="py-20 px-6 text-center bg-white">
-        <div className="max-w-4xl mx-auto">
-          <h2 className="text-5xl sm:text-6xl md:text-7xl font-black uppercase mb-6" style={{letterSpacing: '-0.02em'}}>
-            Featured Collection
-          </h2>
-          <p className="text-lg text-gray-600 font-light">
-            Discover our handpicked selection of trending styles
-          </p>
+      <section className="py-2 pt-16 pl-4 bg-white border-t border-gray-200">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-black uppercase mb-2" style={{letterSpacing: '-0.01em'}}>
+                Shop by Category
+              </h2>
+              <p className="text-sm sm:text-base text-gray-600 font-normal mb-5">
+                Explore our latest collection
+              </p>
+            </div>
+          </div>
         </div>
       </section>
+      
 
       {/* Category Grid */}
       <div className="md:p-4">

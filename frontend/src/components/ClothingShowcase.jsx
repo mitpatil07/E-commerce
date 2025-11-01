@@ -24,12 +24,21 @@ export default function ClothingShowcase() {
     return shuffled;
   };
 
-  // Assign random sizes for masonry layout
+  // Assign random sizes for masonry layout - NO REPEATING PATTERN
   const assignSizes = (products) => {
-    const sizes = ['large', 'medium', 'medium', 'wide', 'medium', 'medium', 'wide', 'medium'];
+    // Create a sizes array that matches the exact number of products
+    const sizes = [];
+    const sizeOptions = ['large', 'medium', 'wide', 'tall'];
+    
+    for (let i = 0; i < products.length; i++) {
+      // Randomly pick a size for each product
+      const randomSize = sizeOptions[Math.floor(Math.random() * sizeOptions.length)];
+      sizes.push(randomSize);
+    }
+    
     return products.map((product, index) => ({
       ...product,
-      size: sizes[index % sizes.length]
+      size: sizes[index]
     }));
   };
 
@@ -37,26 +46,21 @@ export default function ClothingShowcase() {
   useEffect(() => {
     const fetchShowcaseProducts = async () => {
       try {
-        // console.log('🔄 Fetching showcase products...');
-        
         const data = await api.getProducts();
-
-        // console.log('✅ Products received for showcase:', data);
         
         // Handle paginated response
         const productList = data.results || data;
         
-        // Shuffle and take 8 products for showcase
+        // Shuffle and take 14 products for showcase
         const shuffledProducts = shuffleArray(productList);
-        const selectedProducts = shuffledProducts.slice(0, 8);
+        const selectedProducts = shuffledProducts.slice(0, 14);
         
-        // Assign sizes for masonry layout
+        // Assign random sizes for masonry layout (no repeating pattern)
         const productsWithSizes = assignSizes(selectedProducts);
         
         setShowcaseProducts(productsWithSizes);
         setLoading(false);
       } catch (err) {
-        // console.error('❌ Failed to fetch showcase products:', err);
         setError(err.message);
         setLoading(false);
       }
@@ -79,8 +83,6 @@ export default function ClothingShowcase() {
   };
 
   const handleProductClick = (product) => {
-    // console.log('🖱️ Showcase product clicked:', product);
-    // console.log('🔗 Navigating to:', `/product/${product.id}`);
     navigate(`/product/${product.id}`);
   };
 
@@ -92,7 +94,7 @@ export default function ClothingShowcase() {
           <div className="flex items-center justify-center py-20">
             <div className="text-center">
               <Loader2 className="w-12 h-12 animate-spin text-black mx-auto mb-4" />
-              <p className="text-black font-bold" style={{ fontFamily: 'Inter, system-ui, -apple-system, sans-serif', letterSpacing: '0.02em' }}>
+              <p className="text-black font-bold uppercase tracking-wide">
                 Loading showcase...
               </p>
             </div>
@@ -108,14 +110,14 @@ export default function ClothingShowcase() {
       <section className="bg-white py-12 sm:py-16">
         <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center py-20">
-            <div className="inline-block p-6 bg-red-100 rounded-2xl mb-4">
+            <div className="inline-block p-6 bg-red-100 mb-4">
               <ShoppingCart className="w-12 h-12 text-red-600" />
             </div>
             <h3 className="text-xl font-bold text-black mb-2 uppercase">Failed to Load Showcase</h3>
             <p className="text-gray-600 mb-4">{error}</p>
             <button
               onClick={() => window.location.reload()}
-              className="px-6 py-3 bg-black text-white rounded-md font-bold hover:bg-gray-900 transition uppercase"
+              className="px-6 py-3 bg-black text-white font-bold hover:bg-gray-900 transition uppercase"
             >
               Retry
             </button>
@@ -132,7 +134,7 @@ export default function ClothingShowcase() {
         <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center py-20">
             <ShoppingCart className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-600 font-medium uppercase">No products available for showcase</p>
+            <p className="text-gray-600 font-bold uppercase">No products available for showcase</p>
           </div>
         </div>
       </section>
@@ -141,43 +143,13 @@ export default function ClothingShowcase() {
 
   return (
     <section className="bg-white py-12 sm:py-16">
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
-        
-        .section-title {
-          font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-          font-weight: 900;
-          letter-spacing: -0.04em;
-          line-height: 1;
-        }
-        
-        .product-name {
-          font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-          font-weight: 600;
-          letter-spacing: -0.01em;
-          line-height: 1.3;
-        }
-        
-        .price-text {
-          font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-          font-weight: 700;
-          letter-spacing: -0.02em;
-        }
-        
-        .button-text {
-          font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-          font-weight: 800;
-          letter-spacing: 0.02em;
-        }
-      `}</style>
-
       <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8 sm:mb-12">
-          <h2 className="section-title text-3xl sm:text-4xl lg:text-5xl text-black mb-2 uppercase">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-black mb-2 uppercase tracking-tight">
             Featured Collection
           </h2>
-          <p className="text-gray-600 text-sm sm:text-base uppercase tracking-wide">
+          <p className="text-gray-600 text-sm sm:text-base uppercase tracking-wide font-medium">
             Discover our handpicked selection of trending styles
           </p>
         </div>
@@ -205,14 +177,14 @@ export default function ClothingShowcase() {
                 hoveredIndex === index ? 'opacity-100' : 'opacity-0'
               }`}>
                 <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4 md:p-6 text-white">
-                  <p className="text-xs uppercase tracking-wider mb-1 opacity-90 font-medium">
+                  <p className="text-xs uppercase tracking-wider mb-1 opacity-90 font-bold">
                     {product.category}
                   </p>
-                  <h3 className="product-name text-sm sm:text-base md:text-lg mb-2 line-clamp-2 uppercase">
+                  <h3 className="text-sm sm:text-base md:text-lg font-bold mb-2 line-clamp-2 uppercase">
                     {product.name}
                   </h3>
                   <div className="flex items-center justify-between gap-2">
-                    <span className="price-text text-lg sm:text-xl md:text-2xl">
+                    <span className="text-lg sm:text-xl md:text-2xl font-black">
                       Rs. {parseFloat(product.price).toFixed(2)}
                     </span>
                     <button
@@ -220,7 +192,7 @@ export default function ClothingShowcase() {
                         e.stopPropagation();
                         handleProductClick(product);
                       }}
-                      className="button-text bg-white text-black px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 rounded-md text-xs sm:text-sm hover:bg-gray-100 transition-all uppercase"
+                      className="bg-white text-black px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-bold hover:bg-gray-100 transition-all uppercase"
                     >
                       View
                     </button>
@@ -248,16 +220,6 @@ export default function ClothingShowcase() {
               }`} />
             </div>
           ))}
-        </div>
-
-        {/* CTA Button */}
-        <div className="text-center mt-8 sm:mt-12">
-          <button
-            onClick={() => navigate('/')}
-            className="button-text px-8 py-3 sm:py-4 bg-black text-white rounded-md font-bold text-sm sm:text-base hover:bg-gray-900 transition-all uppercase"
-          >
-            Explore All Products
-          </button>
         </div>
       </div>
     </section>

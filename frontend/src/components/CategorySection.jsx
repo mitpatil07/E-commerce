@@ -2,9 +2,11 @@ import { useState } from 'react';
 import { ChevronRight } from 'lucide-react';
 import ClothingShowcase from './ClothingShowcase';
 import { useNavigate } from 'react-router-dom';
+
 export default function CategorySection({ onCategorySelect }) {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const navigate = useNavigate();
+  
   const categories = [
     {
       id: 1,
@@ -57,7 +59,6 @@ export default function CategorySection({ onCategorySelect }) {
   ];
 
   const handleCategoryClick = (category) => {
-    // console.log('📂 Category clicked:', category.name);
     setSelectedCategory(category.id);
     
     // Navigate to category page
@@ -71,54 +72,31 @@ export default function CategorySection({ onCategorySelect }) {
       onCategorySelect(category);
     }
   };
+
   return (
     <>
-      <section className="bg-white">
-        <style>{`
-          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
-          
-          .section-title {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-            font-weight: 900;
-            letter-spacing: -0.04em;
-            line-height: 1;
-          }
-          
-          .category-name {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-            font-weight: 700;
-            letter-spacing: -0.01em;
-            line-height: 1.2;
-          }
-          
-          .category-count {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-            font-weight: 600;
-            letter-spacing: 0.01em;
-          }
-        `}</style>
-
-        <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+      <section className="bg-white py-12 px-4">
+        <div className="max-w-7xl mx-auto">
           {/* Header */}
-          <div className="mb-8 sm:mb-10">
-            <h2 className="section-title text-3xl sm:text-4xl lg:text-5xl text-black mb-2 uppercase">
+          <div className="mb-8">
+            <h2 className="text-4xl md:text-5xl font-black text-black mb-2 uppercase tracking-tight">
               Shop by Category
             </h2>
-            <p className="text-gray-600 text-sm sm:text-base uppercase tracking-wide">
+            <p className="text-gray-600 text-sm uppercase tracking-wide font-medium">
               Discover our premium men's collection
             </p>
           </div>
 
           {/* Categories Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {categories.map((category) => (
               <button
                 key={category.id}
                 onClick={() => handleCategoryClick(category)}
-                className={`group relative overflow-hidden transition-all duration-300 bg-white ${
+                className={`group relative overflow-hidden bg-white border-2 transition-all duration-200 ${
                   selectedCategory === category.id
-                    ? 'ring-4 ring-black'
-                    : 'hover:ring-2 hover:ring-black'
+                    ? 'border-black'
+                    : 'border-transparent hover:border-gray-300'
                 }`}
               >
                 {/* Image Container */}
@@ -126,29 +104,29 @@ export default function CategorySection({ onCategorySelect }) {
                   <img
                     src={category.image}
                     alt={category.name}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                   />
 
+                  {/* Hover Overlay */}
+                  <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-5 transition-opacity duration-200" />
+                  
                   {/* Arrow Icon */}
-                  <div className="absolute top-2 sm:top-3 right-2 sm:right-3 bg-white rounded-full p-1.5 sm:p-2 opacity-0 group-hover:opacity-100 transform group-hover:translate-x-0 translate-x-2 transition-all duration-300">
-                    <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4 text-black" />
+                  <div className="absolute top-3 right-3 bg-white rounded-full p-2 opacity-0 group-hover:opacity-100 transform translate-x-2 group-hover:translate-x-0 transition-all duration-200">
+                    <ChevronRight className="w-4 h-4 text-black" />
                   </div>
-
-                  {/* Overlay on hover */}
-                  <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-10 transition-opacity duration-300" />
                 </div>
 
-                {/* Content Below Image */}
-                <div className="bg-white p-3 sm:p-4 border-t border-gray-200">
-                  <h3 className="category-name text-sm sm:text-base lg:text-lg text-black mb-1 uppercase">
+                {/* Content */}
+                <div className="p-4 text-left bg-white">
+                  <h3 className="text-base md:text-lg font-bold text-black mb-1 uppercase tracking-tight">
                     {category.name}
                   </h3>
-                  <p className="category-count text-xs sm:text-sm text-gray-600 uppercase">
+                  <p className="text-sm text-gray-600 uppercase tracking-wide font-medium">
                     {category.itemCount}+ Products
                   </p>
                 </div>
 
-                {/* Selected Indicator */}
+                {/* Selected Border */}
                 {selectedCategory === category.id && (
                   <div className="absolute inset-0 border-4 border-black pointer-events-none" />
                 )}

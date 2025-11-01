@@ -1,4 +1,4 @@
-// src/App.jsx - CLEAN (Cart page only)
+// src/App.jsx - WITH POPUP SEARCH
 import { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
@@ -16,11 +16,9 @@ import ScrollToTop from './components/ScrollToTop';
 import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
 import Orders from './pages/Orders';
-// import SearchResults from './pages/SearchResults';
+import SearchResultsPopup from './pages/SearchResults';
 import { AuthProvider } from './contexts/AuthContext';
 import api from './services/api';
-import SearchResults from './pages/SearchResults';
-
 
 function HomePage({
   categories,
@@ -31,17 +29,31 @@ function HomePage({
   selectedCategory,
   setSelectedCategory,
   addToCart,
-
+  toggleWishlist,
+  isInWishlist
 }) {
   const navigate = useNavigate();
+  const [showSearchPopup, setShowSearchPopup] = useState(false);
+  const [debouncedQuery, setDebouncedQuery] = useState('');
 
+  // Debounce search query
   useEffect(() => {
-    if (searchQuery && searchQuery.trim() !== '') {
-      navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
-    }
-  }, [searchQuery, navigate]);
+    const timer = setTimeout(() => {
+      if (searchQuery && searchQuery.trim().length >= 2) {
+        setDebouncedQuery(searchQuery);
+        setShowSearchPopup(true);
+      } else {
+        setShowSearchPopup(false);
+        setDebouncedQuery('');
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   const handleProductClick = (product) => {
+    setShowSearchPopup(false);
+    setSearchQuery('');
     navigate(`/product/${product.id}`);
   };
 
@@ -53,8 +65,12 @@ function HomePage({
   };
 
   const handleCartClick = () => {
-    // Open full Cart page (we removed the sidebar)
     navigate('/cart');
+  };
+
+  const closeSearchPopup = () => {
+    setShowSearchPopup(false);
+    setSearchQuery('');
   };
 
   return (
@@ -84,6 +100,16 @@ function HomePage({
       />
 
       <Footer />
+
+      {/* Search Results Popup Overlay */}
+      {showSearchPopup && (
+        <SearchResultsPopup
+          query={debouncedQuery}
+          onProductClick={handleProductClick}
+          onClose={closeSearchPopup}
+          addToCart={addToCart}
+        />
+      )}
     </>
   );
 }
@@ -119,8 +145,6 @@ export default function App() {
   const [wishlist, setWishlist] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
-
-  // store full cart data too (so Cart.jsx can use it if you want)
   const [cart, setCart] = useState([]);
 
   const categories = [
@@ -143,7 +167,7 @@ export default function App() {
   const refreshCartCount = async () => {
     try {
       const cartData = await api.getCart();
-      setCart(cartData.items || []); // keep full cart items
+      setCart(cartData.items || []);
       setCartCount(cartData.total_items || 0);
     } catch (error) {
       setCart([]);
@@ -160,18 +184,16 @@ export default function App() {
         product.selectedSize || null
       );
   
-      // ✅ Re-fetch the cart from backend to stay accurate
       await refreshCartCount();
       const updatedCart = await api.getCart();
       setCart(updatedCart.items || []);
       setCartCount(updatedCart.total_items || 0);
-      console.log("✅ Added to cart successfully and synced with backend");
+      console.log("✅ Added to cart successfully");
     } catch (error) {
       console.error("❌ Failed to add to cart", error);
       alert(error.message || "Failed to add to cart");
     }
   };
-  
   
   const toggleWishlist = (product) => {
     setWishlist(prev => {
@@ -188,7 +210,6 @@ export default function App() {
     return wishlist.some(item => item.id === productId);
   };
 
-  // removeFromCart and updateQuantity helpers (used by ProductDetailPage or elsewhere)
   const removeFromCart = async (itemId) => {
     try {
       await api.removeFromCart(itemId);
@@ -211,10 +232,8 @@ export default function App() {
     <BrowserRouter>
       <AuthProvider>
         <ScrollToTop />
-        <div className="min-h-screen  bg-white border-y border-gray-200">
+        <div className="min-h-screen bg-white border-y border-gray-200">
           <Routes>
-          <Route path="/search" element={<SearchResults />} />
-
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
 
@@ -265,7 +284,6 @@ export default function App() {
               }
             />
 
-            {/* <Route path="/cart" element={<Cart />} /> */}
             <Route
               path="/cart"
               element={
