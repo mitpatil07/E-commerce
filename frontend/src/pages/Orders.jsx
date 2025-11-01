@@ -24,12 +24,12 @@ export default function Orders() {
     try {
       const data = await api.getOrders();
       const ordersData = Array.isArray(data) ? data : data.results || [];
-      console.log('📦 Orders fetched:', ordersData.length);
+      // console.log('📦 Orders fetched:', ordersData.length);
       
       // Debug: Log the structure of the first order item
       if (ordersData.length > 0 && ordersData[0].items?.length > 0) {
-        console.log('🔍 First order item structure:', JSON.stringify(ordersData[0].items[0], null, 2));
-        console.log('🔍 Available fields:', Object.keys(ordersData[0].items[0]));
+        // console.log('🔍 First order item structure:', JSON.stringify(ordersData[0].items[0], null, 2));
+        // console.log('🔍 Available fields:', Object.keys(ordersData[0].items[0]));
       }
       
       setOrders(ordersData);

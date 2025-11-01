@@ -23,7 +23,7 @@ export default function Checkout() {
   });
   const [showSuccess, setShowSuccess] = useState(false);
   const navigate = useNavigate();
-  console.log("🌍 VITE_API_BASE_URL =", import.meta.env.VITE_API_BASE_URL);
+  // console.log("🌍 VITE_API_BASE_URL =", import.meta.env.VITE_API_BASE_URL);
 
   useEffect(() => {
     // Load Razorpay script
@@ -46,11 +46,11 @@ export default function Checkout() {
     const token = localStorage.getItem('access_token');
     const user = localStorage.getItem('user');
     
-    console.log('🔐 Auth Debug:');
-    console.log('  - Has token:', !!token);
-    console.log('  - Token preview:', token ? token.substring(0, 20) + '...' : 'NONE');
-    console.log('  - Has user:', !!user);
-    console.log('  - User:', user ? JSON.parse(user) : 'NONE');
+    // console.log('🔐 Auth Debug:');
+    // console.log('  - Has token:', !!token);
+    // console.log('  - Token preview:', token ? token.substring(0, 20) + '...' : 'NONE');
+    // console.log('  - Has user:', !!user);
+    // console.log('  - User:', user ? JSON.parse(user) : 'NONE');
     
     if (!token) {
       setError('Please login first');
@@ -71,7 +71,7 @@ export default function Checkout() {
     setError(null);
   
     try {
-      console.log('📦 Creating Razorpay order...');
+      // console.log('📦 Creating Razorpay order...');
       
       const orderPayload = {
         shipping_address: {
@@ -86,12 +86,12 @@ export default function Checkout() {
         }
       };
       
-      console.log('📤 Sending payload:', orderPayload);
+      // console.log('📤 Sending payload:', orderPayload);
       
       // Step 1: Create Razorpay order
       const razorpayData = await api.createRazorpayOrder(orderPayload);
       
-      console.log('✅ Razorpay order created:', razorpayData);
+      // console.log('✅ Razorpay order created:', razorpayData);
       
       // Step 2: Open Razorpay payment modal
       const options = {
@@ -102,7 +102,7 @@ export default function Checkout() {
         description: 'Order Payment',
         order_id: razorpayData.razorpay_order_id,
         handler: async function (response) {
-          console.log('✅ Payment successful:', response);
+          // console.log('✅ Payment successful:', response);
           
           try {
             // Step 3: Verify payment and create order
@@ -120,7 +120,7 @@ export default function Checkout() {
               shipping_country: formData.shipping_country
             });
             
-            console.log('✅ Order created:', orderData);
+            // console.log('✅ Order created:', orderData);
             setShowSuccess(true);
             
             setTimeout(() => {
@@ -146,7 +146,7 @@ export default function Checkout() {
         },
         modal: {
           ondismiss: function() {
-            console.log('⚠️ Payment cancelled by user');
+            // console.log('⚠️ Payment cancelled by user');
             setSubmitting(false);
             setError('Payment was cancelled. Please try again.');
           }

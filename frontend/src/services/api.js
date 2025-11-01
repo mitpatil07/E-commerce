@@ -6,8 +6,8 @@ const API_BASE_URL =
     ? 'https://api.whatyouwear.store/api'
     : '/api');
 
-console.log("🌍 Using API_BASE_URL:", API_BASE_URL);
-console.log("🔧 Environment:", import.meta.env.MODE);
+// console.log("🌍 Using API_BASE_URL:", API_BASE_URL);
+// console.log("🔧 Environment:", import.meta.env.MODE);
 
 const getCookie = (name) => {
   let cookieValue = null;
@@ -63,7 +63,7 @@ const getAuthHeaders = (includeAuth = false) => {
     const token = localStorage.getItem('access_token');
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
-      console.log('🔑 Adding auth header - Token exists:', !!token);
+      // console.log('🔑 Adding auth header - Token exists:', !!token);
     } else {
       console.warn('⚠️ No access token found in localStorage');
     }
@@ -98,24 +98,24 @@ const refreshAccessToken = async () => {
 const fetchWithAuth = async (url, options = {}) => {
   try {
     // Log request details in development
-    if (import.meta.env.DEV) {
-      console.log('🌐 Request:', {
-        url,
-        method: options.method,
-        hasAuth: !!options.headers?.Authorization,
-      });
-    }
+    // if (import.meta.env.DEV) {
+    //   console.log('🌐 Request:', {
+    //     url,
+    //     method: options.method,
+    //     hasAuth: !!options.headers?.Authorization,
+    //   });
+    // }
     
     const response = await fetch(url, options);
     
     // Handle 401 with token refresh
     if (response.status === 401 && options.headers?.Authorization) {
-      console.log('🔄 Token expired, attempting refresh...');
+      // console.log('🔄 Token expired, attempting refresh...');
       try {
         const newToken = await refreshAccessToken();
         const newHeaders = { ...options.headers, Authorization: `Bearer ${newToken}` };
         const retryResponse = await fetch(url, { ...options, headers: newHeaders });
-        console.log('✅ Token refreshed, retry successful');
+        // console.log('✅ Token refreshed, retry successful');
         return retryResponse;
       } catch (refreshError) {
         console.error('❌ Token refresh failed:', refreshError);
@@ -155,25 +155,25 @@ const api = {
   },
 
   login: async (credentials) => {
-    console.log('🔐 Attempting login...');
+    // console.log('🔐 Attempting login...');
     const response = await fetchWithAuth(`${API_BASE_URL}/accounts/login/`, {
       method: 'POST',
       headers: getAuthHeaders(false),
       body: JSON.stringify(credentials),
     });
-    console.log('📥 Response status:', response.status);
+    // console.log('📥 Response status:', response.status);
     const data = await handleResponse(response);
     if (data.tokens) {
       localStorage.setItem('access_token', data.tokens.access);
       localStorage.setItem('refresh_token', data.tokens.refresh);
       localStorage.setItem('user', JSON.stringify(data.user));
-      console.log('✅ Tokens stored successfully');
+      // console.log('✅ Tokens stored successfully');
     }
     return data;
   },
 
   googleLogin: async (token) => {
-    console.log('🔐 Attempting Google login...');
+    // console.log('🔐 Attempting Google login...');
     const response = await fetchWithAuth(`${API_BASE_URL}/accounts/google-login/`, {
       method: 'POST',
       headers: getAuthHeaders(false),
@@ -230,7 +230,7 @@ const api = {
 
   isAuthenticated: () => {
     const hasToken = !!localStorage.getItem('access_token');
-    console.log('🔍 isAuthenticated check:', hasToken);
+    // console.log('🔍 isAuthenticated check:', hasToken);
     return hasToken;
   },
 
@@ -374,7 +374,7 @@ const api = {
   },
 
   createRazorpayOrder: async (orderData = {}) => {
-    console.log('💳 Creating Razorpay order...');
+    // console.log('💳 Creating Razorpay order...');
     
     // CRITICAL: Verify token exists before making request
     const token = localStorage.getItem('access_token');
@@ -382,11 +382,11 @@ const api = {
       throw new Error('Authentication required. Please login first.');
     }
     
-    console.log('🔑 Token check:', {
-      exists: !!token,
-      preview: token.substring(0, 30) + '...',
-      length: token.length
-    });
+    // console.log('🔑 Token check:', {
+    //   exists: !!token,
+    //   preview: token.substring(0, 30) + '...',
+    //   length: token.length
+    // });
     
     const response = await fetchWithAuth(`${API_BASE_URL}/payment/create-order/`, {
       method: 'POST',
@@ -395,12 +395,12 @@ const api = {
     });
     
     const data = await handleResponse(response);
-    console.log('✅ Razorpay order created successfully');
+    // console.log('✅ Razorpay order created successfully');
     return data;
   },
 
   verifyPayment: async (paymentData) => {
-    console.log('✅ Verifying payment...');
+    // console.log('✅ Verifying payment...');
     const response = await fetchWithAuth(`${API_BASE_URL}/payment/verify/`, {
       method: 'POST',
       headers: getAuthHeaders(true),

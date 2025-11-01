@@ -78,9 +78,9 @@ export default function ProductDetailPage({
       setError(null);
 
       try {
-        console.log('🔄 Fetching product details for ID:', id);
+        // console.log('🔄 Fetching product details for ID:', id);
         const data = await api.getProductById(id);
-        console.log('✅ Product data received:', data);
+        // console.log('✅ Product data received:', data);
         
         setProduct(data);
         
@@ -118,7 +118,7 @@ export default function ProductDetailPage({
   
   const handleAddToCart = async () => {
     try {
-      console.log('🛒 Adding to cart:', product.name);
+      // console.log('🛒 Adding to cart:', product.name);
   
       await api.addToCart(product.id, quantity, selectedColor, selectedSize);
   
@@ -132,7 +132,7 @@ export default function ProductDetailPage({
       }
   
       showToastMessage(`${product.name} added to cart!`);
-      console.log('✅ Added to cart successfully');
+      // console.log('✅ Added to cart successfully');
     } catch (err) {
       console.error('❌ Failed to add to cart:', err);
       showToastMessage('Failed to add to cart. Please try again.');

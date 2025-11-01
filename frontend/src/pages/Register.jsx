@@ -1,7 +1,7 @@
-// Register.jsx - Fixed with proper api service
+// Register.jsx - Enhanced with Show/Hide Password
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Lock, Mail, Loader2, UserPlus } from 'lucide-react';
+import { Lock, Mail, Loader2, UserPlus, Eye, EyeOff } from 'lucide-react';
 import api from '../services/api';
 import Footer from '../components/Footer';
 
@@ -15,6 +15,8 @@ const Register = () => {
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -54,12 +56,8 @@ const Register = () => {
     try {
       setLoading(true);
       setError('');
-
-      // ✅ Use api.googleLogin() - returns data directly
       const data = await api.googleLogin(response.credential);
-
-      console.log('✅ Google signup successful');
-
+      // console.log('✅ Google signup successful');
       setTimeout(() => {
         window.location.href = '/';
       }, 100);
@@ -84,7 +82,6 @@ const Register = () => {
     setLoading(true);
     setError('');
 
-    // Validation
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match');
       setLoading(false);
@@ -98,26 +95,19 @@ const Register = () => {
     }
 
     try {
-      console.log('🔍 Attempting registration...');
-
-      // ✅ Use api.register() - returns data directly
+      // console.log('🔍 Attempting registration...');
       const data = await api.register({
         email: formData.email,
         password: formData.password,
         first_name: formData.first_name,
         last_name: formData.last_name
       });
-
-      console.log('✅ Registration successful:', data.user);
-
-      // Tokens are already saved by api.register(), just redirect
+      // console.log('✅ Registration successful:', data.user);
       setTimeout(() => {
         window.location.href = '/';
       }, 100);
     } catch (err) {
       console.error('❌ Registration error:', err);
-
-      // ✅ Handle errors properly
       if (err.message.includes('email')) {
         setError('This email is already registered');
       } else if (err.message.includes('password')) {
@@ -132,202 +122,195 @@ const Register = () => {
 
   return (
     <>
-    <div className="min-h-screen bg-white flex items-center justify-center px-4 py-12">
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
-        
-        .page-title {
-          font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-          font-weight: 900;
-          letter-spacing: -0.04em;
-          line-height: 1;
-        }
-        
-        .button-text {
-          font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-          font-weight: 800;
-          letter-spacing: 0.02em;
-        }
-        
-        .label-text {
-          font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-          font-weight: 700;
-          letter-spacing: -0.01em;
-        }
-      `}</style>
+      <div className="min-h-screen bg-white flex items-center justify-center px-4 py-12">
+        <style>{`
+          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+          .page-title { font-family: 'Inter'; font-weight: 900; letter-spacing: -0.04em; }
+          .button-text { font-family: 'Inter'; font-weight: 800; letter-spacing: 0.02em; }
+          .label-text { font-family: 'Inter'; font-weight: 700; letter-spacing: -0.01em; }
+        `}</style>
 
-      <div className="max-w-md w-full">
-        {/* Header */}
-        <div className="text-center mb-8 sm:mb-10">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-black mb-6">
-            <UserPlus className="w-8 h-8 text-white" />
+        <div className="max-w-md w-full">
+          {/* Header */}
+          <div className="text-center mb-8 sm:mb-10">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-black mb-6">
+              <UserPlus className="w-8 h-8 text-white" />
+            </div>
+            <h1 className="page-title text-3xl sm:text-4xl lg:text-5xl text-black mb-2 uppercase">
+              Create Account
+            </h1>
+            <p className="text-gray-600 text-sm sm:text-base uppercase tracking-wide">
+              Join us and start shopping today
+            </p>
           </div>
-          <h1 className="page-title text-3xl sm:text-4xl lg:text-5xl text-black mb-2 uppercase">
-            Create Account
-          </h1>
-          <p className="text-gray-600 text-sm sm:text-base uppercase tracking-wide">
-            Join us and start shopping today
+
+          {/* Error Message */}
+          {error && (
+            <div className="mb-6 bg-red-50 border-2 border-red-200 p-4">
+              <p className="text-red-800 font-bold text-center text-sm uppercase whitespace-pre-line">{error}</p>
+            </div>
+          )}
+
+          {/* Register Form */}
+          <div className="bg-white border-2 border-gray-300 p-6 sm:p-8">
+            <form onSubmit={handleSubmit} className="space-y-5">
+              {/* Name Fields */}
+              <div className="grid grid-cols-2 gap-3 sm:gap-4">
+                <div>
+                  <label htmlFor="first_name" className="label-text block text-xs sm:text-sm text-black mb-2 uppercase">
+                    First Name
+                  </label>
+                  <input
+                    type="text"
+                    id="first_name"
+                    name="first_name"
+                    value={formData.first_name}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-3 sm:px-4 py-3 border-2 border-gray-300 focus:ring-2 focus:ring-black focus:border-black outline-none transition font-medium text-sm sm:text-base"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="last_name" className="label-text block text-xs sm:text-sm text-black mb-2 uppercase">
+                    Last Name
+                  </label>
+                  <input
+                    type="text"
+                    id="last_name"
+                    name="last_name"
+                    value={formData.last_name}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-3 sm:px-4 py-3 border-2 border-gray-300 focus:ring-2 focus:ring-black focus:border-black outline-none transition font-medium text-sm sm:text-base"
+                  />
+                </div>
+              </div>
+
+              {/* Email Field */}
+              <div>
+                <label htmlFor="email" className="label-text block text-xs sm:text-sm text-black mb-2 uppercase">
+                  Email Address
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 sm:pl-4 flex items-center pointer-events-none">
+                    <Mail className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
+                  </div>
+                  <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    required
+                    className="w-full pl-10 sm:pl-12 pr-4 py-3 border-2 border-gray-300 focus:ring-2 focus:ring-black focus:border-black outline-none transition font-medium text-sm sm:text-base"
+                  />
+                </div>
+              </div>
+
+              {/* Password Field */}
+              <div>
+                <label htmlFor="password" className="label-text block text-xs sm:text-sm text-black mb-2 uppercase">
+                  Password
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 sm:pl-4 flex items-center pointer-events-none">
+                    <Lock className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
+                  </div>
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    id="password"
+                    name="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    required
+                    minLength={8}
+                    className="w-full pl-10 sm:pl-12 pr-10 sm:pr-12 py-3 border-2 border-gray-300 focus:ring-2 focus:ring-black focus:border-black outline-none transition font-medium text-sm sm:text-base"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-black focus:outline-none"
+                  >
+                    {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  </button>
+                </div>
+              </div>
+
+              {/* Confirm Password Field */}
+              <div>
+                <label htmlFor="confirmPassword" className="label-text block text-xs sm:text-sm text-black mb-2 uppercase">
+                  Confirm Password
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 sm:pl-4 flex items-center pointer-events-none">
+                    <Lock className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
+                  </div>
+                  <input
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
+                    required
+                    minLength={8}
+                    className="w-full pl-10 sm:pl-12 pr-10 sm:pr-12 py-3 border-2 border-gray-300 focus:ring-2 focus:ring-black focus:border-black outline-none transition font-medium text-sm sm:text-base"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-black focus:outline-none"
+                  >
+                    {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  </button>
+                </div>
+              </div>
+
+              {/* Submit Button */}
+              <button
+                type="submit"
+                disabled={loading}
+                className="button-text w-full bg-black text-white py-3 sm:py-4 rounded-md text-sm sm:text-base hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 uppercase"
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    Creating Account...
+                  </>
+                ) : (
+                  'Create Account'
+                )}
+              </button>
+            </form>
+
+            {/* Divider */}
+            <div className="mt-8">
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t-2 border-gray-200"></div>
+                </div>
+                <div className="relative flex justify-center text-xs sm:text-sm">
+                  <span className="px-4 bg-white text-gray-500 font-bold uppercase">Or sign up with</span>
+                </div>
+              </div>
+
+              {/* Google Sign Up */}
+              <div className="mt-6">
+                <div id="googleSignUpButton" className="flex justify-center"></div>
+              </div>
+            </div>
+          </div>
+
+          {/* Login Link */}
+          <p className="mt-6 sm:mt-8 text-center text-gray-600 text-sm sm:text-base">
+            Already have an account?{' '}
+            <Link to="/login" className="font-bold text-black hover:underline uppercase">
+              Sign in
+            </Link>
           </p>
         </div>
-
-        {/* Error Message */}
-        {error && (
-          <div className="mb-6 bg-red-50 border-2 border-red-200 p-4">
-            <p className="text-red-800 font-bold text-center text-sm uppercase whitespace-pre-line">{error}</p>
-          </div>
-        )}
-
-        {/* Register Form */}
-        <div className="bg-white border-2 border-gray-300 p-6 sm:p-8">
-          <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Name Fields */}
-            <div className="grid grid-cols-2 gap-3 sm:gap-4">
-              <div>
-                <label htmlFor="first_name" className="label-text block text-xs sm:text-sm text-black mb-2 uppercase">
-                  First Name
-                </label>
-                <input
-                  type="text"
-                  id="first_name"
-                  name="first_name"
-                  value={formData.first_name}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-3 sm:px-4 py-3 border-2 border-gray-300 focus:ring-2 focus:ring-black focus:border-black outline-none transition font-medium text-sm sm:text-base"
-                  // placeholder="John"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="last_name" className="label-text block text-xs sm:text-sm text-black mb-2 uppercase">
-                  Last Name
-                </label>
-                <input
-                  type="text"
-                  id="last_name"
-                  name="last_name"
-                  value={formData.last_name}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-3 sm:px-4 py-3 border-2 border-gray-300 focus:ring-2 focus:ring-black focus:border-black outline-none transition font-medium text-sm sm:text-base"
-                  // placeholder="Doe"
-                />
-              </div>
-            </div>
-
-            {/* Email Field */}
-            <div>
-              <label htmlFor="email" className="label-text block text-xs sm:text-sm text-black mb-2 uppercase">
-                Email Address
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 sm:pl-4 flex items-center pointer-events-none">
-                  <Mail className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
-                </div>
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                  className="w-full pl-10 sm:pl-12 pr-4 py-3 border-2 border-gray-300 focus:ring-2 focus:ring-black focus:border-black outline-none transition font-medium text-sm sm:text-base"
-                  // placeholder="you@example.com"
-                />
-              </div>
-            </div>
-
-            {/* Password Field */}
-            <div>
-              <label htmlFor="password" className="label-text block text-xs sm:text-sm text-black mb-2 uppercase">
-                Password
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 sm:pl-4 flex items-center pointer-events-none">
-                  <Lock className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
-                </div>
-                <input
-                  type="password"
-                  id="password"
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  required
-                  minLength={8}
-                  className="w-full pl-10 sm:pl-12 pr-4 py-3 border-2 border-gray-300 focus:ring-2 focus:ring-black focus:border-black outline-none transition font-medium text-sm sm:text-base"
-                  // placeholder="At least 8 characters"
-                />
-              </div>
-            </div>
-
-            {/* Confirm Password Field */}
-            <div>
-              <label htmlFor="confirmPassword" className="label-text block text-xs sm:text-sm text-black mb-2 uppercase">
-                Confirm Password
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 sm:pl-4 flex items-center pointer-events-none">
-                  <Lock className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
-                </div>
-                <input
-                  type="password"
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  required
-                  minLength={8}
-                  className="w-full pl-10 sm:pl-12 pr-4 py-3 border-2 border-gray-300 focus:ring-2 focus:ring-black focus:border-black outline-none transition font-medium text-sm sm:text-base"
-                  // placeholder="Confirm your password"
-                />
-              </div>
-            </div>
-
-            {/* Submit Button */}
-            <button
-              type="submit"
-              disabled={loading}
-              className="button-text w-full bg-black text-white py-3 sm:py-4 rounded-md text-sm sm:text-base hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 uppercase"
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                  Creating Account...
-                </>
-              ) : (
-                'Create Account'
-              )}
-            </button>
-          </form>
-
-          {/* Divider */}
-          <div className="mt-8">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t-2 border-gray-200"></div>
-              </div>
-              <div className="relative flex justify-center text-xs sm:text-sm">
-                <span className="px-4 bg-white text-gray-500 font-bold uppercase">Or sign up with</span>
-              </div>
-            </div>
-
-            {/* Google Sign Up */}
-            <div className="mt-6">
-              <div id="googleSignUpButton" className="flex justify-center"></div>
-            </div>
-          </div>
-        </div>
-
-        {/* Login Link */}
-        <p className="mt-6 sm:mt-8 text-center text-gray-600 text-sm sm:text-base">
-          Already have an account?{' '}
-          <Link to="/login" className="font-bold text-black hover:underline uppercase">
-            Sign in
-          </Link>
-        </p>
       </div>
-    </div>
-    <Footer/>
+      <Footer />
     </>
   );
 };

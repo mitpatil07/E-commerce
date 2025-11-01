@@ -230,7 +230,7 @@ export default function App() {
       const updatedCart = await api.getCart();
       setCart(updatedCart.items || []);
       setCartCount(updatedCart.total_items || 0);
-      console.log("✅ Added to cart successfully");
+      // console.log("✅ Added to cart successfully");
     } catch (error) {
       console.error("❌ Failed to add to cart", error);
       alert(error.message || "Failed to add to cart");
