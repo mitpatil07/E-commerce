@@ -1,13 +1,10 @@
-// src/services/api.js - Enhanced with better auth handling
+// src/services/api.js - Complete Updated Version for Django ViewSet URLs
 
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL ||
   (import.meta.env.PROD
     ? 'https://api.whatyouwear.store/api'
     : '/api');
-
-// console.log("🌍 Using API_BASE_URL:", API_BASE_URL);
-// console.log("🔧 Environment:", import.meta.env.MODE);
 
 const getCookie = (name) => {
   let cookieValue = null;
@@ -25,7 +22,6 @@ const getCookie = (name) => {
 };
 
 const handleResponse = async (response) => {
-  // Get response text first
   const text = await response.text();
   
   if (!response.ok) {
@@ -36,16 +32,14 @@ const handleResponse = async (response) => {
       error = { message: `HTTP error! status: ${response.status}`, detail: text };
     }
     
-    // Special handling for authentication errors
     if (response.status === 401) {
       const errorMsg = error.detail || error.message || 'Authentication failed';
-      throw new Error(`Failed to create payment order: ${errorMsg}`);
+      throw new Error(`Authentication required: ${errorMsg}`);
     }
     
     throw new Error(error.message || error.detail || error.error || 'An error occurred');
   }
   
-  // Parse successful response
   try {
     return JSON.parse(text);
   } catch {
@@ -63,9 +57,6 @@ const getAuthHeaders = (includeAuth = false) => {
     const token = localStorage.getItem('access_token');
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
-      // console.log('🔑 Adding auth header - Token exists:', !!token);
-    } else {
-      console.warn('⚠️ No access token found in localStorage');
     }
   }
   
@@ -97,28 +88,16 @@ const refreshAccessToken = async () => {
 
 const fetchWithAuth = async (url, options = {}) => {
   try {
-    // Log request details in development
-    // if (import.meta.env.DEV) {
-    //   console.log('🌐 Request:', {
-    //     url,
-    //     method: options.method,
-    //     hasAuth: !!options.headers?.Authorization,
-    //   });
-    // }
-    
     const response = await fetch(url, options);
     
-    // Handle 401 with token refresh
     if (response.status === 401 && options.headers?.Authorization) {
-      // console.log('🔄 Token expired, attempting refresh...');
       try {
         const newToken = await refreshAccessToken();
         const newHeaders = { ...options.headers, Authorization: `Bearer ${newToken}` };
         const retryResponse = await fetch(url, { ...options, headers: newHeaders });
-        // console.log('✅ Token refreshed, retry successful');
         return retryResponse;
       } catch (refreshError) {
-        console.error('❌ Token refresh failed:', refreshError);
+        // console.error('❌ Token refresh failed:', refreshError);
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
         localStorage.removeItem('user');
@@ -133,12 +112,13 @@ const fetchWithAuth = async (url, options = {}) => {
     
     return response;
   } catch (error) {
-    console.error('🚨 Fetch error:', error);
+    // console.error('🚨 Fetch error:', error);
     throw error;
   }
 };
 
 const api = {
+  // ========== AUTHENTICATION ==========
   register: async (userData) => {
     const response = await fetchWithAuth(`${API_BASE_URL}/accounts/register/`, {
       method: 'POST',
@@ -155,25 +135,21 @@ const api = {
   },
 
   login: async (credentials) => {
-    // console.log('🔐 Attempting login...');
     const response = await fetchWithAuth(`${API_BASE_URL}/accounts/login/`, {
       method: 'POST',
       headers: getAuthHeaders(false),
       body: JSON.stringify(credentials),
     });
-    // console.log('📥 Response status:', response.status);
     const data = await handleResponse(response);
     if (data.tokens) {
       localStorage.setItem('access_token', data.tokens.access);
       localStorage.setItem('refresh_token', data.tokens.refresh);
       localStorage.setItem('user', JSON.stringify(data.user));
-      // console.log('✅ Tokens stored successfully');
     }
     return data;
   },
 
   googleLogin: async (token) => {
-    // console.log('🔐 Attempting Google login...');
     const response = await fetchWithAuth(`${API_BASE_URL}/accounts/google-login/`, {
       method: 'POST',
       headers: getAuthHeaders(false),
@@ -199,7 +175,7 @@ const api = {
         });
       }
     } catch (error) {
-      console.warn('Logout API call failed, clearing local storage anyway');
+      // console.warn('Logout API call failed, clearing local storage anyway');
     } finally {
       localStorage.removeItem('access_token');
       localStorage.removeItem('refresh_token');
@@ -229,9 +205,7 @@ const api = {
   },
 
   isAuthenticated: () => {
-    const hasToken = !!localStorage.getItem('access_token');
-    // console.log('🔍 isAuthenticated check:', hasToken);
-    return hasToken;
+    return !!localStorage.getItem('access_token');
   },
 
   getCurrentUser: () => {
@@ -239,6 +213,7 @@ const api = {
     return userStr ? JSON.parse(userStr) : null;
   },
 
+  // ========== PRODUCTS ==========
   getProducts: async (params = {}) => {
     const queryString = new URLSearchParams(params).toString();
     const url = `${API_BASE_URL}/products/${queryString ? `?${queryString}` : ''}`;
@@ -272,6 +247,7 @@ const api = {
     return handleResponse(response);
   },
 
+  // ========== CATEGORIES ==========
   getCategories: async () => {
     const response = await fetchWithAuth(`${API_BASE_URL}/categories/`, {
       method: 'GET',
@@ -280,22 +256,36 @@ const api = {
     return handleResponse(response);
   },
 
+  // ========== CART (ViewSet URLs) ==========
   getCart: async () => {
     try {
+      // console.log('🛒 Fetching cart from:', `${API_BASE_URL}/cart/current/`);
       const response = await fetchWithAuth(`${API_BASE_URL}/cart/current/`, {
         method: 'GET',
         credentials: 'include',
         headers: getAuthHeaders(true),
       });
-      return await handleResponse(response);
+      const data = await handleResponse(response);
+      // console.log('✅ Cart data received:', data);
+      return data;
     } catch (error) {
-      console.warn('⚠️ Failed to load cart:', error.message);
+      // console.warn('⚠️ Failed to load cart:', error.message);
       return { items: [], total_items: 0, total_price: 0 };
     }
   },
 
   addToCart: async (productId, quantity = 1, selectedColor = null, selectedSize = null) => {
     const csrfToken = getCookie('csrftoken');
+    const payload = {
+      product_id: productId,
+      quantity: quantity,
+      selected_color: selectedColor,
+      selected_size: selectedSize,
+    };
+    
+    // console.log('➕ Adding to cart:', payload);
+    // console.log('🔗 URL:', `${API_BASE_URL}/cart/add_item/`);
+    
     const response = await fetchWithAuth(`${API_BASE_URL}/cart/add_item/`, {
       method: 'POST',
       credentials: 'include',
@@ -303,18 +293,18 @@ const api = {
         ...getAuthHeaders(api.isAuthenticated()),
         'X-CSRFToken': csrfToken,
       },
-      body: JSON.stringify({
-        product_id: productId,
-        quantity: quantity,
-        selected_color: selectedColor,
-        selected_size: selectedSize,
-      }),
+      body: JSON.stringify(payload),
     });
-    return handleResponse(response);
+    
+    const data = await handleResponse(response);
+    // console.log('✅ Add to cart response:', data);
+    return data;
   },
 
   updateCartItem: async (itemId, quantity) => {
     const csrfToken = getCookie('csrftoken');
+    // console.log('📝 Updating cart item:', { itemId, quantity });
+    
     const response = await fetchWithAuth(`${API_BASE_URL}/cart/update_item/`, {
       method: 'PATCH',
       credentials: 'include',
@@ -329,6 +319,8 @@ const api = {
 
   removeFromCart: async (itemId) => {
     const csrfToken = getCookie('csrftoken');
+    // console.log('🗑️ Removing cart item:', itemId);
+    
     const response = await fetchWithAuth(
       `${API_BASE_URL}/cart/remove_item/?item_id=${itemId}`, 
       {
@@ -345,6 +337,8 @@ const api = {
 
   clearCart: async () => {
     const csrfToken = getCookie('csrftoken');
+    // console.log('🗑️ Clearing entire cart');
+    
     const response = await fetchWithAuth(`${API_BASE_URL}/cart/clear/`, {
       method: 'DELETE',
       credentials: 'include',
@@ -356,6 +350,7 @@ const api = {
     return handleResponse(response);
   },
 
+  // ========== ORDERS ==========
   getOrders: async () => {
     const response = await fetchWithAuth(`${API_BASE_URL}/orders/`, {
       method: 'GET',
@@ -373,20 +368,31 @@ const api = {
     return handleResponse(response);
   },
 
+  cancelOrder: async (orderId) => {
+    const response = await fetchWithAuth(`${API_BASE_URL}/orders/${orderId}/cancel/`, {
+      method: 'POST',
+      headers: getAuthHeaders(true),
+    });
+    return handleResponse(response);
+  },
+
+  refundOrder: async (orderId, reason = '') => {
+    const response = await fetchWithAuth(`${API_BASE_URL}/orders/${orderId}/refund/`, {
+      method: 'POST',
+      headers: getAuthHeaders(true),
+      body: JSON.stringify({ reason }),
+    });
+    return handleResponse(response);
+  },
+
+  // ========== PAYMENT ==========
   createRazorpayOrder: async (orderData = {}) => {
     // console.log('💳 Creating Razorpay order...');
     
-    // CRITICAL: Verify token exists before making request
     const token = localStorage.getItem('access_token');
     if (!token) {
       throw new Error('Authentication required. Please login first.');
     }
-    
-    // console.log('🔑 Token check:', {
-    //   exists: !!token,
-    //   preview: token.substring(0, 30) + '...',
-    //   length: token.length
-    // });
     
     const response = await fetchWithAuth(`${API_BASE_URL}/payment/create-order/`, {
       method: 'POST',
@@ -409,6 +415,7 @@ const api = {
     return handleResponse(response);
   },
 
+  // ========== REVIEWS ==========
   getReviews: async (productId) => {
     const response = await fetchWithAuth(
       `${API_BASE_URL}/reviews/?product_id=${productId}`, 
@@ -425,24 +432,6 @@ const api = {
       method: 'POST',
       headers: getAuthHeaders(true),
       body: JSON.stringify({ product_id: productId, rating, comment }),
-    });
-    return handleResponse(response);
-  },
-  
-  cancelOrder: async (orderId) => {
-    const response = await fetchWithAuth(`${API_BASE_URL}/orders/${orderId}/cancel/`, {
-      method: 'POST',
-      headers: getAuthHeaders(true),
-    });
-    return handleResponse(response);
-  },
-
-  // ✅ Request refund
-  refundOrder: async (orderId, reason = '') => {
-    const response = await fetchWithAuth(`${API_BASE_URL}/orders/${orderId}/refund/`, {
-      method: 'POST',
-      headers: getAuthHeaders(true),
-      body: JSON.stringify({ reason }),
     });
     return handleResponse(response);
   },

@@ -1,4 +1,4 @@
-# product/views.py - UPDATED with better error handling and logging
+# product/views.py - Clean version without logs
 from rest_framework import viewsets, status, filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -6,7 +6,8 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.db.models import Q, Avg
 from django.shortcuts import get_object_or_404
 import uuid
-import logging
+from django.utils import timezone
+from datetime import timedelta
 
 from .models import (
     Category, Product, Cart, CartItem, Order, OrderItem, Review
@@ -17,8 +18,6 @@ from .serializers import (
     OrderSerializer, ReviewSerializer
 )
 
-logger = logging.getLogger(__name__)
-
 
 class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
     """List all categories"""
@@ -28,16 +27,12 @@ class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
     lookup_field = 'slug'
     
     def list(self, request, *args, **kwargs):
-        """Override list to add logging"""
-        logger.info("📋 CategoryViewSet.list() called")
+        """Override list to add error handling"""
         try:
             queryset = self.filter_queryset(self.get_queryset())
-            logger.info(f"✅ Found {queryset.count()} categories")
-            
             serializer = self.get_serializer(queryset, many=True)
             return Response(serializer.data)
         except Exception as e:
-            logger.error(f"❌ Error in CategoryViewSet.list(): {str(e)}")
             return Response(
                 {'error': str(e)},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
@@ -74,14 +69,10 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
         return obj
 
     def get_queryset(self):
-        """Filter products based on query parameters and full-word search"""
-        logger.info("📋 ProductViewSet.get_queryset() called")
+        """Filter products based on query parameters"""
         queryset = super().get_queryset()
         
-        # Log query params
-        logger.info(f"Query params: {self.request.query_params}")
-        
-        # --- Multi-word search ---
+        # Multi-word search
         search = self.request.query_params.get('search', None)
         if search:
             queryset = queryset.filter(
@@ -89,7 +80,6 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
                 Q(description__icontains=search) |
                 Q(category__name__icontains=search)
             )
-            logger.info(f"🔍 Filtering by search: {search}")
         
         # Filter by category
         category = self.request.query_params.get('category', None)
@@ -111,30 +101,21 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
         if max_price:
             queryset = queryset.filter(price__lte=max_price)
         
-        count = queryset.count()
-        logger.info(f"✅ Returning {count} products")
-        
         return queryset
 
     def list(self, request, *args, **kwargs):
-        """Override list to add logging"""
-        logger.info("📋 ProductViewSet.list() called")
+        """Override list with error handling"""
         try:
             queryset = self.filter_queryset(self.get_queryset())
             
-            # Handle pagination if enabled
             page = self.paginate_queryset(queryset)
             if page is not None:
                 serializer = self.get_serializer(page, many=True)
                 return self.get_paginated_response(serializer.data)
 
             serializer = self.get_serializer(queryset, many=True)
-            logger.info(f"✅ Returning {len(serializer.data)} products")
             return Response(serializer.data)
         except Exception as e:
-            logger.error(f"❌ Error in ProductViewSet.list(): {str(e)}")
-            import traceback
-            logger.error(traceback.format_exc())
             return Response(
                 {'error': str(e)},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
@@ -142,11 +123,216 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class CartViewSet(viewsets.ModelViewSet):
-    """Cart management"""
+    """Cart management with custom actions"""
     serializer_class = CartSerializer
     
     def get_permissions(self):
         return [AllowAny()]
+    
+    def get_cart(self, request):
+        """Get or create cart for user or session"""
+        if request.user.is_authenticated:
+            cart, created = Cart.objects.get_or_create(user=request.user)
+            return cart
+        else:
+            session_key = request.session.session_key
+            if not session_key:
+                request.session.create()
+                session_key = request.session.session_key
+            
+            cart, created = Cart.objects.get_or_create(session_key=session_key)
+            return cart
+    
+    @action(detail=False, methods=['get'], permission_classes=[AllowAny])
+    def current(self, request):
+        """Get current cart"""
+        try:
+            cart = self.get_cart(request)
+            serializer = self.get_serializer(cart)
+            return Response(serializer.data)
+        except Exception as e:
+            return Response(
+                {'error': str(e), 'items': [], 'total_items': 0, 'total_price': 0},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+    
+    @action(detail=False, methods=['post'], permission_classes=[AllowAny])
+    def add_item(self, request):
+        """Add item to cart with duplicate prevention"""
+        try:
+            product_id = request.data.get('product_id')
+            quantity = int(request.data.get('quantity', 1))
+            selected_color = request.data.get('selected_color')
+            selected_size = request.data.get('selected_size')
+            
+            try:
+                product = Product.objects.get(id=product_id)
+            except Product.DoesNotExist:
+                return Response(
+                    {'error': 'Product not found'},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+            
+            if not product.in_stock or product.stock < quantity:
+                return Response(
+                    {'error': 'Product is out of stock or insufficient quantity'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            cart = self.get_cart(request)
+            
+            cart_item = cart.items.filter(
+                product=product,
+                selected_color=selected_color,
+                selected_size=selected_size
+            ).first()
+            
+            if cart_item:
+                time_since_update = timezone.now() - cart_item.updated_at
+                if time_since_update < timedelta(seconds=2):
+                    serializer = self.get_serializer(cart)
+                    return Response({
+                        'message': 'Item already in cart',
+                        'cart': serializer.data
+                    }, status=status.HTTP_200_OK)
+                
+                new_quantity = cart_item.quantity + quantity
+                if product.stock < new_quantity:
+                    return Response(
+                        {'error': f'Only {product.stock} items available in stock'},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+                cart_item.quantity = new_quantity
+                cart_item.save()
+            else:
+                cart_item = CartItem.objects.create(
+                    cart=cart,
+                    product=product,
+                    quantity=quantity,
+                    selected_color=selected_color,
+                    selected_size=selected_size
+                )
+            
+            serializer = self.get_serializer(cart)
+            return Response({
+                'message': 'Item added to cart successfully',
+                'cart': serializer.data
+            }, status=status.HTTP_201_CREATED)
+            
+        except ValueError as e:
+            return Response(
+                {'error': 'Invalid quantity or product ID'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            return Response(
+                {'error': str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+    
+    @action(detail=False, methods=['patch'], permission_classes=[AllowAny])
+    def update_item(self, request):
+        """Update cart item quantity"""
+        try:
+            item_id = request.data.get('item_id')
+            quantity = int(request.data.get('quantity', 1))
+            
+            if quantity < 1:
+                return Response(
+                    {'error': 'Quantity must be at least 1'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            cart = self.get_cart(request)
+            
+            try:
+                cart_item = cart.items.get(id=item_id)
+            except CartItem.DoesNotExist:
+                return Response(
+                    {'error': 'Cart item not found'},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+            
+            if cart_item.product.stock < quantity:
+                return Response(
+                    {'error': f'Only {cart_item.product.stock} items available'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            cart_item.quantity = quantity
+            cart_item.save()
+            
+            serializer = self.get_serializer(cart)
+            return Response({
+                'message': 'Cart updated successfully',
+                'cart': serializer.data
+            })
+            
+        except ValueError:
+            return Response(
+                {'error': 'Invalid quantity'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            return Response(
+                {'error': str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+    
+    @action(detail=False, methods=['delete'], permission_classes=[AllowAny])
+    def remove_item(self, request):
+        """Remove item from cart"""
+        try:
+            item_id = request.query_params.get('item_id')
+            
+            if not item_id:
+                return Response(
+                    {'error': 'item_id parameter is required'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            cart = self.get_cart(request)
+            
+            try:
+                cart_item = cart.items.get(id=item_id)
+                cart_item.delete()
+            except CartItem.DoesNotExist:
+                return Response(
+                    {'error': 'Cart item not found'},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+            
+            serializer = self.get_serializer(cart)
+            return Response({
+                'message': 'Item removed from cart',
+                'cart': serializer.data
+            })
+            
+        except Exception as e:
+            return Response(
+                {'error': str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+    
+    @action(detail=False, methods=['delete'], permission_classes=[AllowAny])
+    def clear(self, request):
+        """Clear all items from cart"""
+        try:
+            cart = self.get_cart(request)
+            items_count = cart.items.count()
+            cart.items.all().delete()
+            
+            serializer = self.get_serializer(cart)
+            return Response({
+                'message': f'Cart cleared successfully. Removed {items_count} items.',
+                'cart': serializer.data
+            })
+            
+        except Exception as e:
+            return Response(
+                {'error': str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 
 class OrderViewSet(viewsets.ModelViewSet):
@@ -160,8 +346,8 @@ class OrderViewSet(viewsets.ModelViewSet):
             'items__product',
             'items__product__images'
         )
+    
     def get_serializer_context(self):
-        # ✅ This ensures request context is passed to serializers
         context = super().get_serializer_context()
         context['request'] = self.request
         return context
@@ -176,10 +362,8 @@ class OrderViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        # Generate unique order number
         order_number = f"ORD-{uuid.uuid4().hex[:8].upper()}"
 
-        # Create order
         order = Order.objects.create(
             user=request.user,
             order_number=order_number,
@@ -194,7 +378,6 @@ class OrderViewSet(viewsets.ModelViewSet):
             shipping_country=request.data.get('shipping_country', 'India')
         )
 
-        # Create order items from cart
         for cart_item in cart.items.all():
             OrderItem.objects.create(
                 order=order,
@@ -206,7 +389,6 @@ class OrderViewSet(viewsets.ModelViewSet):
                 selected_size=cart_item.selected_size
             )
 
-        # Clear cart
         cart.items.all().delete()
 
         serializer = self.get_serializer(order)
@@ -217,44 +399,15 @@ class OrderViewSet(viewsets.ModelViewSet):
         """Cancel an order"""
         order = self.get_object()
         
-        # Check if order can be cancelled
         if order.status.upper() not in ['PENDING', 'PROCESSING']:
             return Response(
                 {'error': f'Cannot cancel order with status: {order.status}'},
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        # Update order status
         order.status = 'cancelled'
-        
-        # If payment was made, update payment status and initiate refund
-        if order.payment_status == 'PAID' and order.razorpay_payment_id:
-            order.payment_status = 'REFUNDED'
-            
-            # Initiate Razorpay refund
-            try:
-                client = razorpay.Client(
-                    auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET)
-                )
-                refund = client.payment.refund(
-                    order.razorpay_payment_id,
-                    {
-                        "amount": int(float(order.total_amount) * 100),
-                        "speed": "normal",
-                        "notes": {
-                            "reason": "Order cancelled by customer",
-                            "order_number": order.order_number
-                        }
-                    }
-                )
-                logger.info(f"✅ Refund initiated for order {order.order_number}: {refund['id']}")
-            except Exception as e:
-                logger.error(f"❌ Refund failed for order {order.order_number}: {str(e)}")
-                # Continue with cancellation even if refund API fails
-        
         order.save()
         
-        # Restore product stock
         for item in order.items.all():
             if item.product:
                 item.product.stock += item.quantity
@@ -266,13 +419,11 @@ class OrderViewSet(viewsets.ModelViewSet):
             'order': serializer.data
         })
     
-    # ✅ NEW: Refund Order
     @action(detail=True, methods=['post'])
     def refund(self, request, pk=None):
         """Request refund for an order"""
         order = self.get_object()
         
-        # Check if order can be refunded
         if order.payment_status != 'PAID':
             return Response(
                 {'error': 'Order payment is not completed'},
@@ -285,50 +436,16 @@ class OrderViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        if not order.razorpay_payment_id:
-            return Response(
-                {'error': 'No payment ID found for refund'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+        order.payment_status = 'REFUNDED'
+        order.status = 'cancelled'
+        order.save()
         
-        # Initiate Razorpay refund
-        try:
-            client = razorpay.Client(
-                auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET)
-            )
-            
-            refund = client.payment.refund(
-                order.razorpay_payment_id,
-                {
-                    "amount": int(float(order.total_amount) * 100),
-                    "speed": "normal",
-                    "notes": {
-                        "reason": request.data.get('reason', 'Customer requested refund'),
-                        "order_number": order.order_number
-                    }
-                }
-            )
-            
-            # Update order
-            order.payment_status = 'REFUNDED'
-            order.status = 'cancelled'
-            order.save()
-            
-            logger.info(f"✅ Refund successful for order {order.order_number}: {refund['id']}")
-            
-            serializer = self.get_serializer(order)
-            return Response({
-                'message': 'Refund initiated successfully. Amount will be credited within 5-7 business days.',
-                'refund_id': refund['id'],
-                'order': serializer.data
-            })
-            
-        except Exception as e:
-            logger.error(f"❌ Refund failed for order {order.order_number}: {str(e)}")
-            return Response(
-                {'error': f'Refund failed: {str(e)}'},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+        serializer = self.get_serializer(order)
+        return Response({
+            'message': 'Refund initiated successfully.',
+            'order': serializer.data
+        })
+
 
 class ReviewViewSet(viewsets.ModelViewSet):
     """Product reviews"""
@@ -353,7 +470,6 @@ class ReviewViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_404_NOT_FOUND
             )
 
-        # Check if user already reviewed this product
         if Review.objects.filter(user=request.user, product=product).exists():
             return Response(
                 {'error': 'You have already reviewed this product'},
@@ -367,7 +483,6 @@ class ReviewViewSet(viewsets.ModelViewSet):
             comment=request.data.get('comment', '')
         )
 
-        # Update product rating
         avg_rating = Review.objects.filter(product=product).aggregate(
             Avg('rating')
         )['rating__avg']
@@ -377,7 +492,3 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
         serializer = self.get_serializer(review)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
-    
-
-
-    

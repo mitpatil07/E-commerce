@@ -107,7 +107,7 @@ const Register = () => {
         window.location.href = '/';
       }, 100);
     } catch (err) {
-      console.error('❌ Registration error:', err);
+      // console.error('❌ Registration error:', err);
       if (err.message.includes('email')) {
         setError('This email is already registered');
       } else if (err.message.includes('password')) {

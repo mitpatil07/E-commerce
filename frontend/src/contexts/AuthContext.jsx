@@ -1,4 +1,4 @@
-// src/contexts/AuthContext.jsx - Fixed with proper api service
+// src/contexts/AuthContext.jsx - Clean version without console logs
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import api from '../services/api';
 
@@ -16,7 +16,6 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Check authentication on mount
   useEffect(() => {
     checkAuth();
   }, []);
@@ -29,13 +28,10 @@ export const AuthProvider = ({ children }) => {
       if (accessToken && userData) {
         const parsedUser = JSON.parse(userData);
         setUser(parsedUser);
-        console.log('✅ User is logged in:', parsedUser.email);
       } else {
         setUser(null);
-        console.log('❌ User not logged in');
       }
     } catch (error) {
-      console.error('Error checking auth:', error);
       setUser(null);
     } finally {
       setLoading(false);
@@ -44,28 +40,20 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (credentials) => {
     try {
-      // ✅ api.login() returns data directly
       const data = await api.login(credentials);
-      
       setUser(data.user);
-      console.log('✅ Login successful');
       return data;
     } catch (error) {
-      console.error('❌ Login error:', error);
       throw error;
     }
   };
 
   const register = async (userData) => {
     try {
-      // ✅ api.register() returns data directly
       const data = await api.register(userData);
-      
       setUser(data.user);
-      console.log('✅ Registration successful');
       return data;
     } catch (error) {
-      console.error('❌ Registration error:', error);
       throw error;
     }
   };
@@ -74,17 +62,13 @@ export const AuthProvider = ({ children }) => {
     try {
       await api.logout();
       setUser(null);
-      console.log('✅ Logged out successfully');
     } catch (error) {
-      console.error('Logout error:', error);
-      // Still clear local state even if API call fails
       setUser(null);
     }
   };
 
   const updateUserProfile = async (profileData) => {
     try {
-      // ✅ api.updateProfile() returns data directly
       const data = await api.updateProfile(profileData);
       
       if (data.user) {
@@ -92,7 +76,6 @@ export const AuthProvider = ({ children }) => {
       }
       return data;
     } catch (error) {
-      console.error('Error updating profile:', error);
       throw error;
     }
   };

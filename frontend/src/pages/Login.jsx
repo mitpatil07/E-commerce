@@ -85,7 +85,7 @@ const Login = () => {
         window.location.href = location.state?.from || '/';
       }, 100);
     } catch (err) {
-      console.error('❌ Login error:', err);
+      // console.error('❌ Login error:', err);
       if (err.message.includes('Invalid')) {
         setError('Invalid email or password');
       } else {

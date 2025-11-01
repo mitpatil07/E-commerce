@@ -1,4 +1,4 @@
-# accounts/views.py - COMPLETE UPDATED VERSION
+# accounts/views.py - Clean version without logs
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -9,10 +9,8 @@ from django.contrib.auth.hashers import make_password
 from google.oauth2 import id_token
 from google.auth.transport import requests
 from django.conf import settings
-import logging
 
 User = get_user_model()
-logger = logging.getLogger(__name__)
 
 
 class RegisterUserView(APIView):
@@ -20,30 +18,23 @@ class RegisterUserView(APIView):
     
     def post(self, request):
         """Register a new user"""
-        logger.info("📝 Registration request received")
-        
         email = request.data.get('email')
         password = request.data.get('password')
         first_name = request.data.get('first_name', '')
         last_name = request.data.get('last_name', '')
         
-        # Validation
         if not email or not password:
-            logger.warning("❌ Missing email or password")
             return Response({
                 'success': False,
                 'message': 'Email and password are required'
             }, status=status.HTTP_400_BAD_REQUEST)
         
-        # Check if user already exists
         if User.objects.filter(email=email).exists():
-            logger.warning(f"❌ User already exists: {email}")
             return Response({
                 'success': False,
                 'message': 'User with this email already exists'
             }, status=status.HTTP_400_BAD_REQUEST)
         
-        # Create user
         try:
             user = User.objects.create(
                 email=email,
@@ -53,10 +44,7 @@ class RegisterUserView(APIView):
                 password=make_password(password)
             )
             
-            # Generate tokens
             refresh = RefreshToken.for_user(user)
-            
-            logger.info(f"✅ User registered successfully: {email}")
             
             return Response({
                 'success': True,
@@ -74,7 +62,6 @@ class RegisterUserView(APIView):
             }, status=status.HTTP_201_CREATED)
             
         except Exception as e:
-            logger.error(f"❌ Error creating user: {str(e)}")
             return Response({
                 'success': False,
                 'message': f'Error creating user: {str(e)}'
@@ -86,63 +73,37 @@ class LoginView(APIView):
     
     def post(self, request):
         """Login user with email and password"""
-        logger.info("=" * 60)
-        logger.info("🔐 LOGIN REQUEST RECEIVED")
-        logger.info(f"Request data keys: {list(request.data.keys())}")
-        logger.info("=" * 60)
-        
         email = request.data.get('email')
         password = request.data.get('password')
         
-        logger.info(f"📧 Email: {email}")
-        logger.info(f"🔑 Password provided: {bool(password)}")
-        
-        # Validation
         if not email or not password:
-            logger.warning("❌ Missing credentials")
             return Response({
                 'success': False,
                 'message': 'Email and password are required'
             }, status=status.HTTP_400_BAD_REQUEST)
         
-        # Try to get user by email
         try:
             user = User.objects.get(email=email)
-            logger.info(f"✅ User found: {user.email}")
-            logger.info(f"   Active: {user.is_active}")
-            logger.info(f"   Has password: {user.has_usable_password()}")
         except User.DoesNotExist:
-            logger.warning(f"❌ User not found: {email}")
             return Response({
                 'success': False,
                 'message': 'Invalid email or password'
             }, status=status.HTTP_401_UNAUTHORIZED)
         
-        # Check password
-        password_valid = user.check_password(password)
-        logger.info(f"🔐 Password check: {password_valid}")
-        
-        if not password_valid:
-            logger.warning("❌ Invalid password")
+        if not user.check_password(password):
             return Response({
                 'success': False,
                 'message': 'Invalid email or password'
             }, status=status.HTTP_401_UNAUTHORIZED)
         
-        # Check if user is active
         if not user.is_active:
-            logger.warning("❌ User account is disabled")
             return Response({
                 'success': False,
                 'message': 'Account is disabled'
             }, status=status.HTTP_401_UNAUTHORIZED)
         
-        # Generate tokens
         try:
             refresh = RefreshToken.for_user(user)
-            logger.info("✅ Tokens generated successfully")
-            logger.info("✅ Login successful")
-            logger.info("=" * 60)
             
             return Response({
                 'success': True,
@@ -160,7 +121,6 @@ class LoginView(APIView):
             }, status=status.HTTP_200_OK)
             
         except Exception as e:
-            logger.error(f"❌ Error generating tokens: {str(e)}")
             return Response({
                 'success': False,
                 'message': f'Error generating tokens: {str(e)}'
@@ -172,8 +132,6 @@ class GoogleLoginView(APIView):
     
     def post(self, request):
         """Login/Register user with Google OAuth"""
-        logger.info("🔐 Google login request received")
-        
         token = request.data.get('token')
         
         if not token:
@@ -183,21 +141,16 @@ class GoogleLoginView(APIView):
             }, status=status.HTTP_400_BAD_REQUEST)
         
         try:
-            # Verify the token with Google
             idinfo = id_token.verify_oauth2_token(
                 token, 
                 requests.Request(), 
                 getattr(settings, 'GOOGLE_CLIENT_ID', None)
             )
             
-            # Get user info from token
             email = idinfo['email']
             first_name = idinfo.get('given_name', '')
             last_name = idinfo.get('family_name', '')
             
-            logger.info(f"✅ Google token verified for: {email}")
-            
-            # Get or create user
             user, created = User.objects.get_or_create(
                 email=email,
                 defaults={
@@ -208,10 +161,7 @@ class GoogleLoginView(APIView):
                 }
             )
             
-            # Generate tokens
             refresh = RefreshToken.for_user(user)
-            
-            logger.info(f"✅ Google login successful: {email} (created={created})")
             
             return Response({
                 'success': True,
@@ -229,13 +179,11 @@ class GoogleLoginView(APIView):
             }, status=status.HTTP_200_OK)
             
         except ValueError as e:
-            logger.error(f"❌ Invalid Google token: {str(e)}")
             return Response({
                 'success': False,
                 'message': 'Invalid token'
             }, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
-            logger.error(f"❌ Google login error: {str(e)}")
             return Response({
                 'success': False,
                 'message': f'Error during Google login: {str(e)}'
@@ -265,7 +213,6 @@ class ProfileView(APIView):
         """Update user profile"""
         user = request.user
         
-        # Update allowed fields
         first_name = request.data.get('first_name')
         last_name = request.data.get('last_name')
         phone = request.data.get('phone')
@@ -281,8 +228,6 @@ class ProfileView(APIView):
             user.address = address
         
         user.save()
-        
-        logger.info(f"✅ Profile updated for: {user.email}")
         
         return Response({
             'success': True,
@@ -312,11 +257,8 @@ class LogoutView(APIView):
                     'message': 'Refresh token is required'
                 }, status=status.HTTP_400_BAD_REQUEST)
             
-            # Blacklist the refresh token
             token = RefreshToken(refresh_token)
             token.blacklist()
-            
-            logger.info(f"✅ User logged out: {request.user.email}")
             
             return Response({
                 'success': True,
@@ -324,7 +266,6 @@ class LogoutView(APIView):
             }, status=status.HTTP_200_OK)
             
         except Exception as e:
-            logger.error(f"❌ Logout error: {str(e)}")
             return Response({
                 'success': False,
                 'message': 'Invalid token or already logged out'

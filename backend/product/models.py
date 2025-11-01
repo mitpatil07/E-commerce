@@ -11,6 +11,7 @@ class Category(models.Model):
     description = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    
 
     class Meta:
         verbose_name_plural = 'Categories'
@@ -146,6 +147,7 @@ class CartItem(models.Model):
     selected_color = models.CharField(max_length=50, blank=True, null=True)
     selected_size = models.CharField(max_length=10, blank=True, null=True)
     added_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         # Allow multiple cart items with different color/size combinations

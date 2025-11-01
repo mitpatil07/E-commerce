@@ -41,9 +41,9 @@ export default function Orders() {
       const response = await api.cancelOrder(orderId);
       await fetchOrders();
       setShowConfirmModal(null);
-      alert(response.message || 'Order cancelled successfully! Any payment made will be refunded within 5-7 business days.');
+      // alert(response.message || 'Order cancelled successfully! Any payment made will be refunded within 5-7 business days.');
     } catch (err) {
-      alert(err.message || 'Failed to cancel order');
+      // alert(err.message || 'Failed to cancel order');
     } finally {
       setActionLoading(null);
     }
@@ -51,7 +51,7 @@ export default function Orders() {
 
   const handleRefundOrder = async (orderId) => {
     if (!refundReason.trim()) {
-      alert('Please provide a reason for refund');
+      // alert('Please provide a reason for refund');
       return;
     }
     
@@ -61,9 +61,9 @@ export default function Orders() {
       await fetchOrders();
       setShowConfirmModal(null);
       setRefundReason('');
-      alert(response.message || 'Refund request submitted successfully! Amount will be refunded within 5-7 business days.');
+      // alert(response.message || 'Refund request submitted successfully! Amount will be refunded within 5-7 business days.');
     } catch (err) {
-      alert(err.message || 'Failed to process refund');
+      // alert(err.message || 'Failed to process refund');
     } finally {
       setActionLoading(null);
     }
