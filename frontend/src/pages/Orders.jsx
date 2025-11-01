@@ -1,7 +1,7 @@
-// frontend/src/pages/Orders.jsx
+// frontend/src/pages/Orders.jsx - COMPLETE REPLACEMENT
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Package, Loader2, CheckCircle, Clock, Truck, XCircle, CreditCard, ChevronDown, ChevronUp } from 'lucide-react';
+import { Package, Loader2, CheckCircle, Clock, Truck, XCircle, CreditCard, ChevronDown, ChevronUp, AlertCircle, RefreshCw } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import api from '../services/api';
@@ -10,6 +10,9 @@ export default function Orders() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [expandedOrders, setExpandedOrders] = useState(new Set());
+  const [actionLoading, setActionLoading] = useState(null);
+  const [showConfirmModal, setShowConfirmModal] = useState(null);
+  const [refundReason, setRefundReason] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -24,19 +27,45 @@ export default function Orders() {
     try {
       const data = await api.getOrders();
       const ordersData = Array.isArray(data) ? data : data.results || [];
-      // console.log('📦 Orders fetched:', ordersData.length);
-      
-      // Debug: Log the structure of the first order item
-      if (ordersData.length > 0 && ordersData[0].items?.length > 0) {
-        // console.log('🔍 First order item structure:', JSON.stringify(ordersData[0].items[0], null, 2));
-        // console.log('🔍 Available fields:', Object.keys(ordersData[0].items[0]));
-      }
-      
       setOrders(ordersData);
       setLoading(false);
     } catch (err) {
       console.error('Failed to fetch orders:', err);
       setLoading(false);
+    }
+  };
+
+  const handleCancelOrder = async (orderId) => {
+    setActionLoading(orderId);
+    try {
+      const response = await api.cancelOrder(orderId);
+      await fetchOrders();
+      setShowConfirmModal(null);
+      alert(response.message || 'Order cancelled successfully! Any payment made will be refunded within 5-7 business days.');
+    } catch (err) {
+      alert(err.message || 'Failed to cancel order');
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleRefundOrder = async (orderId) => {
+    if (!refundReason.trim()) {
+      alert('Please provide a reason for refund');
+      return;
+    }
+    
+    setActionLoading(orderId);
+    try {
+      const response = await api.refundOrder(orderId, refundReason);
+      await fetchOrders();
+      setShowConfirmModal(null);
+      setRefundReason('');
+      alert(response.message || 'Refund request submitted successfully! Amount will be refunded within 5-7 business days.');
+    } catch (err) {
+      alert(err.message || 'Failed to process refund');
+    } finally {
+      setActionLoading(null);
     }
   };
 
@@ -124,15 +153,11 @@ export default function Orders() {
     );
   };
 
-  // Enhanced image URL handler with error prevention
   const getImageUrl = (item) => {
-    // Default placeholder as a data URI to prevent network requests
     const PLACEHOLDER = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="200"%3E%3Crect fill="%23f3f4f6" width="200" height="200"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="14" fill="%239ca3af"%3ENo Image%3C/text%3E%3C/svg%3E';
     
-    // Try to find image in different possible locations
     let imageUrl = null;
     
-    // Check all possible image field locations
     if (item.product?.image) {
       imageUrl = item.product.image;
     } else if (item.product_image) {
@@ -142,27 +167,21 @@ export default function Orders() {
     }
 
     if (!imageUrl) {
-      // console.warn('⚠️ No image found for item:', item.product_name || item.id);
       return PLACEHOLDER;
     }
 
-    // If already a full URL, return as is
     if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
       return imageUrl;
     }
 
-    // Construct full URL from relative path
     const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api';
     const baseUrl = apiBaseUrl.replace('/api', '');
-    
-    // Ensure proper path construction
     const cleanImageUrl = imageUrl.startsWith('/') ? imageUrl : `/${imageUrl}`;
     const fullUrl = `${baseUrl}${cleanImageUrl}`;
     
     return fullUrl;
   };
 
-  // Component for order item image with error handling
   const OrderItemImage = ({ item }) => {
     const [imgError, setImgError] = useState(false);
     const imageUrl = getImageUrl(item);
@@ -180,13 +199,80 @@ export default function Orders() {
         src={imageUrl}
         alt={item.product_name || 'Product'}
         className="w-full h-full object-cover"
-        onError={() => {
-          console.error('❌ Image load failed:', item.product_name);
-          setImgError(true);
-        }}
+        onError={() => setImgError(true)}
       />
     );
   };
+
+  // ✅ NEW: Confirmation Modal Component
+  const ConfirmModal = ({ order, type }) => (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-lg max-w-md w-full p-6">
+        <div className="flex items-center gap-3 mb-4">
+          <AlertCircle className={`w-6 h-6 ${type === 'cancel' ? 'text-red-600' : 'text-blue-600'}`} />
+          <h3 className="section-title text-xl text-black uppercase">
+            {type === 'cancel' ? 'Cancel Order' : 'Request Refund'}
+          </h3>
+        </div>
+
+        <p className="text-gray-700 mb-4">
+          {type === 'cancel' 
+            ? 'Are you sure you want to cancel this order? This action cannot be undone.'
+            : 'Please provide a reason for requesting a refund:'
+          }
+        </p>
+
+        {type === 'refund' && (
+          <textarea
+            value={refundReason}
+            onChange={(e) => setRefundReason(e.target.value)}
+            placeholder="Enter reason for refund..."
+            className="w-full border-2 border-gray-300 rounded p-3 mb-4 focus:border-black focus:outline-none"
+            rows="3"
+          />
+        )}
+
+        <div className="bg-gray-50 border border-gray-200 p-3 mb-4">
+          <p className="text-sm text-gray-600 uppercase font-bold mb-1">Order: {order.order_number}</p>
+          <p className="text-lg font-bold">Rs. {parseFloat(order.total_amount).toFixed(2)}</p>
+          {order.payment_status === 'PAID' && (
+            <p className="text-xs text-gray-600 mt-1">
+              ✓ Refund will be processed within 5-7 business days
+            </p>
+          )}
+        </div>
+
+        <div className="flex gap-3">
+          <button
+            onClick={() => {
+              setShowConfirmModal(null);
+              setRefundReason('');
+            }}
+            className="flex-1 px-4 py-2 border-2 border-gray-300 rounded hover:bg-gray-50 button-text uppercase"
+            disabled={actionLoading === order.id}
+          >
+            Cancel
+          </button>
+          <button
+            onClick={() => type === 'cancel' ? handleCancelOrder(order.id) : handleRefundOrder(order.id)}
+            className={`flex-1 px-4 py-2 rounded button-text uppercase text-white ${
+              type === 'cancel' ? 'bg-red-600 hover:bg-red-700' : 'bg-blue-600 hover:bg-blue-700'
+            } ${actionLoading === order.id ? 'opacity-50 cursor-not-allowed' : ''}`}
+            disabled={actionLoading === order.id}
+          >
+            {actionLoading === order.id ? (
+              <span className="flex items-center justify-center gap-2">
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Processing...
+              </span>
+            ) : (
+              type === 'cancel' ? 'Confirm Cancel' : 'Submit Refund'
+            )}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 
   if (loading) {
     return (
@@ -367,6 +453,38 @@ export default function Orders() {
                     {/* Expandable Details */}
                     {isExpanded && (
                       <div className="border-t-2 border-gray-200 p-4 sm:p-6 space-y-6">
+                        {/* ✅ NEW: Action Buttons Section */}
+                        {(order.can_cancel || order.can_refund) && (
+                          <div className="flex flex-wrap gap-3">
+                            {order.can_cancel && (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setShowConfirmModal({ order, type: 'cancel' });
+                                }}
+                                disabled={actionLoading === order.id}
+                                className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 button-text uppercase text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                              >
+                                <XCircle className="w-4 h-4" />
+                                Cancel Order
+                              </button>
+                            )}
+                            {order.can_refund && (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setShowConfirmModal({ order, type: 'refund' });
+                                }}
+                                disabled={actionLoading === order.id}
+                                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 button-text uppercase text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                              >
+                                <RefreshCw className="w-4 h-4" />
+                                Request Refund
+                              </button>
+                            )}
+                          </div>
+                        )}
+
                         {/* Payment Information */}
                         <div className="bg-gray-50 p-4 border border-gray-200">
                           <div className="flex items-center gap-2 mb-3">
@@ -479,6 +597,14 @@ export default function Orders() {
           )}
         </div>
       </div>
+
+      {/* ✅ NEW: Confirmation Modal */}
+      {showConfirmModal && (
+        <ConfirmModal 
+          order={showConfirmModal.order} 
+          type={showConfirmModal.type} 
+        />
+      )}
 
       <Footer />
     </>

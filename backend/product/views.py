@@ -211,7 +211,124 @@ class OrderViewSet(viewsets.ModelViewSet):
 
         serializer = self.get_serializer(order)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
-
+    
+    @action(detail=True, methods=['post'])
+    def cancel(self, request, pk=None):
+        """Cancel an order"""
+        order = self.get_object()
+        
+        # Check if order can be cancelled
+        if order.status.upper() not in ['PENDING', 'PROCESSING']:
+            return Response(
+                {'error': f'Cannot cancel order with status: {order.status}'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Update order status
+        order.status = 'cancelled'
+        
+        # If payment was made, update payment status and initiate refund
+        if order.payment_status == 'PAID' and order.razorpay_payment_id:
+            order.payment_status = 'REFUNDED'
+            
+            # Initiate Razorpay refund
+            try:
+                client = razorpay.Client(
+                    auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET)
+                )
+                refund = client.payment.refund(
+                    order.razorpay_payment_id,
+                    {
+                        "amount": int(float(order.total_amount) * 100),
+                        "speed": "normal",
+                        "notes": {
+                            "reason": "Order cancelled by customer",
+                            "order_number": order.order_number
+                        }
+                    }
+                )
+                logger.info(f"✅ Refund initiated for order {order.order_number}: {refund['id']}")
+            except Exception as e:
+                logger.error(f"❌ Refund failed for order {order.order_number}: {str(e)}")
+                # Continue with cancellation even if refund API fails
+        
+        order.save()
+        
+        # Restore product stock
+        for item in order.items.all():
+            if item.product:
+                item.product.stock += item.quantity
+                item.product.save()
+        
+        serializer = self.get_serializer(order)
+        return Response({
+            'message': 'Order cancelled successfully',
+            'order': serializer.data
+        })
+    
+    # ✅ NEW: Refund Order
+    @action(detail=True, methods=['post'])
+    def refund(self, request, pk=None):
+        """Request refund for an order"""
+        order = self.get_object()
+        
+        # Check if order can be refunded
+        if order.payment_status != 'PAID':
+            return Response(
+                {'error': 'Order payment is not completed'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        if order.status.upper() not in ['DELIVERED', 'SHIPPED']:
+            return Response(
+                {'error': f'Cannot refund order with status: {order.status}'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        if not order.razorpay_payment_id:
+            return Response(
+                {'error': 'No payment ID found for refund'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Initiate Razorpay refund
+        try:
+            client = razorpay.Client(
+                auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET)
+            )
+            
+            refund = client.payment.refund(
+                order.razorpay_payment_id,
+                {
+                    "amount": int(float(order.total_amount) * 100),
+                    "speed": "normal",
+                    "notes": {
+                        "reason": request.data.get('reason', 'Customer requested refund'),
+                        "order_number": order.order_number
+                    }
+                }
+            )
+            
+            # Update order
+            order.payment_status = 'REFUNDED'
+            order.status = 'cancelled'
+            order.save()
+            
+            logger.info(f"✅ Refund successful for order {order.order_number}: {refund['id']}")
+            
+            serializer = self.get_serializer(order)
+            return Response({
+                'message': 'Refund initiated successfully. Amount will be credited within 5-7 business days.',
+                'refund_id': refund['id'],
+                'order': serializer.data
+            })
+            
+        except Exception as e:
+            logger.error(f"❌ Refund failed for order {order.order_number}: {str(e)}")
+            return Response(
+                {'error': f'Refund failed: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 class ReviewViewSet(viewsets.ModelViewSet):
     """Product reviews"""

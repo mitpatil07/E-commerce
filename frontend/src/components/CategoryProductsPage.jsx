@@ -212,7 +212,8 @@ export default function CategoryProductsPage({
         <div className="bg-white border-b border-gray-200">
           <div className="py-6 px-4">
             {/* Title */}
-            <div className="mb-4">
+{/* Title */}
+<div className="mb-12">
               <h1 className="text-4xl md:text-5xl font-black text-black uppercase tracking-tight mb-2">
                 {activeCategory || 'All Products'}
               </h1>

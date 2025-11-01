@@ -428,6 +428,24 @@ const api = {
     });
     return handleResponse(response);
   },
+  
+  cancelOrder: async (orderId) => {
+    const response = await fetchWithAuth(`${API_BASE_URL}/orders/${orderId}/cancel/`, {
+      method: 'POST',
+      headers: getAuthHeaders(true),
+    });
+    return handleResponse(response);
+  },
+
+  // ✅ Request refund
+  refundOrder: async (orderId, reason = '') => {
+    const response = await fetchWithAuth(`${API_BASE_URL}/orders/${orderId}/refund/`, {
+      method: 'POST',
+      headers: getAuthHeaders(true),
+      body: JSON.stringify({ reason }),
+    });
+    return handleResponse(response);
+  },
 };
 
 export default api;

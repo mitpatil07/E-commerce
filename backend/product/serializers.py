@@ -214,6 +214,8 @@ class OrderItemSerializer(serializers.ModelSerializer):
 class OrderSerializer(serializers.ModelSerializer):
     items = serializers.SerializerMethodField()
     payment_method = serializers.SerializerMethodField()  # ✅ Override
+    can_cancel = serializers.SerializerMethodField()  # ✅ NEW
+    can_refund = serializers.SerializerMethodField()  # ✅ NEW
 
     class Meta:
         model = Order
@@ -223,7 +225,8 @@ class OrderSerializer(serializers.ModelSerializer):
             'shipping_name', 'shipping_email', 'shipping_phone',
             'shipping_address', 'shipping_city', 'shipping_state',
             'shipping_zip_code', 'shipping_country',
-            'items', 'created_at', 'updated_at'
+            'items', 'created_at', 'updated_at',
+            'can_cancel', 'can_refund'
         ]
         read_only_fields = ['order_number', 'created_at', 'updated_at']
     
@@ -239,6 +242,18 @@ class OrderSerializer(serializers.ModelSerializer):
     def get_payment_method(self, obj):
         """Return user-friendly payment method string"""
         return obj.get_display_payment_method()
+    
+    def get_can_cancel(self, obj):
+        """Check if order can be cancelled"""
+        return obj.status.upper() in ['PENDING', 'PROCESSING']
+    
+    def get_can_refund(self, obj):
+        """Check if order can be refunded"""
+        return (
+            obj.payment_status == 'PAID' and 
+            obj.status.upper() in ['DELIVERED', 'SHIPPED'] and
+            obj.razorpay_payment_id  # Must have a payment ID to refund
+        )
 
 class ReviewSerializer(serializers.ModelSerializer):
     user = serializers.CharField(source='user.username', read_only=True)
