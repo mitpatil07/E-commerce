@@ -1,4 +1,4 @@
-// src/services/api.js - Complete Updated Version for Django ViewSet URLs
+// src/services/api.js - Complete version with password reset
 
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL ||
@@ -97,7 +97,6 @@ const fetchWithAuth = async (url, options = {}) => {
         const retryResponse = await fetch(url, { ...options, headers: newHeaders });
         return retryResponse;
       } catch (refreshError) {
-        // console.error('❌ Token refresh failed:', refreshError);
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
         localStorage.removeItem('user');
@@ -112,7 +111,6 @@ const fetchWithAuth = async (url, options = {}) => {
     
     return response;
   } catch (error) {
-    // console.error('🚨 Fetch error:', error);
     throw error;
   }
 };
@@ -175,7 +173,7 @@ const api = {
         });
       }
     } catch (error) {
-      // console.warn('Logout API call failed, clearing local storage anyway');
+      // Ignore errors during logout
     } finally {
       localStorage.removeItem('access_token');
       localStorage.removeItem('refresh_token');
@@ -211,6 +209,38 @@ const api = {
   getCurrentUser: () => {
     const userStr = localStorage.getItem('user');
     return userStr ? JSON.parse(userStr) : null;
+  },
+
+  // ========== PASSWORD RESET ==========
+  forgotPassword: async (email) => {
+    const response = await fetchWithAuth(`${API_BASE_URL}/accounts/forgot-password/`, {
+      method: 'POST',
+      headers: getAuthHeaders(false),
+      body: JSON.stringify({ email }),
+    });
+    return handleResponse(response);
+  },
+
+  validateResetToken: async (uidb64, token) => {
+    const response = await fetchWithAuth(`${API_BASE_URL}/accounts/validate-reset-token/${uidb64}/${token}/`, {
+      method: 'GET',  // Changed from POST to GET
+      headers: getAuthHeaders(false),
+      // Removed body - parameters are in URL now
+    });
+    return handleResponse(response);
+  },
+
+  resetPassword: async (uid, token, newPassword) => {
+    const response = await fetchWithAuth(`${API_BASE_URL}/accounts/reset-password/`, {
+      method: 'POST',
+      headers: getAuthHeaders(false),
+      body: JSON.stringify({
+        uid,
+        token,
+        new_password: newPassword,
+      }),
+    });
+    return handleResponse(response);
   },
 
   // ========== PRODUCTS ==========
@@ -256,20 +286,17 @@ const api = {
     return handleResponse(response);
   },
 
-  // ========== CART (ViewSet URLs) ==========
+  // ========== CART ==========
   getCart: async () => {
     try {
-      // console.log('🛒 Fetching cart from:', `${API_BASE_URL}/cart/current/`);
       const response = await fetchWithAuth(`${API_BASE_URL}/cart/current/`, {
         method: 'GET',
         credentials: 'include',
         headers: getAuthHeaders(true),
       });
       const data = await handleResponse(response);
-      // console.log('✅ Cart data received:', data);
       return data;
     } catch (error) {
-      // console.warn('⚠️ Failed to load cart:', error.message);
       return { items: [], total_items: 0, total_price: 0 };
     }
   },
@@ -283,9 +310,6 @@ const api = {
       selected_size: selectedSize,
     };
     
-    // console.log('➕ Adding to cart:', payload);
-    // console.log('🔗 URL:', `${API_BASE_URL}/cart/add_item/`);
-    
     const response = await fetchWithAuth(`${API_BASE_URL}/cart/add_item/`, {
       method: 'POST',
       credentials: 'include',
@@ -297,13 +321,11 @@ const api = {
     });
     
     const data = await handleResponse(response);
-    // console.log('✅ Add to cart response:', data);
     return data;
   },
 
   updateCartItem: async (itemId, quantity) => {
     const csrfToken = getCookie('csrftoken');
-    // console.log('📝 Updating cart item:', { itemId, quantity });
     
     const response = await fetchWithAuth(`${API_BASE_URL}/cart/update_item/`, {
       method: 'PATCH',
@@ -319,7 +341,6 @@ const api = {
 
   removeFromCart: async (itemId) => {
     const csrfToken = getCookie('csrftoken');
-    // console.log('🗑️ Removing cart item:', itemId);
     
     const response = await fetchWithAuth(
       `${API_BASE_URL}/cart/remove_item/?item_id=${itemId}`, 
@@ -337,7 +358,6 @@ const api = {
 
   clearCart: async () => {
     const csrfToken = getCookie('csrftoken');
-    // console.log('🗑️ Clearing entire cart');
     
     const response = await fetchWithAuth(`${API_BASE_URL}/cart/clear/`, {
       method: 'DELETE',
@@ -387,8 +407,6 @@ const api = {
 
   // ========== PAYMENT ==========
   createRazorpayOrder: async (orderData = {}) => {
-    // console.log('💳 Creating Razorpay order...');
-    
     const token = localStorage.getItem('access_token');
     if (!token) {
       throw new Error('Authentication required. Please login first.');
@@ -401,12 +419,10 @@ const api = {
     });
     
     const data = await handleResponse(response);
-    // console.log('✅ Razorpay order created successfully');
     return data;
   },
 
   verifyPayment: async (paymentData) => {
-    // console.log('✅ Verifying payment...');
     const response = await fetchWithAuth(`${API_BASE_URL}/payment/verify/`, {
       method: 'POST',
       headers: getAuthHeaders(true),

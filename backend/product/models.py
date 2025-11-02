@@ -60,6 +60,7 @@ class ProductImage(models.Model):
     image_url = models.URLField(max_length=500, blank=True, null=True)
     is_primary = models.BooleanField(default=False)
     order = models.IntegerField(default=0)
+    color_name = models.CharField(max_length=50, blank=True, null=True)
 
     class Meta:
         ordering = ['order']

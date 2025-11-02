@@ -1,4 +1,4 @@
-// Login.jsx - Updated with Show/Hide Password Toggle
+// Login.jsx - Updated with Forgot Password Link
 import { useState, useEffect } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { Lock, Mail, Loader2, LogIn, Eye, EyeOff } from 'lucide-react';
@@ -47,7 +47,6 @@ const Login = () => {
       setLoading(true);
       setError('');
       const data = await api.googleLogin(response.credential);
-      // console.log('✅ Google login successful');
       setTimeout(() => (window.location.href = '/'), 100);
     } catch (err) {
       setError(err.message || 'An error occurred during Google login');
@@ -80,12 +79,10 @@ const Login = () => {
         password: formData.password,
       });
 
-      // console.log('✅ User logged in:', data.user);
       setTimeout(() => {
         window.location.href = location.state?.from || '/';
       }, 100);
     } catch (err) {
-      // console.error('❌ Login error:', err);
       if (err.message.includes('Invalid')) {
         setError('Invalid email or password');
       } else {
@@ -158,9 +155,17 @@ const Login = () => {
 
               {/* Password */}
               <div>
-                <label htmlFor="password" className="label-text block text-xs sm:text-sm text-black mb-2 uppercase">
-                  Password
-                </label>
+                <div className="flex items-center justify-between mb-2">
+                  <label htmlFor="password" className="label-text block text-xs sm:text-sm text-black uppercase">
+                    Password
+                  </label>
+                  <Link 
+                    to="/forgot-password" 
+                    className="text-xs sm:text-sm font-bold text-black hover:underline uppercase"
+                  >
+                    Forgot?
+                  </Link>
+                </div>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 sm:pl-4 flex items-center pointer-events-none">
                     <Lock className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />

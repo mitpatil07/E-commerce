@@ -1,4 +1,4 @@
-// ProductDetailPage.jsx - FIXED with working search everywhere
+// ProductDetailPage.jsx - With Visual Color Swatches
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Star, ShoppingCart, Minus, Plus, Check, ChevronDown, ChevronUp, Loader2 } from 'lucide-react';
@@ -7,6 +7,39 @@ import Footer from '../components/Footer';
 import ClothingSuggestions from './ClothingSuggestions';
 import SearchResultsPopup from '../pages/SearchResults';
 import api from '../services/api';
+
+// Color name to hex code mapping
+const COLOR_HEX_MAP = {
+  'black': '#000000',
+  'white': '#FFFFFF',
+  'red': '#DC2626',
+  'blue': '#2563EB',
+  'green': '#16A34A',
+  'yellow': '#EAB308',
+  'orange': '#EA580C',
+  'purple': '#9333EA',
+  'pink': '#EC4899',
+  'gray': '#6B7280',
+  'grey': '#6B7280',
+  'brown': '#92400E',
+  'navy': '#1E3A8A',
+  'beige': '#D4C5B9',
+  'maroon': '#7F1D1D',
+  'olive': '#4D7C0F',
+  'teal': '#0F766E',
+  'cyan': '#0891B2',
+  'lime': '#65A30D',
+  'indigo': '#4F46E5',
+  'cream': '#FEF3C7',
+  'khaki': '#C8B896',
+  'charcoal': '#374151',
+};
+
+const getColorHex = (colorName) => {
+  if (!colorName) return '#CCCCCC';
+  const normalized = colorName.toLowerCase().trim();
+  return COLOR_HEX_MAP[normalized] || '#CCCCCC';
+};
 
 export default function ProductDetailPage({
   cart,
@@ -29,13 +62,14 @@ export default function ProductDetailPage({
   });
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
+  const [colorImageMap, setColorImageMap] = useState({});
   
-  // ✅ Search functionality
+  // Search functionality
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearchPopup, setShowSearchPopup] = useState(false);
   const [debouncedQuery, setDebouncedQuery] = useState('');
 
-  // ✅ Debounce search query
+  // Debounce search query
   useEffect(() => {
     const timer = setTimeout(() => {
       if (searchQuery && searchQuery.trim().length >= 2) {
@@ -50,7 +84,7 @@ export default function ProductDetailPage({
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  // ✅ Search handlers
+  // Search handlers
   const handleProductClick = (product) => {
     setShowSearchPopup(false);
     setSearchQuery('');
@@ -62,7 +96,6 @@ export default function ProductDetailPage({
     setSearchQuery('');
   };
 
-  // Calculate cart count
   const cartCount = cart?.reduce((sum, item) => sum + item.quantity, 0) || 0;
 
   // Fetch product details
@@ -78,10 +111,7 @@ export default function ProductDetailPage({
       setError(null);
 
       try {
-        // console.log('🔄 Fetching product details for ID:', id);
         const data = await api.getProductById(id);
-        // console.log('✅ Product data received:', data);
-        
         setProduct(data);
         
         // Set default selections
@@ -91,6 +121,23 @@ export default function ProductDetailPage({
         if (data.sizes && data.sizes.length > 0) {
           setSelectedSize(data.sizes[0].size_name || data.sizes[0]);
         }
+        
+        // Build color-to-image mapping
+        const colorMap = {};
+        if (data.images && data.images.length > 0) {
+          data.images.forEach((img, index) => {
+            const imgData = typeof img === 'string' ? { image_url: img } : img;
+            const colorName = imgData.color_name || imgData.color;
+            
+            if (colorName) {
+              if (!colorMap[colorName]) {
+                colorMap[colorName] = [];
+              }
+              colorMap[colorName].push(index);
+            }
+          });
+        }
+        setColorImageMap(colorMap);
         
         setLoading(false);
       } catch (err) {
@@ -118,8 +165,6 @@ export default function ProductDetailPage({
   
   const handleAddToCart = async () => {
     try {
-      // console.log('🛒 Adding to cart:', product.name);
-  
       await api.addToCart(product.id, quantity, selectedColor, selectedSize);
   
       if (addToCart && typeof addToCart === 'function') {
@@ -132,7 +177,6 @@ export default function ProductDetailPage({
       }
   
       showToastMessage(`${product.name} added to cart!`);
-      // console.log('✅ Added to cart successfully');
     } catch (err) {
       console.error('❌ Failed to add to cart:', err);
       showToastMessage('Failed to add to cart. Please try again.');
@@ -150,11 +194,19 @@ export default function ProductDetailPage({
     ? product.images.map(img => getImageUrl(img))
     : [product?.primary_image || '/placeholder-image.jpg'];
 
-  const currentMainImage = images[selectedImage] || images[0] || '/placeholder-image.jpg';
+  // Filter images by selected color if mapping exists
+  const getFilteredImages = () => {
+    if (selectedColor && colorImageMap[selectedColor] && colorImageMap[selectedColor].length > 0) {
+      return colorImageMap[selectedColor].map(index => images[index]);
+    }
+    return images;
+  };
+
+  const filteredImages = getFilteredImages();
+  const currentMainImage = filteredImages[selectedImage] || filteredImages[0] || images[0] || '/placeholder-image.jpg';
   const colors = product?.colors?.map(c => c.color_name || c) || [];
   const sizes = product?.sizes?.map(s => s.size_name || s) || [];
 
-  // Common style
   const commonStyle = `
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
     .product-title { font-family: 'Inter', sans-serif; font-weight: 700; }
@@ -163,7 +215,6 @@ export default function ProductDetailPage({
     .section-label { font-family: 'Inter', sans-serif; font-weight: 800; letter-spacing: 0.05em; }
   `;
 
-  // Loading state
   if (loading) {
     return (
       <div className="min-h-screen bg-white">
@@ -176,7 +227,6 @@ export default function ProductDetailPage({
           onCartOpen={() => setShowCart && setShowCart(true)}
         />
         
-        {/* Search Results Popup */}
         {showSearchPopup && (
           <SearchResultsPopup
             query={debouncedQuery}
@@ -197,7 +247,6 @@ export default function ProductDetailPage({
     );
   }
 
-  // Error state
   if (error || !product) {
     return (
       <div className="min-h-screen bg-white">
@@ -210,7 +259,6 @@ export default function ProductDetailPage({
           onCartOpen={() => setShowCart && setShowCart(true)}
         />
 
-        {/* Search Results Popup */}
         {showSearchPopup && (
           <SearchResultsPopup
             query={debouncedQuery}
@@ -252,12 +300,10 @@ export default function ProductDetailPage({
     );
   }
 
-  // Main product page
   return (
     <div className="min-h-screen bg-white">
       <style>{commonStyle}</style>
 
-      {/* Navbar with search */}
       <Navbar
         categories={['T-Shirts', 'Hoodies', 'Track Pants', 'Polo Shirts']}
         searchQuery={searchQuery}
@@ -265,7 +311,6 @@ export default function ProductDetailPage({
         cartCount={cartCount}
       />
 
-      {/* Search Results Popup */}
       {showSearchPopup && (
         <SearchResultsPopup
           query={debouncedQuery}
@@ -275,7 +320,6 @@ export default function ProductDetailPage({
         />
       )}
 
-      {/* Toast Notification */}
       {showToast && (
         <div className="fixed top-20 sm:top-24 right-4 z-50 animate-in slide-in-from-right duration-300">
           <div className="bg-black text-white px-6 py-4 rounded-lg shadow-2xl flex items-center gap-3">
@@ -285,7 +329,6 @@ export default function ProductDetailPage({
         </div>
       )}
 
-      {/* Breadcrumb */}
       <div className="border-b border-gray-200 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <button
@@ -320,9 +363,10 @@ export default function ProductDetailPage({
               )}
             </div>
 
-            {images.length > 1 && (
+            {/* Thumbnail Images */}
+            {filteredImages.length > 1 && (
               <div className="grid grid-cols-4 gap-2">
-                {images.map((imgUrl, idx) => (
+                {filteredImages.map((imgUrl, idx) => (
                   <button
                     key={idx}
                     onClick={() => setSelectedImage(idx)}
@@ -340,6 +384,37 @@ export default function ProductDetailPage({
                     />
                   </button>
                 ))}
+              </div>
+            )}
+
+            {/* Color Swatches Below Images */}
+            {colors.length > 0 && (
+              <div className="pt-2">
+                <div className="flex gap-2 flex-wrap">
+                  {colors.map((color) => (
+                    <button
+                      key={color}
+                      onClick={() => {
+                        setSelectedColor(color);
+                        setSelectedImage(0);
+                      }}
+                      className={`relative w-10 h-10 rounded-full border-2 transition-all ${
+                        selectedColor === color
+                          ? 'border-black ring-2 ring-black ring-offset-2'
+                          : 'border-gray-300 hover:border-gray-500'
+                      }`}
+                      title={color}
+                    >
+                      <div
+                        className="w-full h-full rounded-full"
+                        style={{
+                          backgroundColor: getColorHex(color),
+                          border: color.toLowerCase() === 'white' ? '1px solid #e5e7eb' : 'none'
+                        }}
+                      />
+                    </button>
+                  ))}
+                </div>
               </div>
             )}
           </div>
@@ -404,7 +479,10 @@ export default function ProductDetailPage({
                     {colors.map((color) => (
                       <button
                         key={color}
-                        onClick={() => setSelectedColor(color)}
+                        onClick={() => {
+                          setSelectedColor(color);
+                          setSelectedImage(0);
+                        }}
                         className={`px-5 py-2.5 border text-xs font-bold transition uppercase ${
                           selectedColor === color
                             ? 'border-black bg-black text-white'

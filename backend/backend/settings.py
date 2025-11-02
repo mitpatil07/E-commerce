@@ -262,3 +262,24 @@ import logging
 logger = logging.getLogger(__name__)
 key_type = "TEST" if "test" in RAZORPAY_KEY_ID else "LIVE"
 logger.info(f"🔐 Using Razorpay {key_type} keys: {RAZORPAY_KEY_ID[:15]}...")
+
+# ========================
+# Email Configuration (Hostinger) - FIXED VERSION
+# ========================
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.hostinger.com')
+EMAIL_PORT = int(os.getenv('EMAIL_PORT', '465'))  # Changed from 2525 to 587
+EMAIL_USE_SSL = True   # ✅ Changed to True for port 465
+EMAIL_USE_TLS = False  
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', 'inquiry@whatyouwear.store')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
+DEFAULT_FROM_EMAIL = f'WhatYouWear <{EMAIL_HOST_USER}>'
+FRONTEND_URL = os.getenv('FRONTEND_URL', 'https://www.whatyouwear.store')
+PASSWORD_RESET_TIMEOUT = 86400
+EMAIL_TIMEOUT = 30
+
+# For development/testing - uncomment to print emails to console instead of sending
+# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+
+# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
