@@ -224,6 +224,15 @@ class Order(models.Model):
         null=True,
         help_text="Additional details like card type, bank name, UPI app, etc."
     )
+        # ✅ NEW: Refund tracking fields
+    refund_requested_at = models.DateTimeField(blank=True, null=True)
+    refund_reason = models.TextField(blank=True, null=True)
+    refund_completed_at = models.DateTimeField(blank=True, null=True)
+    refund_notes = models.TextField(
+        blank=True, 
+        null=True,
+        help_text="Admin notes about refund processing"
+    )
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

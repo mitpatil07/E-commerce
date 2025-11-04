@@ -9,12 +9,14 @@ import uuid
 from django.utils import timezone
 from datetime import timedelta
 
+
+
 from .models import (
     Category, Product, Cart, CartItem, Order, OrderItem, Review
 )
 from .serializers import (
     CategorySerializer, ProductListSerializer, ProductDetailSerializer,
-    CartSerializer, CartItemSerializer,
+    CartSerializer,
     OrderSerializer, ReviewSerializer
 )
 
@@ -336,7 +338,7 @@ class CartViewSet(viewsets.ModelViewSet):
 
 
 class OrderViewSet(viewsets.ModelViewSet):
-    """Order management"""
+    """Order management with refund workflow"""
     serializer_class = OrderSerializer
     permission_classes = [IsAuthenticated]
 
@@ -396,18 +398,39 @@ class OrderViewSet(viewsets.ModelViewSet):
     
     @action(detail=True, methods=['post'])
     def cancel(self, request, pk=None):
-        """Cancel an order"""
+        """Cancel an order - automatically initiates refund if paid"""
         order = self.get_object()
         
+        # Check if order can be cancelled
         if order.status.upper() not in ['PENDING', 'PROCESSING']:
             return Response(
                 {'error': f'Cannot cancel order with status: {order.status}'},
                 status=status.HTTP_400_BAD_REQUEST
             )
         
+        # Check if already refunding/refunded
+        if order.payment_status in ['REFUND_PENDING', 'REFUNDED']:
+            return Response(
+                {'error': 'Refund already in progress or completed'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Cancel the order
         order.status = 'cancelled'
+        
+        # ✅ If order was paid, mark refund as pending
+        if order.payment_status == 'PAID' and order.razorpay_payment_id:
+            order.payment_status = 'REFUND_PENDING'
+            order.refund_requested_at = timezone.now()
+            order.refund_reason = request.data.get('reason', 'Order cancelled by customer')
+            message = 'Order cancelled. Refund is being processed and will be completed within 5-7 business days.'
+        else:
+            # If not paid, just cancel
+            message = 'Order cancelled successfully.'
+        
         order.save()
         
+        # Restore stock
         for item in order.items.all():
             if item.product:
                 item.product.stock += item.quantity
@@ -415,15 +438,16 @@ class OrderViewSet(viewsets.ModelViewSet):
         
         serializer = self.get_serializer(order)
         return Response({
-            'message': 'Order cancelled successfully',
+            'message': message,
             'order': serializer.data
         })
     
     @action(detail=True, methods=['post'])
     def refund(self, request, pk=None):
-        """Request refund for an order"""
+        """Request refund for a delivered/shipped order"""
         order = self.get_object()
         
+        # Validation checks
         if order.payment_status != 'PAID':
             return Response(
                 {'error': 'Order payment is not completed'},
@@ -436,16 +460,39 @@ class OrderViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        order.payment_status = 'REFUNDED'
-        order.status = 'cancelled'
+        if not order.razorpay_payment_id:
+            return Response(
+                {'error': 'No payment ID found for refund'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Check if already refunding/refunded
+        if order.payment_status in ['REFUND_PENDING', 'REFUNDED']:
+            return Response(
+                {'error': 'Refund already in progress or completed'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Get refund reason from request
+        reason = request.data.get('reason', '').strip()
+        if not reason:
+            return Response(
+                {'error': 'Refund reason is required'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # ✅ Update order status to refund pending
+        order.payment_status = 'REFUND_PENDING'
+        order.refund_requested_at = timezone.now()
+        order.refund_reason = reason
         order.save()
         
         serializer = self.get_serializer(order)
         return Response({
-            'message': 'Refund initiated successfully.',
+            'message': 'Refund request submitted successfully. Our team will process it within 5-7 business days.',
             'order': serializer.data
         })
-
+    
 
 class ReviewViewSet(viewsets.ModelViewSet):
     """Product reviews"""

@@ -181,7 +181,6 @@ class CartSerializer(serializers.ModelSerializer):
         fields = ['id', 'items', 'total_price', 'total_items', 'created_at', 'updated_at']
 
 
-# ✅ FIXED: OrderItemSerializer now includes product image
 class OrderItemSerializer(serializers.ModelSerializer):
     subtotal = serializers.DecimalField(max_digits=10, decimal_places=2, read_only=True)
     product_image = serializers.SerializerMethodField()
@@ -197,8 +196,8 @@ class OrderItemSerializer(serializers.ModelSerializer):
         """Get the product's primary image URL"""
         request = self.context.get('request')
         
-        # If the product still exists, get its primary image
         if obj.product:
+            from .serializers import ProductImageSerializer
             primary_image = obj.product.images.filter(is_primary=True).first()
             if not primary_image:
                 primary_image = obj.product.images.first()
@@ -207,15 +206,17 @@ class OrderItemSerializer(serializers.ModelSerializer):
                 serializer = ProductImageSerializer(primary_image, context={'request': request})
                 return serializer.data.get('image_url')
         
-        # Fallback to None if no image found
         return None
 
 
 class OrderSerializer(serializers.ModelSerializer):
     items = serializers.SerializerMethodField()
-    payment_method = serializers.SerializerMethodField()  # ✅ Override
-    can_cancel = serializers.SerializerMethodField()  # ✅ NEW
-    can_refund = serializers.SerializerMethodField()  # ✅ NEW
+    payment_method = serializers.SerializerMethodField()
+    can_cancel = serializers.SerializerMethodField()
+    can_refund = serializers.SerializerMethodField()
+    # ✅ NEW: Refund fields
+    refund_status = serializers.SerializerMethodField()
+    refund_info = serializers.SerializerMethodField()
 
     class Meta:
         model = Order
@@ -226,7 +227,8 @@ class OrderSerializer(serializers.ModelSerializer):
             'shipping_address', 'shipping_city', 'shipping_state',
             'shipping_zip_code', 'shipping_country',
             'items', 'created_at', 'updated_at',
-            'can_cancel', 'can_refund'
+            'can_cancel', 'can_refund',
+            'refund_status', 'refund_info'  # ✅ NEW
         ]
         read_only_fields = ['order_number', 'created_at', 'updated_at']
     
@@ -245,16 +247,53 @@ class OrderSerializer(serializers.ModelSerializer):
     
     def get_can_cancel(self, obj):
         """Check if order can be cancelled"""
+        # Can't cancel if already refunding or refunded
+        if obj.payment_status in ['REFUND_PENDING', 'REFUNDED']:
+            return False
         return obj.status.upper() in ['PENDING', 'PROCESSING']
     
     def get_can_refund(self, obj):
         """Check if order can be refunded"""
+        # Can't request refund if already refunding or refunded
+        if obj.payment_status in ['REFUND_PENDING', 'REFUNDED']:
+            return False
+        
         return (
             obj.payment_status == 'PAID' and 
             obj.status.upper() in ['DELIVERED', 'SHIPPED'] and
-            obj.razorpay_payment_id  # Must have a payment ID to refund
+            obj.razorpay_payment_id
         )
-
+    
+    def get_refund_status(self, obj):
+        """Get refund status"""
+        if obj.payment_status == 'REFUND_PENDING':
+            return 'pending'
+        elif obj.payment_status == 'REFUNDED':
+            return 'completed'
+        return None
+    
+    def get_refund_info(self, obj):
+        """Get refund information if applicable"""
+        if obj.payment_status not in ['REFUND_PENDING', 'REFUNDED']:
+            return None
+        
+        info = {}
+        
+        if obj.refund_requested_at:
+            info['requested_at'] = obj.refund_requested_at.isoformat()
+        
+        if obj.refund_reason:
+            info['reason'] = obj.refund_reason
+        
+        if obj.payment_status == 'REFUNDED' and obj.refund_completed_at:
+            info['completed_at'] = obj.refund_completed_at.isoformat()
+        
+        if obj.refund_notes:
+            info['notes'] = obj.refund_notes
+        
+        return info if info else None
+    
+    
 class ReviewSerializer(serializers.ModelSerializer):
     user = serializers.CharField(source='user.username', read_only=True)
 
