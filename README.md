@@ -76,6 +76,8 @@ EMAIL_HOST_PASSWORD=your_email_password
 FRONTEND_URL=http://localhost:5173
 ```
 
+> Replace `EMAIL_HOST` with your real SMTP provider host (for example, Hostinger/Gmail SMTP).
+
 ### 2) Frontend Setup (React + Vite)
 
 ```bash
@@ -149,5 +151,6 @@ Inside `frontend/`:
 
 ## Notes
 
-- Frontend Vite dev server proxies `/api` to `https://api.whatyouwear.store` by default (as configured in `vite.config.js`) **only when `VITE_API_BASE_URL` is not set**.
+- In this README setup, `VITE_API_BASE_URL` is explicitly set to your local backend, so the app uses that URL directly.
+- The Vite `/api` proxy to `https://api.whatyouwear.store` applies only if you remove/unset `VITE_API_BASE_URL`.
 - Keep all secrets in `.env` files and never commit them.
