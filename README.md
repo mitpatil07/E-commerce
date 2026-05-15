@@ -45,7 +45,7 @@ E-commerce/
 
 ## Local Setup
 
-## 1) Backend Setup (Django)
+### 1) Backend Setup (Django)
 
 ```bash
 cd backend
@@ -76,7 +76,7 @@ EMAIL_HOST_PASSWORD=your_email_password
 FRONTEND_URL=http://localhost:5173
 ```
 
-## 2) Frontend Setup (React + Vite)
+### 2) Frontend Setup (React + Vite)
 
 ```bash
 cd frontend
