@@ -69,7 +69,7 @@ RAZORPAY_KEY_SECRET=your_razorpay_key_secret
 
 GOOGLE_CLIENT_ID=your_google_client_id
 
-EMAIL_HOST=smtp.hostinger.com
+EMAIL_HOST=smtp.example.com
 EMAIL_PORT=465
 EMAIL_HOST_USER=your_email
 EMAIL_HOST_PASSWORD=your_email_password
@@ -147,5 +147,5 @@ Inside `frontend/`:
 
 ## Notes
 
-- Frontend uses `/api` proxy in Vite dev server to forward requests to production API unless `VITE_API_BASE_URL` is explicitly set.
+- Frontend Vite dev server proxies `/api` to `https://api.whatyouwear.store` by default (as configured in `vite.config.js`); set `VITE_API_BASE_URL` to target a local backend instead.
 - Keep all secrets in `.env` files and never commit them.
