@@ -48,7 +48,7 @@ E-commerce/
 ## 1) Backend Setup (Django)
 
 ```bash
-cd /home/runner/work/E-commerce/E-commerce/backend
+cd backend
 python -m venv .venv
 source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
@@ -58,7 +58,7 @@ python manage.py runserver
 
 Backend default URL: `http://127.0.0.1:8000`
 
-Create `/home/runner/work/E-commerce/E-commerce/backend/.env`:
+Create `backend/.env`:
 
 ```env
 DJANGO_SECRET_KEY=your_secret_key
@@ -79,14 +79,14 @@ FRONTEND_URL=http://localhost:5173
 ## 2) Frontend Setup (React + Vite)
 
 ```bash
-cd /home/runner/work/E-commerce/E-commerce/frontend
+cd frontend
 npm install
 npm run dev
 ```
 
 Frontend default URL: `http://localhost:5173`
 
-Create `/home/runner/work/E-commerce/E-commerce/frontend/.env`:
+Create `frontend/.env`:
 
 ```env
 VITE_API_BASE_URL=http://127.0.0.1:8000/api
@@ -138,7 +138,7 @@ Base URL (local): `http://127.0.0.1:8000/api`
 
 ## Frontend Scripts
 
-Inside `/home/runner/work/E-commerce/E-commerce/frontend`:
+Inside `frontend/`:
 
 - `npm run dev` – start development server
 - `npm run build` – build production assets
