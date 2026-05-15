@@ -93,6 +93,8 @@ VITE_API_BASE_URL=http://127.0.0.1:8000/api
 VITE_GOOGLE_CLIENT_ID=your_google_client_id
 ```
 
+For local development, keep `VITE_API_BASE_URL` set to your local backend (`http://127.0.0.1:8000/api`).
+
 ## API Overview
 
 Base URL (local): `http://127.0.0.1:8000/api`
@@ -147,5 +149,5 @@ Inside `frontend/`:
 
 ## Notes
 
-- Frontend Vite dev server proxies `/api` to `https://api.whatyouwear.store` by default (as configured in `vite.config.js`); set `VITE_API_BASE_URL` to target a local backend instead.
+- Frontend Vite dev server proxies `/api` to `https://api.whatyouwear.store` by default (as configured in `vite.config.js`) **only when `VITE_API_BASE_URL` is not set**.
 - Keep all secrets in `.env` files and never commit them.
